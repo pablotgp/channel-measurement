@@ -1,0 +1,12 @@
+Salida de sign_test.py con 60 réplicas (semillas 120000-120059), 24 de octubre de 2026.
+Efecto del recorte en milésimas de punto porcentual (1e-5 en proporción), escenario base.
+
+p99 ŵ con g (sin ruido de Y):  +3.42 ± 0.50 milésimas   z vs 0 = +6.9   réplicas con signo +: 97 %
+p99 ŵ con Y                 :  +4.05 ± 5.02 milésimas   z vs 0 = +0.8   réplicas con signo +: 65 %
+p99 w con g                 :  -0.37 ± 0.02 milésimas   z vs 0 = -17.1   réplicas con signo +: 2 %
+p95 ŵ con g (sin ruido de Y):  +6.94 ± 0.60 milésimas   z vs 0 = +11.5   réplicas con signo +: 100 %
+p95 ŵ con Y                 :  +7.81 ± 6.40 milésimas   z vs 0 = +1.2   réplicas con signo +: 65 %
+p95 w con g                 :  -3.13 ± 0.06 milésimas   z vs 0 = -56.5   réplicas con signo +: 0 %
+p90 ŵ con g (sin ruido de Y): +10.85 ± 0.71 milésimas   z vs 0 = +15.2   réplicas con signo +: 100 %
+p90 ŵ con Y                 : +11.77 ± 7.25 milésimas   z vs 0 = +1.6   réplicas con signo +: 67 %
+p90 w con g                 :  -7.81 ± 0.09 milésimas   z vs 0 = -84.4   réplicas con signo +: 0 %

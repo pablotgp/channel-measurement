@@ -1,0 +1,8 @@
+{
+ "registrada": "2026-10-24T00:36:18",
+ "escenario": "n_10000 (10 000 clientes, resto como el base)",
+ "theta": 0.009575447347237531,
+ "prediccion_DR": 0.009575447347237531,
+ "DE_predicha_si_vale_raiz_n": 0.0019318445110776893,
+ "cobertura": "entre el 70 % (3 000 clientes) y el 95,5 % (30 000); si la asintótica ya vale, cerca del 95 %"
+}

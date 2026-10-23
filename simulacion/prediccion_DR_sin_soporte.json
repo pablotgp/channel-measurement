@@ -1,0 +1,12 @@
+{
+ "registrada": "2026-10-23T21:07:07.204821",
+ "motivo": "DR extrapola m_hat (que ignora C) a la parte sin soporte",
+ "confunde_con_C": {
+  "dr": 0.013139808831507744,
+  "hajek": 0.012806636895757091
+ },
+ "con_C": {
+  "dr": 0.009575447347237531,
+  "hajek": 0.009395952552226963
+ }
+}
