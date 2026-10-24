@@ -46,7 +46,16 @@ python run.py base 200 1000    # un escenario: nombre, réplicas, semilla inicia
 python analyze.py              # comparación con las predicciones
 ```
 
-Con 2 núcleos, cada escenario de 30 000 clientes y 200 réplicas tarda unos 8–10 minutos. Las semillas usadas son: 1000 para los escenarios de la tabla principal, 7000 para la réplica del solapamiento medio y 3000 para el escenario de 10 000 clientes.
+Con 2 núcleos, cada escenario de 30 000 clientes y 200 réplicas tarda unos 8–10 minutos.
+
+Por defecto se usan 2 procesos en paralelo. Para usar todos los núcleos de tu máquina, define `N_JOBS` (`-1` = todos):
+
+```bash
+N_JOBS=-1 python run.py base 200 1000
+N_JOBS=-1 python bootstrap.py n_10000 80 60 3000   # escenario, réplicas, remuestreos, semilla inicial
+```
+
+Los resultados no dependen de `N_JOBS`: cada réplica usa su propia semilla y LightGBM se ejecuta con un solo hilo dentro de cada proceso. Las semillas usadas son: 1000 para los escenarios de la tabla principal, 7000 para la réplica del solapamiento medio y 3000 para el escenario de 10 000 clientes.
 
 ## Estado
 

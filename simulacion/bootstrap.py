@@ -7,7 +7,7 @@ para que nunca queden en bloques distintos del cross-fitting.
 
 Uso: python bootstrap.py <escenario> <R> <B> <semilla_inicial>
 """
-import sys, json, time
+import os, sys, json, time
 import numpy as np
 import lightgbm as lgb
 from joblib import Parallel, delayed
@@ -52,6 +52,6 @@ if __name__ == "__main__":
     name, R, B, seed0 = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     cs = json.load(open("c_star.json"))[name]
     t = time.time()
-    res = Parallel(n_jobs=2)(delayed(one)(name, seed0 + r, B, cs) for r in range(R))
+    res = Parallel(n_jobs=int(os.environ.get("N_JOBS", "2")))(delayed(one)(name, seed0 + r, B, cs) for r in range(R))
     json.dump(res, open(f"boot_{name}_{R}x{B}.json", "w"))
     print(f"{name}: {R} réplicas × {B} remuestreos en {time.time()-t:.0f} s")

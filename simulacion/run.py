@@ -1,5 +1,5 @@
 """Ejecuta R réplicas de un escenario en paralelo y guarda los resultados."""
-import sys, json, time
+import os, sys, json, time
 import numpy as np
 from joblib import Parallel, delayed
 from scenarios import SCEN
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     seed0 = int(sys.argv[3]) if len(sys.argv) > 3 else 1000
     cs = c_star_for(name)
     t = time.time()
-    res = Parallel(n_jobs=2)(delayed(one)(name, seed0 + r, cs) for r in range(R))
+    res = Parallel(n_jobs=int(os.environ.get("N_JOBS", "2")))(delayed(one)(name, seed0 + r, cs) for r in range(R))
     res = [{k: float(v) for k, v in r.items()} for r in res]
     json.dump(res, open(f"res_{name}_{R}.json", "w"))
     print(f"{name}: {R} réplicas en {time.time()-t:.0f} s")
