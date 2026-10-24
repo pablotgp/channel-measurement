@@ -1,0 +1,39 @@
+\section{Sensibilidad a la confusión no observada}\label{sec:sensibilidad}
+
+Si falla (A2), $\theta$ deja de estar identificado. El modelo de sensibilidad marginal acota cuánto puede alejarse $\theta$ del valor identificado en función de un único parámetro $\Lambda\ge1$.
+
+\paragraph{Modelo.} Seguimos a \citet{tan2006} y \citet{dorn2023}. Supongamos que existe una variable no observada $U$ tal que la intercambiabilidad vale dado $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. En la muestra combinada de la sección~\ref{sec:clasificador}, sea $\lambda(X,U)$ el cociente entre los odds de pertenecer al grupo objetivo dado $(X,U)$ y dado $X$ solo. El modelo MSM($\Lambda$) supone $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: conocer $U$ puede multiplicar o dividir esos odds como mucho por $\Lambda$. Con $\Lambda=1$ se recupera (A2).
+
+\begin{proposicion}[Cotas de sensibilidad]\label{prop:sensibilidad}
+Supongamos (A1), (A3), (A4), $Y\ge0$ y MSM($\Lambda$), y sea $\theta_0=\int m_0\dd P$ el valor identificado bajo (A2).
+\begin{enumerate}
+  \item \emph{Validez.} $\theta\in[\theta_0/\Lambda,\ \Lambda\theta_0]$.
+  \item \emph{Exactitud para resultados raros.} Si además $\PP(Y>0\mid X,D=0)\le1/(1+\Lambda)$ $Q$-casi seguro, las dos cotas se alcanzan: existe un mundo compatible con MSM($\Lambda$) y con todo lo observado en el que $\theta=\Lambda\theta_0$, y otro en el que $\theta=\theta_0/\Lambda$.
+  \item \emph{Caso binario general.} Para $Y\in\{0,1\}$ con $m=m_0(x)$, las cotas exactas integran respecto de $P$ los valores $\min\bigl(\Lambda m,\,1-(1-m)/\Lambda\bigr)$ (superior) y $\max\bigl(m/\Lambda,\,1-\Lambda(1-m)\bigr)$ (inferior); es la regla del cuantil de \citet{dorn2023} trasladada a $\theta$.
+\end{enumerate}
+\end{proposicion}
+\begin{proof}
+Por Bayes, $\lambda(x,\cdot)$ es la densidad de la ley de $U$ dado $X=x$ en el grupo objetivo respecto de la del canal donante, así que $\E_Q[\lambda\mid X]=1$, y la derivada de la ley de $(X,U)$ en el grupo objetivo respecto de la del donante es $w(X)\,\lambda(X,U)$. Aplicando el Teorema~\ref{teo:identificacion} a $(X,U)$, $\theta=\E_Q[w(X)\,\E_Q(\lambda Y\mid X)]$.
+
+(1) Como $Y\ge0$ y $\Lambda^{-1}\le\lambda\le\Lambda$, $m_0(X)/\Lambda\le\E_Q[\lambda Y\mid X]\le\Lambda m_0(X)$; se integra contra $w\dd Q$.
+
+(2) Sea $\pi_+(X)=\PP(Y>0\mid X,D=0)$. Para la cota superior, tómese $U=Y(0)$, $\lambda=\Lambda$ si $Y(0)>0$ y $\lambda=c(X)=(1-\Lambda\pi_+)/(1-\pi_+)$ si $Y(0)=0$. Entonces $\E_Q[\lambda\mid X]=1$; además $c\le1\le\Lambda$, y $c\ge1/\Lambda$ equivale a $\pi_+\le1/(1+\Lambda)$, así que MSM($\Lambda$) se cumple. Como $\E_Q[\lambda\mid X]=1$, ni la ley de $X$ en el grupo objetivo ni los datos del canal donante cambian, y $Y(0)$ del grupo objetivo nunca se observa, así que el mundo es compatible con lo observado; en él, $\E_Q[\lambda Y\mid X]=\Lambda m_0(X)$ y $\theta=\Lambda\theta_0$. Para la inferior, $\lambda=1/\Lambda$ si $Y(0)>0$ y $\lambda=(1-\pi_+/\Lambda)/(1-\pi_+)$ si $Y(0)=0$; este valor es $\ge1$ y es $\le\Lambda$ si $\pi_+\le\Lambda/(1+\Lambda)$, que se cumple porque $\pi_+\le1/(1+\Lambda)\le\Lambda/(1+\Lambda)$.
+
+(3) Sean $\bar\lambda_1$ y $\bar\lambda_0$ las medias de $\lambda$ sobre $\{Y=1\}$ y $\{Y=0\}$ dado $X$. La restricción $\E_Q[\lambda\mid X]=1$ es $m\bar\lambda_1+(1-m)\bar\lambda_0=1$ con $\bar\lambda_0,\bar\lambda_1\in[1/\Lambda,\Lambda]$, y $\E_Q[\lambda Y\mid X]=m\bar\lambda_1$. Despejando $\bar\lambda_0$, el máximo de $m\bar\lambda_1$ es $\min(\Lambda m,\,1-(1-m)/\Lambda)$ y el mínimo, $\max(m/\Lambda,\,1-\Lambda(1-m))$; ambos se alcanzan con $\lambda$ constante en cada clase. Comprobamos además la fórmula frente a la solución por programación lineal en 2\,000 casos aleatorios, con error máximo de $10^{-15}$.
+\end{proof}
+
+\paragraph{Uso práctico.} Con un intervalo de confianza $[\hat L,\hat U]$ para $\theta_0$, el intervalo $[\hat L/\Lambda,\ \hat U\Lambda]$ combina la incertidumbre de muestreo con la de confusión. El \emph{$\Lambda$ de ruptura} es el menor $\Lambda$ que cambia la conclusión; por ejemplo, la pérdida $\E[Y\mid S=1]-\theta$ sigue siendo positiva para todo $\Lambda<\E[Y\mid S=1]/\theta_0$.
+
+\paragraph{Calibración de $\Lambda$.} La comparación con covariables observadas, quitando cada una del modelo de propensión y midiendo cuánto cambian los odds, es una práctica establecida \citep{mcclean2024,baitairian2025}. Cuando el grupo objetivo es un corte en una puntuación de las propias covariables hay que hacerla con el modelo de canal, no con el de «grupo objetivo frente a donantes».
+
+\begin{lema}[Calibración con el modelo de canal]\label{lem:calibracion}
+Sea $S=D\cdot\ind\{s(X)\le c\}$ con $s$ observada. En la región $R=\{s(X)\le c\}$,
+\[
+\lambda(X,U)=\frac{\odds(D=1\mid X,U)}{\odds(D=1\mid X)}.
+\]
+\end{lema}
+\begin{proof}
+En la muestra combinada, por Bayes, $\odds(Z=1\mid x,u)=\frac{\pi}{1-\pi}\cdot\frac{\PP(S=1\mid x,u)/\PP(S=1)}{\PP(D=0\mid x,u)/\PP(D=0)}$, y lo mismo sin $u$. En $R$, $\PP(S=1\mid x,u)=\PP(D=1\mid x,u)$ y $\PP(S=1\mid x)=\PP(D=1\mid x)$; las constantes se cancelan en el cociente.
+\end{proof}
+
+Fuera de $R$, el modelo del grupo objetivo está dominado por el corte, que no es confusión. Dentro de $R$, el lema permite calibrar con un modelo de propensión de canal ordinario. Definimos el \emph{benchmark} de la covariable $j$ como $\Lambda_j(q)$, el cuantil $q$ en $R$ de $\max(\lambda_j,1/\lambda_j)$, con $\lambda_j=\odds(D=1\mid X)/\odds(D=1\mid X\text{ sin }j)$, ambos estimados fuera de muestra. Usamos cuantiles y no el máximo muestral, que crece con el tamaño de la muestra; son una escala de comparación, no una verificación del modelo. Dos advertencias: que un confusor oculto sea más débil que la covariable observada más fuerte es un supuesto, no una consecuencia de los datos; y quitar las covariables de una en una subestima la confusión si varias correlacionadas la reparten \citep{mcclean2024}.

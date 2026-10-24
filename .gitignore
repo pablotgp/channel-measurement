@@ -8,3 +8,7 @@ __pycache__/
 # resultados de ejecuciones locales (se suben aparte)
 simulacion/resultados_local/
 simulacion/resultados_*.zip
+# auxiliares de LaTeX
+paper/**/*.aux
+paper/**/*.log
+paper/**/*.out

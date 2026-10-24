@@ -1,0 +1,63 @@
+\section{Proof of Theorem~\ref{thm:normality}}\label{app:proof}
+
+The doubly robust estimator equals $\theta$ plus an average of i.i.d. mean-zero terms, plus remainders of order $o_P(n^{-1/2})$; the central limit theorem does the rest.
+
+\paragraph{Notation.} We first work with i.i.d. observations $O=(Z,X,Y)$; the case of several observations per unit is treated at the end. $P_nf=n^{-1}\sum_if(O_i)$; $\E f$ is the population expectation; $\|h\|_Q$ and $\|h\|_P$ are the norms of $L^2(Q)$ and $L^2(P)$. Let $\bar o=(1-\eta)/\eta$ and $\bar w=(1-\pi)\bar o/\pi$: by condition 1 and Theorem~\ref{thm:odds}, $o\le\bar o$ and $w\le\bar w$, and by condition 2, $\hat o\le\bar o$. The observations are bounded: $|Y|\le M$ and $|\hat m|\le M$. In fold $k$, with $n_k$ observations, $(\hat o_k,\hat m_k)$ are trained on the data outside the fold; $\E_k$ and $\PP_k$ denote expectation and probability conditional on those data, and $P_{n,k}$ the empirical mean within the fold.
+
+\paragraph{Three identities.} For every bounded measurable $h$:
+\begin{align*}
+&\text{(I1)}\quad \E[(1-Z)\,o(X)\,h(X)]=\pi\,\E_P[h],\\
+&\text{(I2)}\quad \E[(1-Z)\,h(X)\,(Y-m_0(X))]=0,\\
+&\text{(I3)}\quad \|h\|_P^2\le\bar w\,\|h\|_Q^2 .
+\end{align*}
+(I1): $\E[(1-Z)oh]=(1-\pi)\E_Q[oh]$, and $o=\pi w/(1-\pi)$ by Theorem~\ref{thm:odds}, so it equals $\pi\E_Q[wh]=\pi\E_P[h]$. (I2): tower property conditioning on $X$ on $\{Z=0\}$, where $\E[Y\mid X,Z=0]=m_0(X)$. (I3): $\|h\|_P^2=\E_Q[wh^2]\le\bar w\,\E_Q[h^2]$.
+
+\paragraph{Step 1 (the function $\psi$ and its bias).} For bounded $(o',m')$, let $\psi(O;o',m')=(1-Z)\,o'(X)\,(Y-m'(X))+Z\,(m'(X)-\theta)$. Then $\pi\phi=\psi(\cdot;o,m_0)$ and
+\[
+\E[\psi(O;o',m')]=(1-\pi)\,\E_Q[(o'-o)(m_0-m')].
+\]
+By (I2) with $h=o'$, $\E[(1-Z)o'(Y-m')]=(1-\pi)\E_Q[o'(m_0-m')]$. By (A2), $\theta=\E_P[m_0]$, and by (I1) with $h=m'-m_0$, $\E[Z(m'-\theta)]=\pi\E_P[m'-m_0]=(1-\pi)\E_Q[o(m'-m_0)]$. Adding gives the formula; in particular, $\E\phi=0$. This is Proposition~\ref{prop:dr} written in odds.
+
+\paragraph{Step 2 (linearization).} With $\hat A=P_n[(1-Z)\hat o(Y-\hat m)]$, $\hat B=P_n[(1-Z)\hat o]$ and $\hat\pi=P_nZ$, the estimator is $\hat\theta=\hat A/\hat B+P_n[Z\hat m]/\hat\pi$. Since $P_n[Z\theta]/\hat\pi=\theta$, algebra gives exactly
+\[
+\hat\theta-\theta=\frac1\pi P_n\psi(O;\hat o,\hat m)+\hat A\Bigl(\frac1{\hat B}-\frac1\pi\Bigr)+P_n[Z(\hat m-\theta)]\Bigl(\frac1{\hat\pi}-\frac1\pi\Bigr).
+\]
+Steps 3 and 4 show that the first term is $P_n\phi+o_P(n^{-1/2})$; Step 5, that the other two are $o_P(n^{-1/2})$.
+
+\paragraph{Step 3 (empirical process).} Let $\Delta_k=\psi(\cdot;\hat o_k,\hat m_k)-\psi(\cdot;o,m_0)$. Conditional on the data outside fold $k$, $\hat o_k$ and $\hat m_k$ are fixed functions and the $\Delta_k(O_i)$ in the fold are i.i.d. By the conditional Chebyshev inequality, for every $\epsilon>0$,
+\[
+\PP_k\Bigl(\bigl|(P_{n,k}-\E_k)\Delta_k\bigr|>\epsilon\,n^{-1/2}\Bigr)\le\frac{n}{n_k}\,\frac{\E_k[\Delta_k^2]}{\epsilon^2}.
+\]
+Since $\Delta=(1-Z)[(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)]+Z(\hat m-m_0)$ and $|Y-m_0|\le2M$, the inequality $(a+b+c)^2\le3(a^2+b^2+c^2)$ and (I3) give
+\[
+\E_k[\Delta_k^2]\le3\Bigl[4M^2(1-\pi)\,\|\hat o_k-o\|_Q^2+\bigl((1-\pi)\bar o^{\,2}+\pi\bar w\bigr)\|\hat m_k-m_0\|_Q^2\Bigr],
+\]
+which goes to 0 in probability by condition 3. Since $n/n_k\to K$, the conditional probability goes to 0 in probability, and being bounded by 1, dominated convergence gives that the unconditional probability also goes to 0. Hence $(P_{n,k}-\E_k)\Delta_k=o_P(n^{-1/2})$ for each of the $K$ folds.
+
+\paragraph{Step 4 (bias).} Since $\E_k\psi(\cdot;o,m_0)=0$, Step 1 and Cauchy--Schwarz give
+\[
+|\E_k\Delta_k|=(1-\pi)\bigl|\E_Q[(\hat o_k-o)(m_0-\hat m_k)]\bigr|\le(1-\pi)\,r_o\,r_m=o_P(n^{-1/2}).
+\]
+Summing over folds with weights $n_k/n$, $P_n\psi(\cdot;\hat o,\hat m)=P_n\psi(\cdot;o,m_0)+o_P(n^{-1/2})=\pi P_n\phi+o_P(n^{-1/2})$.
+
+\paragraph{Step 5 (normalizations).} We split the factors of Step 2 into an i.i.d. part and an auxiliary-error part:
+\begin{itemize}
+  \item $\hat A=P_n[(1-Z)o(Y-m_0)]+P_n[(1-Z)\{(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)\}]$. The first term is $O_P(n^{-1/2})$ by the central limit theorem. In the second, the centered part is $o_P(n^{-1/2})$ by the argument of Step 3, and its conditional mean, by (I2), is $(1-\pi)\E_Q[\hat o_k(m_0-\hat m_k)]$, bounded by $(1-\pi)\bar o\,r_m$. Hence $\hat A=O_P(n^{-1/2})+O_P(r_m)$.
+  \item Likewise, $\hat B-\pi=(P_n-\E)[(1-Z)o]+P_n[(1-Z)(\hat o-o)]=O_P(n^{-1/2})+O_P(r_o)$, using $\E[(1-Z)o]=\pi$ by (I1) and that the $L^1(Q)$ norm does not exceed the $L^2(Q)$ norm.
+  \item $P_n[Z(\hat m-\theta)]=P_n[Z(m_0-\theta)]+P_n[Z(\hat m-m_0)]=O_P(n^{-1/2})+O_P(r_m)$, using $\E[Z(m_0-\theta)]=0$ and (I3). Moreover, $1/\hat\pi-1/\pi=O_P(n^{-1/2})$.
+\end{itemize}
+Since $\hat B\to\pi>0$ in probability,
+\[
+\hat A\Bigl(\frac1{\hat B}-\frac1\pi\Bigr)=\frac{\hat A(\pi-\hat B)}{\pi\hat B}=O_P\bigl(n^{-1}+n^{-1/2}(r_o+r_m)+r_or_m\bigr)=o_P(n^{-1/2}),
+\]
+and the third term of Step 2 is $O_P(n^{-1/2})\cdot[O_P(n^{-1/2})+O_P(r_m)]=o_P(n^{-1/2})$.
+
+\paragraph{Step 6 (conclusion).} $\hat\theta-\theta=P_n\phi+o_P(n^{-1/2})$. The $\phi(O_i)$ are i.i.d., with $\E\phi=0$ and $\E\phi^2=V<\infty$, because $\phi$ is bounded. The central limit theorem and Slutsky's lemma give $\sqrt n(\hat\theta-\theta)\to N(0,V)$.
+
+\paragraph{Step 7 (estimating $V$).} The implemented estimator uses
+\[
+\hat\phi(O)=\frac{(1-Z)\,\hat o(X)\,\bigl(Y-\hat m(X)-\hat A/\hat B\bigr)}{\hat B}+\frac{Z\,(\hat m(X)-\hat C)}{\hat\pi},\qquad\hat C=\frac{P_n[Z\hat m]}{\hat\pi}.
+\]
+All functions are bounded, so $|\hat\phi-\phi|\le c\,(|\hat o-o|+|\hat m-m_0|+|\hat C-\theta|+|\hat A/\hat B|+|\hat B-\pi|+|\hat\pi-\pi|)$ for a constant $c$. The conditional means of the squares of the first two terms go to 0 fold by fold, and the scalars go to 0 in probability, so $P_n(\hat\phi-\phi)^2=o_P(1)$. With $P_n\phi^2\to V$ by the law of large numbers and Cauchy--Schwarz, $|P_n\hat\phi^2-P_n\phi^2|\le P_n(\hat\phi-\phi)^2+2[P_n(\hat\phi-\phi)^2\cdot P_n\phi^2]^{1/2}\to0$. Thus $\hat V\to V$ in probability, and by Slutsky the interval $\hat\theta\pm z_{1-\alpha/2}(\hat V/n)^{1/2}$ has asymptotic coverage $1-\alpha$.
+
+\paragraph{Several observations per unit.} If each unit $i$ contributes a block of $m_i\le\bar m$ observations with the same $Z_i$, units are i.i.d. and $P$ and $Q$ are defined as observation-level laws, all of the above is repeated with block quantities. Identities (I1)--(I3) hold for block sums by linearity, with $\pi$ replaced by $\bar N_1=\E[\sum_jZ_{ij}]$, the expected number of target observations per unit, and $o$ by the observation-level odds. Cross-fitting by unit keeps the evaluated fold independent of the training data, and $m_i\le\bar m$ keeps everything bounded. The unit-level influence function is $\sum_j\psi(O_{ij};o,m_0)/\bar N_1$, and $\sqrt n$ refers to the number of units; the clustered standard error is its sample version.

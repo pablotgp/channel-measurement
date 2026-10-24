@@ -1,0 +1,38 @@
+\section{Identification as a change of measure}\label{sec:identification}
+
+Under (A1)--(A4), the counterfactual mean $\theta$ is the mean of the observed outcome in the donor channel weighted by $w=dP/dQ$. No part of the argument uses densities with respect to Lebesgue measure.
+
+\begin{theorem}[Identification]\label{thm:identification}
+Assume (A1)--(A4) and, in addition, $\int_\X\E\bigl[|Y|\mid X=x,D=0\bigr]\,P(dx)<\infty$. Let $w=dP/dQ$, which exists by (A3). Then
+\[
+\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{for every }\tilde w=c\,w,\ c>0.
+\]
+\end{theorem}
+The additional condition holds whenever $Y$ is bounded.
+
+\begin{proof}
+\emph{Step 1 (tower).} Since the law of $X$ given $S=1$ is $P$, $\theta=\E[m_0^S(X)\mid S=1]=\int m_0^S\dd P$, finite by (A4) because $|m_0^S|\le\E[|Y(0)|\mid X,S=1]$ $P$-almost surely.
+\emph{Step 2 (exchangeability).} By (A2), $\theta=\int m_0\dd P$.
+\emph{Step 3 (Radon--Nikodym).} By (A3) there is a measurable $w\ge0$ with $P(A)=\int_A w\dd Q$ for all $A$. The change-of-measure formula, valid for indicators, for simple functions by linearity and for nonnegative functions by monotone convergence, extends to every $P$-integrable $g$: $\int g\dd P=\int g\,w\dd Q$. With $g=m_0$, $\theta=\int m_0\,w\dd Q$.
+\emph{Step 4 (back to the data).} The additional condition is equivalent to $\E[w(X)|Y|\mid D=0]<\infty$, so $w(X)Y$ is integrable under $\PP(\cdot\mid D=0)$, and taking out what is known, $\E[w(X)Y\mid D=0]=\E[w(X)m_0(X)\mid D=0]=\int m_0\,w\dd Q=\theta$.
+The self-normalized form follows from $\E[w(X)\mid D=0]=\int w\dd Q=P(\X)=1$: the ratio equals $\theta$ for $w$ and is invariant to multiplying $w$ by $c>0$.
+\end{proof}
+
+This invariance is what allows us, in Section~\ref{sec:classifier}, to use weights known only up to a constant.
+
+\begin{example}\label{ex:toy}
+Let three profiles A, B and C have $Q=(0.5,\,0.3,\,0.2)$, $P=(0.1,\,0.3,\,0.6)$ and $m_0=(4\,\%,\,2\,\%,\,0.5\,\%)$. The naive donor mean is $2.7\,\%$, but $\theta=0.1\cdot4\,\%+0.3\cdot2\,\%+0.6\cdot0.5\,\%=1.3\,\%$. The weights $w=P/Q=(0.2,\,1,\,3)$ recover it from the donor channel: $0.5\cdot0.2\cdot4\,\%+0.3\cdot1\cdot2\,\%+0.2\cdot3\cdot0.5\,\%=1.3\,\%$. The naive mean doubles $\theta$ because the donor channel consists mostly of A profiles, which respond more.
+\end{example}
+
+\begin{proposition}[Double robustness]\label{prop:dr}
+Under (A1)--(A4), let $\bar w\ge0$ and $\bar m$ be measurable, with the following integrals finite, and
+\[
+\psi(\bar w,\bar m)=\E\bigl[\bar w(X)\,(Y-\bar m(X))\mid D=0\bigr]+\int\bar m\dd P .
+\]
+Then $\psi(\bar w,\bar m)-\theta=\int_\X(\bar w-w)(m_0-\bar m)\dd Q$. In particular, $\psi(\bar w,\bar m)=\theta$ if $\bar w=w$ or $\bar m=m_0$, $Q$-almost surely.
+\end{proposition}
+\begin{proof}
+By Step 4 of the previous proof applied to $\bar w$, the first term equals $\int\bar w(m_0-\bar m)\dd Q$. By Step 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Adding gives the result.
+\end{proof}
+
+The error is a product of the two estimation errors. This structure is what allows slow rates for each model and still $\sqrt n$ normality (Theorem~\ref{thm:normality}).

@@ -1,0 +1,15 @@
+\section{Discusión}\label{sec:discusion}
+
+\paragraph{Recomendaciones prácticas.} De la teoría y de la simulación se siguen seis pautas para evaluar un cambio de canal con datos observacionales:
+\begin{enumerate}
+  \item Si el grupo objetivo es un corte en una puntuación conocida, estimar los pesos con la propensión de canal, usando todas las unidades del canal premium, e imponer el corte (Proposición~\ref{prop:corte}).
+  \item Excluir de las covariables las variables que solo registra un canal cuando no predicen el resultado dadas las demás (Proposición~\ref{prop:descartar}), y diagnosticar la falta de soporte con la masa de $\hat p$ o $\hat e$ cercana a 1 (Proposición~\ref{prop:rompe}). Ninguna comprobación con los datos detecta una variable medida de forma distinta (Teorema~\ref{teo:medicion}); hace falta información externa.
+  \item Usar el estimador doblemente robusto con \emph{cross-fitting} por unidad, sabiendo que sin soporte extrapola el modelo de resultado (Corolario~\ref{cor:drsinsoporte}).
+  \item Para el intervalo, Wald con muestras grandes. Con muestras medianas, el bootstrap bayesiano por unidad con pesos de corte conocido fue el único intervalo casi calibrado en la simulación; con el clasificador estándar, el bootstrap es conservador. Desconfiar si $\neff/n_0$ sale muy por debajo de lo esperable.
+  \item No trasladar el signo del recorte de los pesos verdaderos a los estimados sin comprobarlo. Si se recorta, hacerlo dentro del estimador doblemente robusto y calcular el error típico con los pesos sin recortar.
+  \item Acompañar la estimación de un análisis de sensibilidad con $\Lambda$ calibrado frente a las covariables observadas mediante el modelo de canal (Lema~\ref{lem:calibracion}).
+\end{enumerate}
+
+\paragraph{Limitaciones.} Toda la evidencia empírica procede de un único generador de datos, construido para que cada resultado teórico tuviera un escenario que lo contrastase; las conclusiones cuantitativas de la simulación, como las ganancias del corte conocido o el exceso del bootstrap, deben leerse como ilustraciones de los mecanismos, no como magnitudes generales. Las cotas de sensibilidad suponen el modelo MSM, que con confusores no acotados no se cumple en sentido estricto. Tratamos el umbral que define el grupo objetivo como fijo. Y el estimando es la media contrafactual con el canal básico tal como es hoy: si recibir las unidades desviadas lo satura, (A1) falla.
+
+\paragraph{Problemas abiertos.} Cuatro preguntas quedan sin respuesta: una teoría que explique el exceso del bootstrap con pesos estimados ruidosos y la validez del bootstrap bayesiano con los pesos de corte conocido; la contribución a la varianza de un umbral estimado como cuantil de la puntuación, que se relaciona con la elección del propio umbral; la combinación del análisis de sensibilidad con la falta de soporte (Corolario~\ref{cor:cotas}; \citealp{manamkoong2025}) y su extensión a la condición (3) de la Proposición~\ref{prop:descartar}; y una ilustración con datos públicos en la que las covariables se midan de forma distinta en los dos grupos.

@@ -1,0 +1,39 @@
+\section{Sensitivity to unobserved confounding}\label{sec:sensitivity}
+
+If (A2) fails, $\theta$ is no longer identified. The marginal sensitivity model bounds how far $\theta$ can move from the identified value as a function of a single parameter $\Lambda\ge1$.
+
+\paragraph{Model.} We follow \citet{tan2006} and \citet{dorn2023}. Suppose there is an unobserved variable $U$ such that exchangeability holds given $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. In the pooled sample of Section~\ref{sec:classifier}, let $\lambda(X,U)$ be the ratio of the odds of belonging to the target group given $(X,U)$ and given $X$ alone. The model MSM($\Lambda$) assumes $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: knowing $U$ can multiply or divide those odds by at most $\Lambda$. With $\Lambda=1$ we recover (A2).
+
+\begin{proposition}[Sensitivity bounds]\label{prop:sensitivity}
+Assume (A1), (A3), (A4), $Y\ge0$ and MSM($\Lambda$), and let $\theta_0=\int m_0\dd P$ be the value identified under (A2).
+\begin{enumerate}
+  \item \emph{Validity.} $\theta\in[\theta_0/\Lambda,\ \Lambda\theta_0]$.
+  \item \emph{Sharpness for rare outcomes.} If, in addition, $\PP(Y>0\mid X,D=0)\le1/(1+\Lambda)$ $Q$-almost surely, both bounds are attained: there is a world compatible with MSM($\Lambda$) and with everything observed in which $\theta=\Lambda\theta_0$, and another in which $\theta=\theta_0/\Lambda$.
+  \item \emph{General binary case.} For $Y\in\{0,1\}$ with $m=m_0(x)$, the sharp bounds integrate with respect to $P$ the values $\min\bigl(\Lambda m,\,1-(1-m)/\Lambda\bigr)$ (upper) and $\max\bigl(m/\Lambda,\,1-\Lambda(1-m)\bigr)$ (lower); this is the quantile rule of \citet{dorn2023} carried over to $\theta$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+By Bayes' rule, $\lambda(x,\cdot)$ is the density of the law of $U$ given $X=x$ in the target group with respect to that in the donor channel, so $\E_Q[\lambda\mid X]=1$, and the derivative of the law of $(X,U)$ in the target group with respect to that in the donor channel is $w(X)\,\lambda(X,U)$. Applying Theorem~\ref{thm:identification} to $(X,U)$, $\theta=\E_Q[w(X)\,\E_Q(\lambda Y\mid X)]$.
+
+(1) Since $Y\ge0$ and $\Lambda^{-1}\le\lambda\le\Lambda$, $m_0(X)/\Lambda\le\E_Q[\lambda Y\mid X]\le\Lambda m_0(X)$; integrate against $w\dd Q$.
+
+(2) Let $\pi_+(X)=\PP(Y>0\mid X,D=0)$. For the upper bound, take $U=Y(0)$, $\lambda=\Lambda$ if $Y(0)>0$ and $\lambda=c(X)=(1-\Lambda\pi_+)/(1-\pi_+)$ if $Y(0)=0$. Then $\E_Q[\lambda\mid X]=1$; moreover $c\le1\le\Lambda$, and $c\ge1/\Lambda$ is equivalent to $\pi_+\le1/(1+\Lambda)$, so MSM($\Lambda$) holds. Since $\E_Q[\lambda\mid X]=1$, neither the law of $X$ in the target group nor the donor data change, and the target group's $Y(0)$ is never observed, so the world is compatible with the observables; in it, $\E_Q[\lambda Y\mid X]=\Lambda m_0(X)$ and $\theta=\Lambda\theta_0$. For the lower bound, $\lambda=1/\Lambda$ if $Y(0)>0$ and $\lambda=(1-\pi_+/\Lambda)/(1-\pi_+)$ if $Y(0)=0$; this value is $\ge1$ and is $\le\Lambda$ if $\pi_+\le\Lambda/(1+\Lambda)$, which holds because $\pi_+\le1/(1+\Lambda)\le\Lambda/(1+\Lambda)$.
+
+(3) Let $\bar\lambda_1$ and $\bar\lambda_0$ be the means of $\lambda$ over $\{Y=1\}$ and $\{Y=0\}$ given $X$. The constraint $\E_Q[\lambda\mid X]=1$ reads $m\bar\lambda_1+(1-m)\bar\lambda_0=1$ with $\bar\lambda_0,\bar\lambda_1\in[1/\Lambda,\Lambda]$, and $\E_Q[\lambda Y\mid X]=m\bar\lambda_1$. Solving for $\bar\lambda_0$, the maximum of $m\bar\lambda_1$ is $\min(\Lambda m,\,1-(1-m)/\Lambda)$ and the minimum is $\max(m/\Lambda,\,1-\Lambda(1-m))$; both are attained with $\lambda$ constant on each class. We also checked the formula against the linear-programming solution in 2{,}000 random cases, with maximum error $10^{-15}$.
+\end{proof}
+
+\paragraph{Practical use.} Given a confidence interval $[\hat L,\hat U]$ for $\theta_0$, the interval $[\hat L/\Lambda,\ \hat U\Lambda]$ combines sampling and confounding uncertainty. The \emph{breakdown $\Lambda$} is the smallest $\Lambda$ that changes the conclusion; for instance, the loss $\E[Y\mid S=1]-\theta$ remains positive for every $\Lambda<\E[Y\mid S=1]/\theta_0$.
+
+\paragraph{Calibrating $\Lambda$.} Comparing with observed covariates, dropping each from the propensity model and measuring how much the odds change, is established practice \citep{mcclean2024,baitairian2025}. When the target group is a cutoff on a score of the covariates themselves, this must be done with the channel model, not with the ``target versus donors'' model.
+
+\begin{lemma}[Calibration with the channel model]\label{lem:calibration}
+Let $S=D\cdot\ind\{s(X)\le c\}$ with $s$ observed. On the region $R=\{s(X)\le c\}$,
+\[
+\lambda(X,U)=\frac{\odds(D=1\mid X,U)}{\odds(D=1\mid X)}.
+\]
+\end{lemma}
+\begin{proof}
+In the pooled sample, by Bayes' rule, $\odds(Z=1\mid x,u)=\frac{\pi}{1-\pi}\cdot\frac{\PP(S=1\mid x,u)/\PP(S=1)}{\PP(D=0\mid x,u)/\PP(D=0)}$, and likewise without $u$. On $R$, $\PP(S=1\mid x,u)=\PP(D=1\mid x,u)$ and $\PP(S=1\mid x)=\PP(D=1\mid x)$; the constants cancel in the ratio.
+\end{proof}
+
+Outside $R$, the target-group model is dominated by the cutoff, which is not confounding. Inside $R$, the lemma allows calibrating with an ordinary channel propensity model. We define the \emph{benchmark} of covariate $j$ as $\Lambda_j(q)$, the $q$-quantile on $R$ of $\max(\lambda_j,1/\lambda_j)$, with $\lambda_j=\odds(D=1\mid X)/\odds(D=1\mid X\text{ without }j)$, both estimated out of sample. We use quantiles rather than the sample maximum, which grows with the sample size; they are a scale for comparison, not a verification of the model. Two caveats: that a hidden confounder is weaker than the strongest observed covariate is an assumption, not a consequence of the data; and dropping covariates one at a time understates confounding when several correlated covariates share it \citep{mcclean2024}.

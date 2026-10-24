@@ -1,0 +1,64 @@
+\section{El clasificador identifica la derivada de Radon--Nikodym}\label{sec:clasificador}
+
+Un clasificador calibrado que distingue el grupo objetivo del canal donante da $w$ salvo una constante, y el conjunto donde ese clasificador está seguro, $\{p=1\}$, es exactamente la parte del grupo objetivo sin soporte.
+
+\paragraph{Construcción.} Juntamos ambas poblaciones con una etiqueta: $(\tilde X,Z)$ con $Z\sim\mathrm{Bernoulli}(\pi)$, $\pi\in(0,1)$, $\tilde X\mid Z=1\sim P$ y $\tilde X\mid Z=0\sim Q$. La ley de $\tilde X$ es la mezcla $M=\pi P+(1-\pi)Q$, y el clasificador ideal es una versión $p(x)$ de $\PP(Z=1\mid\tilde X=x)$. En la práctica $\pi$ es la fracción del grupo objetivo en la muestra combinada; no afecta al estimando.
+
+\begin{lema}\label{lem:mezcla}
+$P\ll M$ y $Q\ll M$, con $dP/dM=p/\pi$ y $dQ/dM=(1-p)/(1-\pi)$, $M$-casi seguro.
+\end{lema}
+\begin{proof}
+Si $M(A)=0$, entonces $\pi P(A)+(1-\pi)Q(A)=0$ y, como ambos coeficientes son positivos, $P(A)=Q(A)=0$. Además, para todo $A\in\A$, $\pi P(A)=\PP(Z=1,\tilde X\in A)=\int_A p\dd M$ por definición de esperanza condicionada; luego $p/\pi$ es una versión de $dP/dM$. El caso de $Q$ es idéntico con $1-p$.
+\end{proof}
+
+\begin{teorema}[Cociente de odds]\label{teo:odds}
+Sea $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ sobre $\{p<1\}$ y $r=0$ sobre $\{p=1\}$. Entonces $Q(\{p=1\})=0$ y, para todo $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. En particular, bajo (A3), $r=dP/dQ$ $Q$-casi seguro.
+\end{teorema}
+\begin{proof}
+Por el Lema~\ref{lem:mezcla}, $Q(\{p=1\})=\int_{\{p=1\}}\frac{1-p}{1-\pi}\dd M=0$. Para $A\in\A$, por la regla de la cadena,
+\[
+\int_A r\dd Q=\int_{A\cap\{p<1\}}\frac{1-\pi}{\pi}\,\frac{p}{1-p}\cdot\frac{1-p}{1-\pi}\dd M=\int_{A\cap\{p<1\}}\frac{p}{\pi}\dd M=P(A\cap\{p<1\}).
+\]
+Bajo (A3), $P(\{p=1\})=0$ porque $Q(\{p=1\})=0$, así que $\int_A r\dd Q=P(A)$ para todo $A$.
+\end{proof}
+
+Combinado con la invarianza del Teorema~\ref{teo:identificacion}, bastan los odds $p/(1-p)$: la constante $(1-\pi)/\pi$ se cancela. Con un clasificador de log-odds $F$, el peso es $e^{F}$. El teorema exige que $p$ sea la probabilidad condicional verdadera: un clasificador bien ordenado pero mal calibrado ordena bien a las unidades y aun así da pesos sesgados.
+
+\paragraph{Ejemplo~\ref{ej:juguete} (continuación).}
+Con $\pi=0,2$, el clasificador ideal vale $p=(0,048;\,0,200;\,0,429)$ en A, B y C, con odds $(0,05;\,0,25;\,0,75)=w/4$, y el estimador autonormalizado da $1,3\,\%$. El clasificador $\tilde p=p^2$ ordena igual (mismo AUC), pero sus odds $(0,0023;\,0,042;\,0,225)$ dan $0,89\,\%$, un sesgo del 32\,\%. La calibración importa, no solo la discriminación.
+
+
+\begin{teorema}[Soporte y descomposición de Lebesgue]\label{teo:lebesgue}
+Sin suponer (A3):
+\begin{enumerate}
+  \item $P\ll Q$ si y solo si $P(\{p=1\})=0$.
+  \item La descomposición de Lebesgue de $P$ respecto de $Q$ es $P=\Pac+\Ps$, con $\Pac(A)=P(A\cap\{p<1\})$, $\Ps(A)=P(A\cap\{p=1\})$ y $d\Pac/dQ=r$.
+  \item Sea $\varepsilon=P(\{p=1\})$. Si $\varepsilon<1$ y (A2) se cumple sobre $\{p<1\}$, la ponderación autonormalizada con $r$ recupera
+  \[
+  \frac{\E[r(X)\,Y\mid D=0]}{\E[r(X)\mid D=0]}=\thac:=\E\bigl[Y(0)\mid S=1,\ p(X)<1\bigr],
+  \]
+  y $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, con $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$ no identificado.
+\end{enumerate}
+\end{teorema}
+\begin{proof}
+(2) Por el Teorema~\ref{teo:odds}, $\Pac$ tiene densidad $r$ respecto de $Q$, luego $\Pac\ll Q$; $\Ps$ está concentrada en $\{p=1\}$, que es $Q$-nulo, luego $\Ps\perp Q$; por la unicidad de la descomposición de Lebesgue, esta es la descomposición. El conjunto $\{p=1\}$ depende de la versión de $p$ solo módulo conjuntos $M$-nulos, que son nulos para $P$ y para $Q$. (1) $P\ll Q$ si y solo si $\Ps=0$. (3) Por el Teorema~\ref{teo:odds}, $\E[r(X)\mid D=0]=1-\varepsilon$; repitiendo los pasos 3 y 4 del Teorema~\ref{teo:identificacion} con $\Pac$, el numerador vale $\int_{\{p<1\}}m_0\dd P=(1-\varepsilon)\thac$. La relación con $\theta$ es la ley de probabilidad total.
+\end{proof}
+
+\begin{corolario}[Cotas de identificación parcial]\label{cor:cotas}
+Si $Y\in[0,1]$, entonces $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, y el sesgo de la ponderación es $\thac-\theta=\varepsilon(\thac-\ths)$.
+\end{corolario}
+La anchura del intervalo es $\varepsilon$, que puede superar a la propia tasa cuando las tasas son pequeñas: si al Ejemplo~\ref{ej:juguete} se añade un perfil sin soporte con $P=(0,1;\,0,3;\,0,5;\,0,1)$, entonces $\varepsilon=0,1$, $\thac=1,39\,\%$ y el intervalo es $[1,25\,\%;\,11,25\,\%]$. Solo es informativo con un supuesto adicional; por ejemplo, si las unidades sin soporte no responden mejor que el resto del grupo, $\ths\le\thac$, el intervalo se reduce a $[(1-\varepsilon)\thac,\thac]$, aquí $[1,25\,\%;\,1,39\,\%]$, y el estimador ponderado es una cota superior de $\theta$.
+
+\begin{corolario}[Estimador doblemente robusto sin soporte]\label{cor:drsinsoporte}
+Bajo las hipótesis del Teorema~\ref{teo:lebesgue}, sea $\bar m$ con $\bar m=m_0$ $P$-casi seguro sobre $\{p<1\}$. Con los pesos $r$,
+\[
+\frac{\E[r(X)(Y-\bar m(X))\mid D=0]}{\E[r(X)\mid D=0]}+\int\bar m\dd P=(1-\varepsilon)\thac+\varepsilon\,\E_P\bigl[\bar m(X)\mid p(X)=1\bigr].
+\]
+\end{corolario}
+\begin{proof}
+Por el Teorema~\ref{teo:odds}, el numerador del primer sumando es $\int_{\{p<1\}}(m_0-\bar m)\dd P=0$. El segundo se parte en $\{p<1\}$, donde integra $(1-\varepsilon)\thac$, y $\{p=1\}$, donde integra $\varepsilon\,\E_P[\bar m\mid p=1]$.
+\end{proof}
+
+A diferencia del estimador ponderado, que se queda con la parte con soporte, el doblemente robusto rellena la parte sin soporte con la extrapolación del modelo de resultado. Recupera $\theta$ si y solo si esa extrapolación acierta en media, $\E_P[\bar m\mid p=1]=\ths$, que es un supuesto adicional no contrastable. \citet{manamkoong2025} proponen hacerla explícita bajo un supuesto de suavidad y acotar su efecto con un análisis de sensibilidad.
+
+\paragraph{Lectura práctica.} En muestra finita nunca se observa $\hat p=1$ exactamente. Un diagnóstico natural es la masa estimada $\hat P(\hat p>1-\delta)$ para $\delta$ pequeño; un AUC cercano a 1 es una señal de alarma, porque indica que $P$ y $Q$ están cerca de ser mutuamente singulares, no que el clasificador sea bueno.

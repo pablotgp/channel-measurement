@@ -1,0 +1,38 @@
+\section{Identificación como cambio de medida}\label{sec:identificacion}
+
+Bajo (A1)--(A4), la media contrafactual $\theta$ es la media del resultado observado en el canal donante ponderada por $w=dP/dQ$. Ninguna parte del argumento usa densidades respecto de la medida de Lebesgue.
+
+\begin{teorema}[Identificación]\label{teo:identificacion}
+Supongamos (A1)--(A4) y además $\int_\X\E\bigl[|Y|\mid X=x,D=0\bigr]\,P(dx)<\infty$. Sea $w=dP/dQ$, que existe por (A3). Entonces
+\[
+\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{para todo }\tilde w=c\,w,\ c>0.
+\]
+\end{teorema}
+La condición adicional se cumple siempre que $Y$ esté acotada.
+
+\begin{proof}
+\emph{Paso 1 (torre).} Como la ley de $X$ condicionada a $S=1$ es $P$, $\theta=\E[m_0^S(X)\mid S=1]=\int m_0^S\dd P$, finita por (A4), ya que $|m_0^S|\le\E[|Y(0)|\mid X,S=1]$ $P$-casi seguro.
+\emph{Paso 2 (intercambiabilidad).} Por (A2), $\theta=\int m_0\dd P$.
+\emph{Paso 3 (Radon--Nikodym).} Por (A3) existe $w\ge0$ medible con $P(A)=\int_A w\dd Q$ para todo $A$. La fórmula de cambio de medida, válida para indicadores, para funciones simples por linealidad y para funciones no negativas por convergencia monótona, se extiende a toda $g$ $P$-integrable: $\int g\dd P=\int g\,w\dd Q$. Con $g=m_0$, $\theta=\int m_0\,w\dd Q$.
+\emph{Paso 4 (vuelta a los datos).} La condición adicional equivale a $\E[w(X)|Y|\mid D=0]<\infty$, así que $w(X)Y$ es integrable bajo $\PP(\cdot\mid D=0)$, y extrayendo lo conocido de la esperanza condicionada, $\E[w(X)Y\mid D=0]=\E[w(X)m_0(X)\mid D=0]=\int m_0\,w\dd Q=\theta$.
+La forma autonormalizada se sigue de $\E[w(X)\mid D=0]=\int w\dd Q=P(\X)=1$: el cociente vale $\theta$ para $w$ y es invariante al multiplicar $w$ por $c>0$.
+\end{proof}
+
+Esta invarianza es la que permite, en la sección~\ref{sec:clasificador}, usar pesos conocidos solo salvo una constante.
+
+\begin{ejemplo}\label{ej:juguete}
+Sean tres perfiles A, B y C con $Q=(0,5;\,0,3;\,0,2)$, $P=(0,1;\,0,3;\,0,6)$ y $m_0=(4\,\%;\,2\,\%;\,0,5\,\%)$. La media ingenua del canal donante es $2,7\,\%$, pero $\theta=0,1\cdot4\,\%+0,3\cdot2\,\%+0,6\cdot0,5\,\%=1,3\,\%$. Los pesos $w=P/Q=(0,2;\,1;\,3)$ la recuperan desde el canal donante: $0,5\cdot0,2\cdot4\,\%+0,3\cdot1\cdot2\,\%+0,2\cdot3\cdot0,5\,\%=1,3\,\%$. La media ingenua duplica $\theta$ porque el canal donante tiene sobre todo perfiles A, que responden más.
+\end{ejemplo}
+
+\begin{proposicion}[Doble robustez]\label{prop:dr}
+Bajo (A1)--(A4), sean $\bar w\ge0$ y $\bar m$ medibles, con las integrales siguientes finitas, y
+\[
+\psi(\bar w,\bar m)=\E\bigl[\bar w(X)\,(Y-\bar m(X))\mid D=0\bigr]+\int\bar m\dd P .
+\]
+Entonces $\psi(\bar w,\bar m)-\theta=\int_\X(\bar w-w)(m_0-\bar m)\dd Q$. En particular, $\psi(\bar w,\bar m)=\theta$ si $\bar w=w$ o $\bar m=m_0$, $Q$-casi seguro.
+\end{proposicion}
+\begin{proof}
+Por el paso 4 de la prueba anterior aplicado a $\bar w$, el primer sumando vale $\int\bar w(m_0-\bar m)\dd Q$. Por el paso 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Sumando se obtiene el resultado.
+\end{proof}
+
+El error es un producto de los dos errores de estimación. Esa estructura es la que permite tasas lentas en cada modelo y, aun así, normalidad a ritmo $\sqrt n$ (Teorema~\ref{teo:normalidad}).

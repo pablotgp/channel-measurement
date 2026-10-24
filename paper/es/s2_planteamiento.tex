@@ -1,0 +1,52 @@
+\section{Planteamiento}\label{sec:planteamiento}
+
+Trabajamos en un espacio de probabilidad $(\Omega,\mathcal F,\PP)$. Las covariables son una variable aleatoria $X\colon\Omega\to\X$, con $(\X,\A)$ un espacio estándar de Borel; esto garantiza distribuciones condicionadas regulares y admite vectores mixtos de variables continuas, categóricas y ausentes.
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Símbolo & Significado \\
+\midrule
+$D\in\{0,1\}$ & Canal que atiende a la unidad (1 = premium, 0 = básico) \\
+$S\in\{0,1\}$ & Pertenencia al grupo objetivo, con $\{S=1\}\subseteq\{D=1\}$ \\
+$Y(0),\,Y(1)$ & Resultados potenciales si la atiende el canal básico o el premium \\
+$Y$ & Resultado observado \\
+$P$ & Ley de $X$ en el grupo objetivo: $P(A)=\PP(X\in A\mid S=1)$ \\
+$Q$ & Ley de $X$ en el canal donante: $Q(A)=\PP(X\in A\mid D=0)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Suponemos $\PP(S=1)>0$ y $\PP(D=0)>0$. Un caso típico es $S=\ind\{D=1,\ s(X)\le c\}$: el grupo objetivo son las unidades del canal premium cuya puntuación $s(X)$ cae por debajo de un umbral, por ejemplo la cola de menor propensión de compra.
+
+\paragraph{Estimando.} La media contrafactual del grupo objetivo en el canal básico,
+\[
+\theta=\E\bigl[Y(0)\mid S=1\bigr].
+\]
+La pérdida al desviar el grupo es $L=\E[Y\mid S=1]-\theta$; su primer término se observa directamente.
+
+\paragraph{Regresiones.} Llamamos $m_0$ a una versión de $\E[Y\mid X,D=0]$, es decir, una función $\A$-medible y $Q$-integrable tal que, para todo $A\in\A$,
+\[
+\E\bigl[Y\,\ind\{X\in A\}\mid D=0\bigr]=\int_A m_0\dd Q .
+\]
+Existe por el teorema de Radon--Nikodym, aplicado a la medida $A\mapsto\E[Y\ind\{X\in A\}\mid D=0]$, que es absolutamente continua respecto de $Q$, y es única $Q$-casi seguro. Con $X$ discreta, $m_0(x)$ es la tasa del perfil $x$; la definición con conjuntos hace falta porque, con $X$ continua, cada valor concreto tiene probabilidad cero. Análogamente, $m_0^S$ es una versión de $\E[Y(0)\mid X,S=1]$, única $P$-casi seguro.
+
+\paragraph{Supuestos.}
+\begin{enumerate}[label=(A\arabic*)]
+  \item \emph{Consistencia.} $Y=Y(0)$ sobre $\{D=0\}$. Falla si el canal básico cambia al recibir las unidades desviadas, por ejemplo por saturación.
+  \item \emph{Intercambiabilidad condicional en media.} $m_0^S=m_0$ $P$-casi seguro, donde, por (A1), $m_0$ es también una versión de $\E[Y(0)\mid X,D=0]$. Solo concierne al canal básico: entre unidades con el mismo perfil, las del grupo objetivo obtendrían en él, en media, el mismo resultado que las que atiende hoy. No dice nada sobre $Y(1)$ y no es contrastable con los datos.
+  \item \emph{Soporte.} $P\ll Q$: todo conjunto de perfiles con probabilidad cero en el canal donante tiene probabilidad cero en el grupo objetivo.
+  \item \emph{Integrabilidad.} $\E[|Y(0)|\mid S=1]<\infty$ y $\E[|Y|\mid D=0]<\infty$; se cumple si $Y$ está acotada.
+\end{enumerate}
+
+\begin{observacion}[A2 presupone A3]\label{obs:a2a3}
+Como $m_0$ solo está determinada $Q$-casi seguro, la igualdad $P$-casi seguro de (A2) depende de la versión elegida salvo que $P\ll Q$. Si $P$ tiene masa donde $Q$ no la tiene, $m_0$ es arbitraria allí y ningún dato del canal donante la fija. Este hecho reaparece en el Teorema~\ref{teo:lebesgue}: la parte del grupo objetivo sin soporte no es estimable, no solo difícil de estimar.
+\end{observacion}
+
+\begin{observacion}[Descomposición estructural de la pérdida]\label{obs:descomposicion}
+Si el resultado es una suma de componentes, $Y=\sum_k Y_k$ (por ejemplo, compras de distintos productos), y el canal básico no puede producir las componentes de un conjunto $K_{\mathrm{ex}}$, es decir, $Y_k(0)=0$ casi seguro para $k\in K_{\mathrm{ex}}$, entonces, con consistencia también en el canal premium ($Y=Y(1)$ sobre $\{D=1\}$) y por linealidad,
+\[
+L=\sum_{k\in K_{\mathrm{ex}}}\E[Y_k\mid S=1]+\sum_{k\notin K_{\mathrm{ex}}}\bigl(\E[Y_k\mid S=1]-\E[Y_k(0)\mid S=1]\bigr).
+\]
+El primer sumando se observa sin ningún supuesto de identificación; solo el segundo necesita las secciones~\ref{sec:identificacion} y~\ref{sec:clasificador}. Un error $e$ en $\theta_{\mathrm{com}}=\sum_{k\notin K_{\mathrm{ex}}}\E[Y_k(0)\mid S=1]$ produce el mismo error en $\hat L$, así que la conclusión sobre $L$ es poco sensible a fallos de (A2) o (A3) cuando $\theta_{\mathrm{com}}/L$ es pequeño. Una parte estructural grande no basta por sí sola: con $a_{\mathrm{ex}}$ y $a_{\mathrm{com}}$ las dos sumas de $\E[Y_k\mid S=1]$ y $\rho=a_{\mathrm{ex}}/L$, se tiene $\theta_{\mathrm{com}}/L=a_{\mathrm{com}}/L-(1-\rho)$, que puede ser grande aunque $\rho$ se acerque a 1. Dos advertencias: si la unidad obtiene después la componente por otra vía, $L$ es una cota superior de la pérdida para la organización; y con un resultado binario del tipo «compra algo» la descomposición no es aditiva, así que hay que trabajar con los indicadores por componente. El intercambio completo, que además inyecta en el canal premium un grupo procedente del básico, es la misma construcción con los papeles de los canales intercambiados.
+\end{observacion}

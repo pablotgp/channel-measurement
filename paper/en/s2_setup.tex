@@ -1,0 +1,52 @@
+\section{Setup}\label{sec:setup}
+
+We work on a probability space $(\Omega,\mathcal F,\PP)$. The covariates are a random variable $X\colon\Omega\to\X$, with $(\X,\A)$ a standard Borel space; this guarantees regular conditional distributions and allows mixed vectors of continuous, categorical and missing variables.
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$D\in\{0,1\}$ & Channel serving the unit (1 = premium, 0 = basic) \\
+$S\in\{0,1\}$ & Membership in the target group, with $\{S=1\}\subseteq\{D=1\}$ \\
+$Y(0),\,Y(1)$ & Potential outcomes if served by the basic or the premium channel \\
+$Y$ & Observed outcome \\
+$P$ & Law of $X$ in the target group: $P(A)=\PP(X\in A\mid S=1)$ \\
+$Q$ & Law of $X$ in the donor channel: $Q(A)=\PP(X\in A\mid D=0)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+We assume $\PP(S=1)>0$ and $\PP(D=0)>0$. A typical case is $S=\ind\{D=1,\ s(X)\le c\}$: the target group consists of the premium-channel units whose score $s(X)$ falls below a threshold, for instance the tail with the lowest purchase propensity.
+
+\paragraph{Estimand.} The counterfactual mean of the target group in the basic channel,
+\[
+\theta=\E\bigl[Y(0)\mid S=1\bigr].
+\]
+The loss from diverting the group is $L=\E[Y\mid S=1]-\theta$; its first term is observed directly.
+
+\paragraph{Regressions.} Let $m_0$ be a version of $\E[Y\mid X,D=0]$, that is, an $\A$-measurable, $Q$-integrable function such that, for all $A\in\A$,
+\[
+\E\bigl[Y\,\ind\{X\in A\}\mid D=0\bigr]=\int_A m_0\dd Q .
+\]
+It exists by the Radon--Nikodym theorem applied to the measure $A\mapsto\E[Y\ind\{X\in A\}\mid D=0]$, which is absolutely continuous with respect to $Q$, and it is unique $Q$-almost surely. With discrete $X$, $m_0(x)$ is the rate of profile $x$; the definition through sets is needed because, with continuous $X$, each single value has probability zero. Similarly, $m_0^S$ is a version of $\E[Y(0)\mid X,S=1]$, unique $P$-almost surely.
+
+\paragraph{Assumptions.}
+\begin{enumerate}[label=(A\arabic*)]
+  \item \emph{Consistency.} $Y=Y(0)$ on $\{D=0\}$. It fails if the basic channel changes when it receives the diverted units, for instance through congestion.
+  \item \emph{Conditional mean exchangeability.} $m_0^S=m_0$ $P$-almost surely, where, by (A1), $m_0$ is also a version of $\E[Y(0)\mid X,D=0]$. It concerns only the basic channel: among units with the same profile, those in the target group would obtain there, on average, the same outcome as those it serves today. It says nothing about $Y(1)$ and cannot be tested with the data.
+  \item \emph{Support.} $P\ll Q$: every set of profiles with probability zero in the donor channel has probability zero in the target group.
+  \item \emph{Integrability.} $\E[|Y(0)|\mid S=1]<\infty$ and $\E[|Y|\mid D=0]<\infty$; it holds if $Y$ is bounded.
+\end{enumerate}
+
+\begin{remark}[A2 presupposes A3]\label{rem:a2a3}
+Since $m_0$ is determined only $Q$-almost surely, the $P$-almost-sure equality in (A2) depends on the chosen version unless $P\ll Q$. If $P$ has mass where $Q$ has none, $m_0$ is arbitrary there and no donor data pin it down. This reappears in Theorem~\ref{thm:lebesgue}: the unsupported part of the target group is not estimable, not merely hard to estimate.
+\end{remark}
+
+\begin{remark}[Structural decomposition of the loss]\label{rem:decomposition}
+If the outcome is a sum of components, $Y=\sum_kY_k$ (for example, purchases of different products), and the basic channel cannot produce the components in a set $K_{\mathrm{ex}}$, that is, $Y_k(0)=0$ almost surely for $k\in K_{\mathrm{ex}}$, then, with consistency also in the premium channel ($Y=Y(1)$ on $\{D=1\}$) and by linearity,
+\[
+L=\sum_{k\in K_{\mathrm{ex}}}\E[Y_k\mid S=1]+\sum_{k\notin K_{\mathrm{ex}}}\bigl(\E[Y_k\mid S=1]-\E[Y_k(0)\mid S=1]\bigr).
+\]
+The first sum is observed without any identification assumption; only the second needs Sections~\ref{sec:identification} and~\ref{sec:classifier}. An error $e$ in $\theta_{\mathrm{com}}=\sum_{k\notin K_{\mathrm{ex}}}\E[Y_k(0)\mid S=1]$ produces the same error in $\hat L$, so the conclusion about $L$ is insensitive to failures of (A2) or (A3) when $\theta_{\mathrm{com}}/L$ is small. A large structural part is not enough on its own: with $a_{\mathrm{ex}}$ and $a_{\mathrm{com}}$ the two sums of $\E[Y_k\mid S=1]$ and $\rho=a_{\mathrm{ex}}/L$, we have $\theta_{\mathrm{com}}/L=a_{\mathrm{com}}/L-(1-\rho)$, which can be large even when $\rho$ is close to 1. Two caveats: if the unit later obtains the component through another route, $L$ is an upper bound on the loss to the organization; and with a binary ``buys anything'' outcome the decomposition is not additive, so one must work with the component indicators. The full swap, which also moves a group from the basic channel into the premium one, is the same construction with the roles of the channels exchanged.
+\end{remark}

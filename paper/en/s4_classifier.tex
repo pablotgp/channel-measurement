@@ -1,0 +1,64 @@
+\section{The classifier identifies the Radon--Nikodym derivative}\label{sec:classifier}
+
+A calibrated classifier that separates the target group from the donor channel yields $w$ up to a constant, and the set where that classifier is certain, $\{p=1\}$, is exactly the unsupported part of the target group.
+
+\paragraph{Construction.} We pool both populations with a label: $(\tilde X,Z)$ with $Z\sim\mathrm{Bernoulli}(\pi)$, $\pi\in(0,1)$, $\tilde X\mid Z=1\sim P$ and $\tilde X\mid Z=0\sim Q$. The law of $\tilde X$ is the mixture $M=\pi P+(1-\pi)Q$, and the ideal classifier is a version $p(x)$ of $\PP(Z=1\mid\tilde X=x)$. In practice $\pi$ is the fraction of the target group in the pooled sample; it does not affect the estimand.
+
+\begin{lemma}\label{lem:mixture}
+$P\ll M$ and $Q\ll M$, with $dP/dM=p/\pi$ and $dQ/dM=(1-p)/(1-\pi)$, $M$-almost surely.
+\end{lemma}
+\begin{proof}
+If $M(A)=0$, then $\pi P(A)+(1-\pi)Q(A)=0$ and, both coefficients being positive, $P(A)=Q(A)=0$. Moreover, for all $A\in\A$, $\pi P(A)=\PP(Z=1,\tilde X\in A)=\int_A p\dd M$ by definition of conditional expectation; hence $p/\pi$ is a version of $dP/dM$. The case of $Q$ is identical with $1-p$.
+\end{proof}
+
+\begin{theorem}[Odds ratio]\label{thm:odds}
+Let $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ on $\{p<1\}$ and $r=0$ on $\{p=1\}$. Then $Q(\{p=1\})=0$ and, for all $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. In particular, under (A3), $r=dP/dQ$ $Q$-almost surely.
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:mixture}, $Q(\{p=1\})=\int_{\{p=1\}}\frac{1-p}{1-\pi}\dd M=0$. For $A\in\A$, by the chain rule,
+\[
+\int_A r\dd Q=\int_{A\cap\{p<1\}}\frac{1-\pi}{\pi}\,\frac{p}{1-p}\cdot\frac{1-p}{1-\pi}\dd M=\int_{A\cap\{p<1\}}\frac{p}{\pi}\dd M=P(A\cap\{p<1\}).
+\]
+Under (A3), $P(\{p=1\})=0$ because $Q(\{p=1\})=0$, so $\int_A r\dd Q=P(A)$ for all $A$.
+\end{proof}
+
+Combined with the invariance in Theorem~\ref{thm:identification}, the odds $p/(1-p)$ suffice: the constant $(1-\pi)/\pi$ cancels. With a classifier of log-odds $F$, the weight is $e^{F}$. The theorem requires $p$ to be the true conditional probability: a classifier that ranks well but is miscalibrated orders units correctly and still gives biased weights.
+
+\paragraph{Example~\ref{ex:toy} (continued).}
+With $\pi=0.2$, the ideal classifier takes the values $p=(0.048,\,0.200,\,0.429)$ in A, B and C, with odds $(0.05,\,0.25,\,0.75)=w/4$, and the self-normalized estimator gives $1.3\,\%$. The classifier $\tilde p=p^2$ ranks identically (same AUC), but its odds $(0.0023,\,0.042,\,0.225)$ give $0.89\,\%$, a 32\,\% bias. Calibration matters, not only discrimination.
+
+
+\begin{theorem}[Support and Lebesgue decomposition]\label{thm:lebesgue}
+Without assuming (A3):
+\begin{enumerate}
+  \item $P\ll Q$ if and only if $P(\{p=1\})=0$.
+  \item The Lebesgue decomposition of $P$ with respect to $Q$ is $P=\Pac+\Ps$, with $\Pac(A)=P(A\cap\{p<1\})$, $\Ps(A)=P(A\cap\{p=1\})$ and $d\Pac/dQ=r$.
+  \item Let $\varepsilon=P(\{p=1\})$. If $\varepsilon<1$ and (A2) holds on $\{p<1\}$, self-normalized weighting with $r$ recovers
+  \[
+  \frac{\E[r(X)\,Y\mid D=0]}{\E[r(X)\mid D=0]}=\thac:=\E\bigl[Y(0)\mid S=1,\ p(X)<1\bigr],
+  \]
+  and $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, with $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$ not identified.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(2) By Theorem~\ref{thm:odds}, $\Pac$ has density $r$ with respect to $Q$, hence $\Pac\ll Q$; $\Ps$ is concentrated on $\{p=1\}$, which is $Q$-null, hence $\Ps\perp Q$; by uniqueness of the Lebesgue decomposition, this is the decomposition. The set $\{p=1\}$ depends on the version of $p$ only up to $M$-null sets, which are null for both $P$ and $Q$. (1) $P\ll Q$ if and only if $\Ps=0$. (3) By Theorem~\ref{thm:odds}, $\E[r(X)\mid D=0]=1-\varepsilon$; repeating Steps 3 and 4 of Theorem~\ref{thm:identification} with $\Pac$, the numerator equals $\int_{\{p<1\}}m_0\dd P=(1-\varepsilon)\thac$. The relation with $\theta$ is the law of total probability.
+\end{proof}
+
+\begin{corollary}[Partial identification bounds]\label{cor:bounds}
+If $Y\in[0,1]$, then $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, and the bias of weighting is $\thac-\theta=\varepsilon(\thac-\ths)$.
+\end{corollary}
+The width of the interval is $\varepsilon$, which can exceed the rate itself when rates are small: if an unsupported profile is added to Example~\ref{ex:toy} with $P=(0.1,\,0.3,\,0.5,\,0.1)$, then $\varepsilon=0.1$, $\thac=1.39\,\%$ and the interval is $[1.25\,\%,\,11.25\,\%]$. It is informative only under an additional assumption; for instance, if unsupported units do not respond better than the rest of the group, $\ths\le\thac$, the interval shrinks to $[(1-\varepsilon)\thac,\thac]$, here $[1.25\,\%,\,1.39\,\%]$, and the weighting estimator is an upper bound for $\theta$.
+
+\begin{corollary}[Doubly robust estimator without support]\label{cor:drnosupport}
+Under the hypotheses of Theorem~\ref{thm:lebesgue}, let $\bar m=m_0$ $P$-almost surely on $\{p<1\}$. With the weights $r$,
+\[
+\frac{\E[r(X)(Y-\bar m(X))\mid D=0]}{\E[r(X)\mid D=0]}+\int\bar m\dd P=(1-\varepsilon)\thac+\varepsilon\,\E_P\bigl[\bar m(X)\mid p(X)=1\bigr].
+\]
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:odds}, the numerator of the first term is $\int_{\{p<1\}}(m_0-\bar m)\dd P=0$. The second term splits into $\{p<1\}$, where it integrates to $(1-\varepsilon)\thac$, and $\{p=1\}$, where it integrates to $\varepsilon\,\E_P[\bar m\mid p=1]$.
+\end{proof}
+
+Unlike the weighting estimator, which keeps the supported part, the doubly robust estimator fills the unsupported part with the extrapolation of the outcome model. It recovers $\theta$ if and only if that extrapolation is right on average, $\E_P[\bar m\mid p=1]=\ths$, an additional, untestable assumption. \citet{manamkoong2025} propose making it explicit under a smoothness assumption and bounding its effect with a sensitivity analysis.
+
+\paragraph{Practical reading.} In finite samples one never observes $\hat p=1$ exactly. A natural diagnostic is the estimated mass $\hat P(\hat p>1-\delta)$ for small $\delta$; an AUC close to 1 is a warning sign, because it indicates that $P$ and $Q$ are close to mutually singular, not that the classifier is good.

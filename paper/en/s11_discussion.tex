@@ -1,0 +1,15 @@
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{Practical recommendations.} The theory and the simulation suggest six guidelines for evaluating a channel switch with observational data:
+\begin{enumerate}
+  \item If the target group is a cutoff on a known score, estimate the weights with the channel propensity, using all units of the premium channel, and impose the cutoff (Proposition~\ref{prop:cutoff}).
+  \item Exclude from the covariates the variables recorded by only one channel when they do not predict the outcome given the others (Proposition~\ref{prop:drop}), and diagnose lack of support through the mass of $\hat p$ or $\hat e$ close to 1 (Proposition~\ref{prop:breaks}). No check on the data detects a variable measured differently (Theorem~\ref{thm:measurement}); external information is needed.
+  \item Use the doubly robust estimator with cross-fitting by unit, bearing in mind that without support it extrapolates the outcome model (Corollary~\ref{cor:drnosupport}).
+  \item For the interval, use Wald with large samples. With medium samples, the unit-level Bayesian bootstrap with known-cutoff weights was the only nearly calibrated interval in the simulation; with the standard classifier, the bootstrap is conservative. Be wary if $\neff/n_0$ is far below what is expected.
+  \item Do not carry the sign of trimming from the true weights over to the estimated ones without checking it. If trimming, do it within the doubly robust estimator and compute the standard error with the untrimmed weights.
+  \item Accompany the estimate with a sensitivity analysis, with $\Lambda$ calibrated against the observed covariates through the channel model (Lemma~\ref{lem:calibration}).
+\end{enumerate}
+
+\paragraph{Limitations.} All the empirical evidence comes from a single data-generating process, built so that each theoretical result had a scenario to test it; quantitative conclusions from the simulation, such as the gains of the known cutoff or the excess of the bootstrap, should be read as illustrations of the mechanisms, not as general magnitudes. The sensitivity bounds assume the MSM, which does not hold in the strict sense with unbounded confounders. We treat the threshold that defines the target group as fixed. And the estimand is the counterfactual mean under the basic channel as it is today: if receiving the diverted units congests it, (A1) fails.
+
+\paragraph{Open problems.} Four questions remain open: a theory explaining the excess of the bootstrap with noisy estimated weights and the validity of the Bayesian bootstrap with known-cutoff weights; the variance contribution of a threshold estimated as a quantile of the score, which relates to choosing the threshold itself; combining the sensitivity analysis with lack of support (Corollary~\ref{cor:bounds}; \citealp{manamkoong2025}) and extending it to condition (3) of Proposition~\ref{prop:drop}; and an illustration with public data in which covariates are measured differently in the two groups.

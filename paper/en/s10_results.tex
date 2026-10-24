@@ -1,0 +1,160 @@
+\section{Simulation results}\label{sec:results}
+
+\subsection{Identification, channel variables and specification}\label{sec:res-main}
+
+In the eight scenarios of Table~\ref{tab:main}, the means of the estimators converge to the predicted limit. With small samples, dispersion and coverage fail, not the mean (Section~\ref{sec:res-bootstrap}). A discrepancy under medium overlap ($z=-3.0$ for Hájek) disappeared when replicated with 200 new seeds ($z=+0.8$; with all 400 replications, $z=-1.4$), as can be expected with about 40 comparisons.
+
+\begin{table}[ht]
+\centering\small
+\caption{Main results. Rates in \%; in parentheses, $z=$ (mean $-$ prediction)/(Monte Carlo error). SD: standard deviation of the DR estimator across replications. Coverage of the DR Wald interval at 95\,\%, with respect to $\theta$. In the scenarios with $C$, the theoretical $\neff/n_0$ is computed with the supported part; it is practically the same as without $C$ (0.217), because $\PP(H=0\mid V,D=1)$ varies little on the target region.}\label{tab:main}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccc c@{}}
+\toprule
+Scenario & $\theta$ & Prediction & Hájek & DR & SD & Coverage & $\neff/n_0$ (theoretical) \\
+\midrule
+Base & 0.958 & 0.958 & 0.958 (0.0) & 0.961 (0.4) & 0.112 & 95.5\,\% & 0.14 (0.22) \\
+With $C$ & 0.958 & H 0.940; DR 0.958 & 0.939 ($-$0.1) & 0.958 (0.0) & 0.107 & 96.5\,\% & 0.12 (0.22) \\
+$C$ confounds, without $C$ & 1.712 & 1.314 & 1.313 ($-$0.2) & 1.320 (0.7) & 0.132 & 15.5\,\% & 0.14 (0.22) \\
+$C$ confounds, with $C$ & 1.712 & H 1.281; DR 1.314 & 1.280 (0.0) & 1.320 (0.6) & 0.129 & 17.5\,\% & 0.12 (0.22) \\
+Medium overlap & 1.178 & 1.178 & 1.151 ($-$3.0) & 1.158 ($-$2.1) & 0.136 & 94.5\,\% & 0.10 (0.14) \\
+Low overlap & 1.274 & 1.274 & 1.283 (0.5) & 1.298 (1.1) & 0.300 & 91.0\,\% & 0.03 (0.03) \\
+Unobserved confounding & 2.697 & 1.193 & 1.198 (0.6) & 1.204 (1.3) & 0.127 & 0.0\,\% & 0.14 (0.20) \\
+3{,}000 customers & 0.958 & 0.958 & 0.887 ($-$1.2) & 0.883 ($-$1.2) & 0.912 & 70.0\,\% & 0.02 (0.22) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \emph{Identification.} Without confounding or a channel variable, Hájek and DR recover $\theta$ and the interval covers 95.5\,\%.
+  \item \emph{Channel variable.} With $C$, the estimated unsupported mass was $\hat\varepsilon=0.326$, against $\kappa=0.335$ (Proposition~\ref{prop:breaks}), and Hájek converges to $\thac$, with the predicted bias of $-0.018$ points. The original prediction also assigned $\thac$ to the DR estimator and failed ($z=2.4$ and $4.3$). The DR estimator extrapolates the outcome model to the unsupported part (Corollary~\ref{cor:drnosupport}); the prediction derived from this (0.958 and 1.314) was added after the ``With $C$'' scenario and registered before running ``$C$ confounds, with $C$'', where it held ($z=0.6$).
+  \item \emph{Confounding through the history.} Without $C$, the bias is as predicted: $-0.40$ points, 23\,\% of $\theta$. With $C$, $\theta$ is not recovered either, as Section~\ref{sec:channel} says.
+  \item \emph{Unobserved confounding.} The estimators converge to the limit predicted from the observables, less than half of $\theta$, with zero coverage. The standard error is well calibrated (97\,\% of the actual dispersion) and the diagnostics resemble those of the base scenario: nothing in the data reveals the problem.
+  \item \emph{Overlap.} With $\chi^2=36$, the standard deviation almost triples, the estimated standard error is 87\,\% of the actual dispersion and coverage drops to 91\,\%.
+\end{itemize}
+
+\begin{table}[ht]
+\centering\small
+\caption{Specification (base scenario). Rates in \%.}\label{tab:specification}
+\begin{tabular}{@{}llllcc@{}}
+\toprule
+Classifier & Outcome model & Estimator & Prediction & Mean ($z$) & Coverage \\
+\midrule
+LightGBM & LightGBM & DR & 0.958 & 0.961 (0.4) & 95.5\,\% \\
+LightGBM & linear in $V_1$ & DR & 0.958 & 0.955 ($-$0.3) & 95.0\,\% \\
+Linear logistic & LightGBM & DR & 0.958 & 0.946 ($-$2.3) & 88.0\,\% \\
+Linear logistic & --- & Hájek & 1.024 & 1.023 ($-$0.4) & --- \\
+Linear logistic & linear in $V_1$ & DR & 1.157 & 1.150 ($-$1.5) & 13.5\,\% \\
+--- & linear in $V_1$ & Regression & 1.069 & 1.075 (1.4) & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With a well-specified classifier and a misspecified outcome model, the DR estimator is unbiased and covers 95\,\%; with both misspecified, it converges to the predicted limit, far from $\theta$ (Table~\ref{tab:specification}). With a misspecified classifier and a well-specified outcome model, a bias of $-0.012$ points and 88\,\% coverage remain: the outcome model is a LightGBM, not $m_0$, and the product of errors is not negligible at these sizes. Even so, the DR estimator reduces the bias of the corresponding Hájek estimator by 82\,\%.
+
+\subsection{Trimming}\label{sec:res-trimming}
+
+We measure the effect of trimming as the paired difference, trimmed minus untrimmed, within each replication, in thousandths of a percentage point. With the true weights and the true response $m_0$, in 60 replications of the base scenario, Proposition~\ref{prop:trimming} predicts $-0.37$, $-3.19$ and $-7.98$ at the 99th, 95th and 90th percentiles, and we observe $-0.37\pm0.02$, $-3.13\pm0.06$ and $-7.81\pm0.09$: the profiles with the largest weights respond more, and trimming lowers the estimate. With the weights estimated by the classifier, the sign reverses: $+10.9\pm0.7$ at the 90th percentile, positive in all 60 replications (with the simulated purchases, noise hides it: $+6.8\pm4.7$). Within the DR estimator, the mean effect of trimming lies between $-0.1$ and $+2.1$ thousandths in the base and low-overlap scenarios, and between $+6.4$ and $+12.5$ under medium overlap, indistinguishable from zero ($|z|<2$); at the 90th percentile, the root mean squared error drops from 0.300 to 0.163 points under low overlap and from 0.111 to 0.082 in the base scenario. But the standard error computed with the trimmed weights is only 64\,\% of the actual dispersion under low overlap, and coverage falls to 78.5\,\%; with the untrimmed standard error it is 96.5--99.5\,\%, conservative in this simulation. The mechanism of the reversal is analyzed in the companion note.
+
+\subsection{Known-cutoff weights}\label{sec:res-cutoff}
+
+We compare the estimator with the weights of Proposition~\ref{prop:cutoff} with the standard one in the same replications: same data, same LightGBM and same outcome model; only the weights change. The channel propensity is estimated adding the premium calls outside the target group, which the standard estimator does not use. The predictions were registered before running.
+
+\begin{table}[ht]
+\centering\small
+\caption{Known-cutoff weights in the base scenario, by size. 200 replications; $\theta=0.958\,\%$. SD in points. The last column is the effect of trimming the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths; with the true weights it is $-7.8$.}\label{tab:cutoff}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+Customers & Weights & DR (\%) & SD & Coverage & $\neff/n_0$ & Trimming p90 \\
+\midrule
+30{,}000 & standard & 0.961 & 0.112 & 95.5\,\% & 0.14 & $+10.4$ \\
+30{,}000 & known cutoff & 0.960 & 0.098 & 92.5\,\% & 0.20 & $-6.2$ \\
+10{,}000 & standard & 0.962 & 0.294 & 88.0\,\% & 0.07 & $+19.8$ \\
+10{,}000 & known cutoff & 0.957 & 0.195 & 91.0\,\% & 0.17 & $-4.8$ \\
+3{,}000 & standard & 0.883 & 0.912 & 70.0\,\% & 0.02 & $+50.0$ \\
+3{,}000 & known cutoff & 0.944 & 0.371 & 87.0\,\% & 0.11 & $-10.2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Five of the six predictions hold (Table~\ref{tab:cutoff}): no appreciable bias; $\neff/n_0$ approaches the theoretical 0.22; the dispersion falls by 12, 34 and 59\,\%; trimming recovers the sign of the true weights; and coverage improves with 10{,}000 and 3{,}000 customers. Coverage with 30{,}000 fails: we predicted between 93 and 97\,\% and obtained $92.5\,\%\pm1.9$, because the standard error is 93\,\% of the actual dispersion. With 10{,}000 customers, the standard deviation is 15\,\% above what the $\sqrt n$ rate predicts from the same estimator with 30{,}000 ($0.098\cdot\sqrt3=0.170$), against 52\,\% for the standard one.
+
+A subsequent analysis, not registered in advance, separates the two novelties: imposing the cutoff and using the premium units outside the target group. Imposing the cutoff on the standard classifier, without new data, does not reduce the dispersion (0.117, 0.298 and 0.933 points) and only partly corrects the sign of trimming ($+1.0$, $+2.7$ and $+9.6$). The improvement comes mainly from estimating the channel propensity with many more positive cases; the known cutoff is what makes using it possible.
+
+\begin{table}[ht]
+\centering\small
+\caption{Known-cutoff weights in the other scenarios (200 replications, same data as Table~\ref{tab:main}). In each cell, standard $\to$ known cutoff. Trimming of the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths.}\label{tab:cutoff-scenarios}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Scenario & SD of DR & Coverage & Trimming p90 \\
+\midrule
+With $C$ & 0.107 $\to$ 0.096 & 96.5 $\to$ 93.5\,\% & $+16.4\to-0.4$ \\
+$C$ confounds, without $C$ & 0.132 $\to$ 0.115 & 15.5 $\to$ 9.0\,\% & $+20.1\to-7.4$ \\
+$C$ confounds, with $C$ & 0.129 $\to$ 0.113 & 17.5 $\to$ 6.5\,\% & $+32.0\to+3.9$ \\
+Medium overlap & 0.136 $\to$ 0.147 & 94.5 $\to$ 93.5\,\% & $+19.6\to-15.6$ \\
+Low overlap & 0.300 $\to$ 0.342 & 91.0 $\to$ 87.0\,\% & $+34.5\to-20.6$ \\
+Unobserved confounding & 0.127 $\to$ 0.109 & 0.0 $\to$ 0.0\,\% & $+23.1\to+4.6$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the other scenarios, with a second registered prediction (Table~\ref{tab:cutoff-scenarios}), the estimators converge to the same limits as the standard one ($|z|\le1.7$), because only the estimation of the same weights changes; with confounding, coverage with respect to $\theta$ is even lower, because the estimator is more precise around a wrong value. With the channel variable, the weights do not blow up: donors never have it recorded, and the lack of support shows up as $\hat e>0.99$ in 33.3\,\% of the target group, against $\kappa=0.335$. Under low overlap, trimming with these weights reproduces what Proposition~\ref{prop:trimming} predicts for the true weights ($-2.2$, $-12.1$ and $-20.6$ against $-3.0$, $-11.9$ and $-20.8$). The effect of trimming shrinks substantially in every scenario and becomes negative in those without a channel variable or unobserved confounding, but in ``$C$ confounds, with $C$'' and ``Unobserved confounding'' it remains positive.
+
+Two predictions fail: the dispersion does not decrease under medium overlap, and under low overlap it increases and coverage falls from 91 to 87\,\%. Our interpretation, untested: as overlap worsens, the channel propensity approaches 1 inside the target group and its odds are estimated from few donors, whereas the standard classifier, with very few positive cases, shrinks them toward moderate values. Trimming within the DR estimator equalizes both methods: under low overlap, the root mean squared error at the 90th percentile is 0.160 with the known cutoff and 0.163 with the standard estimator, with 98\,\% coverage using the untrimmed standard error. The precision gain is therefore limited to good overlap, especially with small samples.
+
+\subsection{Sensitivity}\label{sec:res-sensitivity}
+
+The smallest $\Lambda$ whose point interval contains $\theta$ is $\theta/\theta_0$: 1.30 when the history confounds and 2.26 with unobserved confounding. Coverage of the combined interval $[\hat L/\Lambda,\hat U\Lambda]$ rises quickly around that value (Table~\ref{tab:sensitivity}); it stays below the normal approximation because the standard error is smaller in replications with low estimates (correlations of 0.64 and 0.70). The rare-outcome condition of Proposition~\ref{prop:sensitivity}, checked at the 99.99th percentile of $g$ in the donor channel (not at the essential supremum), holds at least up to $\Lambda=5.6$ in the base scenario, 1.8 under confounding through the history and 7.3 under unobserved confounding. With normal $U$, $\lambda$ is unbounded and no finite $\Lambda$ satisfies the MSM in the strict sense, so in that scenario Proposition~\ref{prop:sensitivity} guarantees nothing; $\Lambda=2.26$ contains $\theta$ by construction, and we use it only as a scale.
+
+\begin{table}[ht]
+\centering\small
+\caption{Coverage of the combined sensitivity interval.}\label{tab:sensitivity}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Scenario & $\theta/\theta_0$ & $\Lambda=1.25$ & $\Lambda=1.5$ & $\Lambda=2$ & $\Lambda=2.5$ \\
+\midrule
+$C$ confounds, without $C$ & 1.30 & 87\,\% & 100\,\% & 100\,\% & 100\,\% \\
+Unobserved confounding & 2.26 & 0\,\% & 3\,\% & 71\,\% & 99\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+To calibrate $\Lambda$, in the unobserved-confounding scenario $U$ enters the channel with coefficient 1 and the strongest observed covariate, $V_1$, with 0.5. We predicted, before computing it, that the method of Lemma~\ref{lem:calibration} would recover the exact value for $U$ and that $U$ would exceed every observed covariate; both hold (Table~\ref{tab:calibration}). The breakdown $\Lambda$, 2.26, lies between the median and the 90th percentile of $V_1$: the conclusion does not survive a confounder somewhat stronger than the strongest observed covariate. In a second estimate with another sample, the ``target versus donors'' model agrees with the channel model at the median (2.06 against 1.99) but overstates the extremes: 6.34 and 29.98 at the 90th and 99th percentiles, against 5.37 and 15.51 with the channel model and 5.38 and 14.07 exact.
+
+\begin{table}[ht]
+\centering\small
+\caption{Calibration of $\Lambda$ with the channel model: quantiles on $R$ of $\max(\lambda,1/\lambda)$.}\label{tab:calibration}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Variable & Median & 90th percentile & 99th percentile \\
+\midrule
+$U$, exact & 1.99 & 5.38 & 14.07 \\
+$U$, estimated & 2.03 & 5.21 & 14.14 \\
+$V_1$ & 1.72 & 3.07 & 5.81 \\
+$V_2$ & 1.17 & 1.53 & 2.17 \\
+$V_3$ & 1.14 & 1.45 & 1.98 \\
+$V_4$ & 1.12 & 1.36 & 1.70 \\
+$V_5$ & 1.08 & 1.21 & 1.42 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sample size and intervals: Wald and bootstrap}\label{sec:res-bootstrap}
+
+With the standard estimator, the standard deviation of the DR estimator is 0.912, 0.508, 0.294, 0.183 and 0.112 points with 3{,}000, 5{,}000, 10{,}000, 15{,}000 and 30{,}000 customers: it falls like $n^{-0.91}$, much faster than $n^{-1/2}$, and Wald coverage is 70, 80, 88, 92 and 95.5\,\%. The predictions for 5{,}000 and 15{,}000 were registered in advance and held. The estimated $\neff/n_0$ follows the same progression (0.02, 0.07 and 0.14 with 3{,}000, 10{,}000 and 30{,}000, against the theoretical 0.22). This suggests a diagnostic, not yet tested: if $\neff/n_0$ keeps increasing with the sample size, the intervals are not yet reliable.
+
+\begin{table}[ht]
+\centering\small
+\caption{Customer-level bootstrap: mean standard error in points and, in parentheses, 95\,\% coverage, on the same 40 replications.}\label{tab:bootstrap}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Customers & Actual SD & Wald & Bootstrap with replacement & Bayesian bootstrap \\
+\midrule
+30{,}000 & 0.109 & 0.102 (98\,\%) & 0.162 (100\,\%) & 0.147 (100\,\%) \\
+10{,}000 & 0.274 & 0.230 (82\,\%) & 0.432 (100\,\%) & 0.370 (98\,\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We evaluated the customer-level bootstrap with replacement, re-estimating LightGBM and the cross-fitting in each of 60 resamples, in 80 replications with 30{,}000 and 10{,}000 customers, and, in 40 of them, a Bayesian variant that gives each customer an $\mathrm{Exp}(1)$ weight instead of copies. All four registered predictions failed (Table~\ref{tab:bootstrap}). We predicted that the bootstrap with replacement would be close to the actual dispersion with 30{,}000 customers and between Wald and the actual dispersion with 10{,}000; both overstate it (over the 80 replications, 0.165 against 0.119 and 0.446 against 0.322). We attributed the excess to duplicated customers and predicted that the Bayesian variant would remove it, but it reduces it by only 9 and 14\,\%.
+
+A second check, also registered, points to the cause. Applied to the estimator with known-cutoff weights, whose weights are much less noisy, the Bayesian bootstrap is nearly calibrated: mean standard error of 0.101 against an actual dispersion of 0.096 on the same 40 replications with 30{,}000 customers, and 0.208 against 0.187 with 10{,}000, with coverage of 95 and 90\,\% ($\pm5$). This indicates that the excess is tied to the noise of the estimated weights: resampling reduces the effective information, and since the dispersion of the standard classifier grows quickly as information shrinks, the bootstrap world exaggerates it. This is evidence from a single data-generating process, not a proof.

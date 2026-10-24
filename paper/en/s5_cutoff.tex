@@ -1,0 +1,17 @@
+\section{Target group defined by a known cutoff}\label{sec:cutoff}
+
+In the typical case, the target group is a cutoff on a score the organization knows, $S=D\cdot\ind\{s(X)\le c\}$. Then no classifier separating the target group from the donor channel is needed: the ordinary channel propensity suffices, with the cutoff imposed by hand.
+
+\begin{proposition}[Known-cutoff weights]\label{prop:cutoff}
+Let $S=D\cdot\ind\{s(X)\le c\}$, with $s$ measurable and known, and let $e$ be a version of $\PP(D=1\mid X)$. Under (A3), there is $k>0$ such that
+\[
+\frac{dP}{dQ}(x)=k\,\ind\{s(x)\le c\}\,\frac{e(x)}{1-e(x)}\qquad Q\text{-almost surely.}
+\]
+\end{proposition}
+\begin{proof}
+Let $\mu$ be the law of $X$ in the population. Since $s(X)$ is a function of $X$, $\PP(S=1\mid X)=\ind\{s(X)\le c\}\,e(X)$. By the definition of conditional probability, $P(A)=\int_A\ind\{s\le c\}\,e\dd\mu/\PP(S=1)$ and $Q(A)=\int_A(1-e)\dd\mu/\PP(D=0)$ for all $A\in\A$, so $P$ and $Q$ are absolutely continuous with respect to $\mu$, with densities proportional to $\ind\{s\le c\}\,e$ and to $1-e$. The set $\{e=1\}$ is $Q$-null, and off it, under (A3), the chain rule gives $dP/dQ=(dP/d\mu)/(dQ/d\mu)=k\,\ind\{s\le c\}\,e/(1-e)$, with $k=\PP(D=0)/\PP(S=1)$.
+\end{proof}
+
+The identity is elementary, but it changes the estimation problem. The classifier of Theorem~\ref{thm:odds} must learn a sharp jump at $\{s=c\}$, with the few target-group cases as positives. The channel propensity is usually a smooth function and is estimated with all the units of the premium channel. The constant $k$ cancels under normalization, and the support diagnostic of Theorem~\ref{thm:lebesgue} is read from $\hat e$: support fails where $\hat e\to1$ inside $\{s\le c\}$. Lemma~\ref{lem:calibration} is the same identity applied to $(X,U)$.
+
+\paragraph{Relation to the literature.} The identity is not new in substance. In subgroup analysis with propensity scores it is common practice to estimate the propensity in the full cohort and apply it within the subgroup \citep{rassen2012}, and \citet{dong2020} study when that model is preferable to one fitted within each subgroup, which balances better within the subgroup at the cost of more variance. What we add is the comparison with the ``target versus donors'' classifier, the usual choice when the change of measure is framed as density-ratio estimation \citep{bickel2009,sugiyama2012}, in the case where the target group is a cutoff on a score of the covariates themselves. With flexible models, both approaches are consistent and the differences are finite-sample ones, but they affect things the subgroup literature does not examine: the sign of trimming, the effective sample size and the validity of the bootstrap (Section~\ref{sec:res-cutoff}).
