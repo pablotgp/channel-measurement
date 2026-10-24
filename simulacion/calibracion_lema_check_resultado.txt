@@ -1,0 +1,6 @@
+Salida de calibracion_lema_check.py (24 de octubre de 2026), escenario confusion_U, región R = {s* <= c*}.
+Cuantiles de max(λ, 1/λ) para U, estimados con LightGBM fuera de muestra:
+
+modelo cola frente a CC : q50 = 2.06  q90 = 6.34  q99 = 29.98
+modelo de canal         : q50 = 1.99  q90 = 5.37  q99 = 15.51
+(exacto, de calibracion_lambda.py: q50 = 1.99  q90 = 5.38  q99 = 14.07)

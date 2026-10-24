@@ -1,0 +1,8 @@
+{
+ "registrada": "2026-10-24T09:45:46",
+ "escenario": "confusion_U (nu = nu_y = 1, lambda = 0,5)",
+ "lema": "En la región {s*(V) <= c*}, lambda(X,U) = odds(D=1|X,U)/odds(D=1|X); el lambda calculado con el modelo 'cola frente a CC' debe coincidir con el del modelo de canal.",
+ "prediccion_1": "El estimador de benchmark (LightGBM con y sin la variable, predicción fuera de muestra) recupera los cuantiles exactos de max(lambda,1/lambda) para U.",
+ "prediccion_2": "U (coeficiente 1 en el logit del canal) supera en todos los cuantiles a cada covariable observada: el mayor coeficiente observado en el canal es 0,5 (V1).",
+ "lambda_ruptura_conocido": 2.262
+}
