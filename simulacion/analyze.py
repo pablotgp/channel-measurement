@@ -1,9 +1,9 @@
 """Compara los resultados de la simulación con las predicciones registradas antes de simular."""
-import json, glob
+import json, glob, sys
 import numpy as np
 
 pred = json.load(open("predicciones.json"))
-R = 200
+R = int(sys.argv[1]) if len(sys.argv) > 1 else 200   # réplicas: python analyze.py [R]
 
 
 def load(name):

@@ -57,6 +57,18 @@ N_JOBS=-1 python bootstrap.py n_10000 80 60 3000   # escenario, réplicas, remue
 
 Los resultados no dependen de `N_JOBS`: cada réplica usa su propia semilla y LightGBM se ejecuta con un solo hilo dentro de cada proceso. Las semillas usadas son: 1000 para los escenarios de la tabla principal, 7000 para la réplica del solapamiento medio y 3000 para el escenario de 10 000 clientes.
 
+### Ejecutar el bootstrap en tu ordenador
+
+`simulacion/ejecutar_todo.py` lo hace todo con un comando: instala las librerías si faltan, usa casi todos los núcleos, guarda cada réplica al terminarla (si se interrumpe, se relanza y sigue) y al final analiza y crea un zip con los resultados.
+
+```bash
+cd simulacion
+python ejecutar_todo.py            # bootstrap de 30 000 clientes (semillas 1000-1079, B = 60)
+python ejecutar_todo.py n_10000    # repetición del de 10 000 clientes (semillas 3000-3079)
+```
+
+En Windows, si `python` no se reconoce, usa `py`. Las predicciones de ambas tareas están registradas en `prediccion_bootstrap_base.json` y `prediccion_bootstrap.json`.
+
 ## Estado
 
 Los borradores están en español, para fijar notación y resultados; la versión final irá en inglés y LaTeX. La lista de tareas pendientes está al final del paper 1.

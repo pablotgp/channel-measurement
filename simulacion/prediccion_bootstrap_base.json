@@ -1,0 +1,11 @@
+{
+ "registrada": "2026-10-24T09:57:55",
+ "diseno": "escenario base (30 000 clientes), réplicas con semillas 1000-1079 (las 80 primeras de res_base_200.json), B = 60 remuestreos por cliente re-estimando LightGBM y el cross-fitting. Se ejecutará en SageMaker con el notebook ejecutar_en_sagemaker.ipynb.",
+ "wald_en_estas_80_replicas": {
+  "cobertura": 0.9625,
+  "EE_medio": 0.0010540794918062787,
+  "DE_real_200": 0.001115
+ },
+ "prediccion": "Con 30 000 clientes la asintótica ya vale: el error típico bootstrap medio estará cerca de la desviación real (0,00112) y la cobertura de ambos intervalos bootstrap será compatible con el 95 % (dentro de unos ±5 puntos con 80 réplicas), sin diferencia apreciable con Wald.",
+ "reproducibilidad": "La tarea n_10000 del notebook usa las mismas semillas que la ejecución local (3000-3079, B = 60). Si las versiones de las librerías coinciden, los resultados deben ser idénticos; si no, solo estadísticamente equivalentes."
+}

@@ -4,3 +4,7 @@ __pycache__/
 *.log
 *.toc
 *.out
+
+# resultados de ejecuciones locales (se suben aparte)
+simulacion/resultados_local/
+simulacion/resultados_*.zip
