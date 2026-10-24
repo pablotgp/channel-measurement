@@ -86,6 +86,7 @@ if __name__ == "__main__":
     name, R, seed0 = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
     cs = json.load(open("c_star.json"))[name]
     t = time.time()
-    res = Parallel(n_jobs=int(os.environ.get("N_JOBS", "2")))(delayed(one)(name, seed0 + r, cs) for r in range(R))
+    from corte_conocido import one as one_mod      # por referencia: loky no puede reconstruir funciones de __main__
+    res = Parallel(n_jobs=int(os.environ.get("N_JOBS", "2")))(delayed(one_mod)(name, seed0 + r, cs) for r in range(R))
     json.dump(res, open(f"res_corte_{name}_{R}.json", "w"))
     print(f"{name}: {R} réplicas en {time.time()-t:.0f} s")

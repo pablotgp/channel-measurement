@@ -1,0 +1,8 @@
+{
+ "registrada": "2026-10-24T11:27:12",
+ "resultado_que_lo_motiva": "Bootstrap por cliente con reemplazo, re-estimando LightGBM: EE medio 0,165 pp frente a DE real 0,119 (base, 80 réplicas) y 0,432 frente a 0,274 (n_10000, 40 réplicas). Sobrestima un 40-60 % y cubre el 99-100 %. Las predicciones prediccion_bootstrap.json y prediccion_bootstrap_base.json fallaron.",
+ "hipotesis": "El remuestreo con reemplazo duplica clientes (un 37 % de copias); LightGBM trata las copias como datos independientes, sobreajusta y da pesos más ruidosos en el mundo bootstrap que en el real.",
+ "diseno": "Bootstrap bayesiano: cada cliente recibe un peso Exp(1) normalizado, usado en el ajuste de LightGBM (sample_weight) y en el estimador; ninguna fila se duplica. Mismas réplicas que el bootstrap estándar: base semillas 1000-1039 y n_10000 semillas 3000-3039, B = 60, emparejadas con sus réplicas.",
+ "prediccion": "Si la hipótesis es cierta, el EE bootstrap bayesiano medio estará cerca de la DE real: entre 0,10 y 0,14 pp en base y entre 0,24 y 0,34 en n_10000. Si sale cerca del bootstrap estándar (unos 0,165 y 0,43), la causa no son las filas duplicadas sino el ruido de re-estimar los modelos con menos información efectiva (los pesos Exp(1) también reducen el tamaño efectivo a la mitad).",
+ "confianza": "Moderada: los pesos Exp(1) también dan mucho peso a pocos clientes, así que el resultado puede quedar a medio camino."
+}

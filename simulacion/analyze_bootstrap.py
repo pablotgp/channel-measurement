@@ -9,9 +9,11 @@ import numpy as np
 
 name = sys.argv[1] if len(sys.argv) > 1 else "n_10000"
 folder = sys.argv[2] if len(sys.argv) > 2 else "."
-PRED = {"n_10000": "prediccion_bootstrap.json", "base": "prediccion_bootstrap_base.json"}
+PRED = {"n_10000": "prediccion_bootstrap.json", "base": "prediccion_bootstrap_base.json",
+        "base_bayes": "prediccion_bootstrap_bayesiano.json", "n_10000_bayes": "prediccion_bootstrap_bayesiano.json"}
+base_name = name.replace("_bayes", "")
 
-th = json.load(open("predicciones.json"))[name]["theta"]
+th = json.load(open("predicciones.json"))[base_name]["theta"]
 files = sorted(glob.glob(os.path.join(folder, f"boot_{name}_parte*.json")))
 if not files:
     sys.exit(f"No hay ficheros boot_{name}_parte*.json en {folder}")
@@ -30,7 +32,7 @@ cov = {
 }
 mc = lambda c: np.sqrt(c.mean() * (1 - c.mean()) / R)
 try:
-    sd200 = np.std([r["dr"] for r in json.load(open(f"res_{name}_200.json"))], ddof=1)
+    sd200 = np.std([r["dr"] for r in json.load(open(f"res_{base_name}_200.json"))], ddof=1)
     sd200_txt = f"{sd200*100:.3f}"
 except FileNotFoundError:
     sd200_txt = "no disponible"

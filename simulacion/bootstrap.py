@@ -48,6 +48,35 @@ def one(name, seed, B, cs):
     return dict(est=float(est), se=float(se), boot=boot.tolist())
 
 
+def dr_w(X, Z, Y, groups, wt, K=5):
+    """DR normalizado con pesos de cliente wt (bootstrap bayesiano): sin filas duplicadas."""
+    cc = Z == 0
+    p = np.zeros(len(Z)); mh = np.zeros(len(Z))
+    for tr, te in GroupKFold(K).split(X, Z, groups):
+        p[te] = lgb.LGBMClassifier(**LGB_CLF).fit(X[tr], Z[tr], sample_weight=wt[tr]).predict_proba(X[te])[:, 1]
+        trc = tr[cc[tr]]
+        mh[te] = lgb.LGBMRegressor(**LGB_REG).fit(X[trc], Y[trc], sample_weight=wt[trc]).predict(X[te])
+    p = np.clip(p, 1e-6, 1 - 1e-6); o = p / (1 - p)
+    a = wt[cc] * o[cc]
+    return np.sum(a * (Y[cc] - mh[cc])) / np.sum(a) + np.sum(wt[~cc] * mh[~cc]) / np.sum(wt[~cc])
+
+
+def one_bayes(name, seed, B, cs):
+    """Como one(), pero cada remuestreo da a cada cliente un peso Exp(1) en lugar de copias."""
+    p, useC, n = SCEN[name]
+    rng = np.random.default_rng(seed)
+    d = sample_calls(n, p, cs, rng)
+    X = features(d["V"], d["V5"]); Z, Y, cl = d["Z"], d["Y"], d["client"]
+    est, se = dr(X, Z, Y, cl)
+    uniq, inv = np.unique(cl, return_inverse=True)
+    brng = np.random.default_rng([seed, 1])          # flujo aparte: no altera los datos
+    boot = np.empty(B)
+    for b in range(B):
+        wc = brng.exponential(1.0, len(uniq)); wc /= wc.mean()
+        boot[b] = dr_w(X, Z, Y, cl, wc[inv])
+    return dict(est=float(est), se=float(se), boot=boot.tolist())
+
+
 if __name__ == "__main__":
     name, R, B, seed0 = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     cs = json.load(open("c_star.json"))[name]

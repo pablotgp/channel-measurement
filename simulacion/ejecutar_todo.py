@@ -3,6 +3,7 @@
     python ejecutar_todo.py                 # bootstrap de 30 000 clientes (tarea "base")
     python ejecutar_todo.py n_10000         # repetición del bootstrap de 10 000 clientes
     python ejecutar_todo.py base n_10000    # las dos, una detrás de otra
+    python ejecutar_todo.py n_10000 base_bayes n_10000_bayes   # bootstrap bayesiano
     python ejecutar_todo.py base --nucleos 6
 
 Qué hace:
@@ -28,6 +29,8 @@ os.chdir(AQUI); sys.path.insert(0, AQUI)
 TAREAS = {
     "base":    dict(R=80, B=60, semilla=1000, pred="prediccion_bootstrap_base.json"),
     "n_10000": dict(R=80, B=60, semilla=3000, pred="prediccion_bootstrap.json"),
+    "base_bayes": dict(R=40, B=60, semilla=1000, pred="prediccion_bootstrap_bayesiano.json"),
+    "n_10000_bayes": dict(R=40, B=60, semilla=3000, pred="prediccion_bootstrap_bayesiano.json"),
 }
 
 
@@ -57,8 +60,12 @@ def comprobar_entorno():
 def una_replica(nombre, seed, B, cs, carpeta):
     """Una réplica completa; escribe su fichero al terminar (así se puede reanudar)."""
     import json
-    from bootstrap import one
-    r = one(nombre, seed, B, cs); r["semilla"] = seed
+    from bootstrap import one, one_bayes
+    if nombre.endswith("_bayes"):
+        r = one_bayes(nombre[:-6], seed, B, cs)
+    else:
+        r = one(nombre, seed, B, cs)
+    r["semilla"] = seed
     tmp = os.path.join(carpeta, f"rep_{seed}.json.tmp")
     with open(tmp, "w") as f:
         json.dump(r, f)
@@ -70,7 +77,7 @@ def ejecutar(nombre, nucleos, versiones):
     import json, time, shutil, zipfile, platform
     from joblib import Parallel, delayed
     t = TAREAS[nombre]
-    cs = json.load(open("c_star.json"))[nombre]
+    cs = json.load(open("c_star.json"))[nombre.replace("_bayes", "")]
     carpeta = os.path.join("resultados_local", nombre); os.makedirs(carpeta, exist_ok=True)
     semillas = [t["semilla"] + r for r in range(t["R"])]
     hechas = {s for s in semillas if os.path.exists(os.path.join(carpeta, f"rep_{s}.json"))}
