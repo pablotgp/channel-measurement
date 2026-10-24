@@ -1,0 +1,14 @@
+{
+ "registrada": "2026-10-24T10:45:51",
+ "idea": "Con S = D·1{s(X) <= c} y s conocida, dP/dQ(x) es proporcional a 1{s(x) <= c}·e(x)/(1 - e(x)), con e(x) = P(D=1|x). En vez del clasificador cola frente a donantes, se estima la propensión de canal e con todos los clientes (incluidos los premium fuera de la cola) y el corte se pone a mano.",
+ "diseno": "Mismas réplicas (mismas semillas y mismos datos) que la simulación original: base 200 réplicas desde 1000, n_10000 200 desde 3000, n_pequeno 200 desde 1000. Mismo LightGBM, mismo modelo de resultado y mismo cross-fitting por cliente; solo cambian los pesos. Comparación pareada con el estimador estándar en cada réplica.",
+ "predicciones": {
+  "1_sesgo": "Base: Hájek y DR con corte conocido sin sesgo apreciable frente a θ = 0,958 % (|z| < 2).",
+  "2_n_eff": "Base: n_eff/n0 medio >= 0,18 (estándar 0,14; teórico con pesos verdaderos 0,22).",
+  "3_precision": "Base: desviación típica del DR <= 0,112 pp (la del estándar) y cobertura entre 93 % y 97 %.",
+  "4_signo_recorte": "Base: el efecto del recorte en p90 con los pesos de corte conocido y la respuesta verdadera g es negativo en media, como con los pesos verdaderos (-7,8 milésimas), y no positivo como con el clasificador estándar (+10,9).",
+  "5_n_10000": "Cobertura >= 91 % (estándar 88 %) y desviación típica del DR < 0,294 pp.",
+  "6_n_pequeno": "Cobertura > 70 % (estándar) y desviación típica del DR < 0,912 pp."
+ },
+ "incertidumbre": "La 1 y la 4 son las que más confío. La 2 y la 5 dependen de cuánto del déficit de n_eff se deba a la rampa del corte y cuánto al ruido propio de estimar e; si fallan, el déficit no venía sobre todo del corte."
+}
