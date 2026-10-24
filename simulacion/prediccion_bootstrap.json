@@ -1,0 +1,15 @@
+{
+ "registrada": "2026-10-24T09:53:35",
+ "diseno": "escenario n_10000, réplicas con semillas 3000-3079 (las 80 primeras de res_n_10000_200.json), B = 60 remuestreos por cliente, re-estimando LightGBM y el cross-fitting",
+ "wald_en_estas_80_replicas": {
+  "cobertura": 0.85,
+  "EE_medio": 0.0024325346115765963,
+  "DE_real_200": 0.002943
+ },
+ "prediccion": "Si el bootstrap capta la variabilidad de los modelos auxiliares, su error típico medio estará entre el de Wald (0,0024) y la desviación real (0,0029), y la cobertura de theta ± 1,96·EE_boot será mayor que la de Wald en las mismas réplicas. No predigo que llegue al 95 %.",
+ "metricas": [
+  "cobertura de theta ± 1,96·EE_boot",
+  "cobertura del intervalo percentil",
+  "EE_boot medio frente a la DE real"
+ ]
+}
