@@ -16,7 +16,8 @@ import os, sys, json, glob, zipfile, datetime, time
 
 if __name__ == "__main__" and os.environ.get("PYTHONUTF8") != "1":
     os.environ["PYTHONUTF8"] = "1"
-    os.execv(sys.executable, [sys.executable] + sys.argv)
+    import subprocess  # no os.execv: en Windows rompe las rutas con espacios
+    sys.exit(subprocess.run([sys.executable] + sys.argv, env=os.environ).returncode)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
