@@ -36,6 +36,8 @@ Comprobaciones: `verificacion.py` contrasta los resultados teóricos en ejemplos
 
 `res_base_40.json` es la prueba piloto inicial (40 réplicas, semilla 500). Notas sobre los resultados del escenario de solapamiento medio: `res_solap_medio_200.json` y `res_solap_medio_ORIGINAL.json` son la tanda original (semillas 1000–1199) y `res_solap_medio_rep7000.json` es la réplica con semillas nuevas (7000–7199).
 
+Pesos con corte conocido (sección 12 del paper 1): `corte_conocido.py` (simulación, con su predicción en `prediccion_corte_conocido.json`), `analyze_corte.py` y `corte_descomposicion.py` (análisis exploratorio). Bootstrap: `bootstrap.py` (con reemplazo y bayesiano), `analyze_bootstrap.py`, predicciones `prediccion_bootstrap*.json` y `prediccion_hipotesis_bootstrap.json`; los resultados ejecutados en el ordenador de Pablo están en `simulacion/resultados_pc/`.
+
 ### Reproducir
 
 ```bash
