@@ -46,6 +46,8 @@ def fit_predict(kind, Xtr, ytr, Xte, clf=True, seed=0):
 
 
 def estimate(kind, cap_X=False, cap_Y=False, K=5, seed=0):
+    # Nota: cap_Y no cambia nada (la CPS ya está censurada en su propio tope); el efecto del tope en el
+    # resultado se mide en la referencia (theta_cap), aplicándolo a los controles del NSW.
     t = nsw[nsw.treat == 1]
     X = pd.concat([features(t, cap_X), features(cps, cap_X)], ignore_index=True)
     Z = np.r_[np.ones(len(t)), np.zeros(len(cps))]

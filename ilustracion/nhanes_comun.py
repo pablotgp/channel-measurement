@@ -1,7 +1,7 @@
 """Datos y piezas comunes de la ilustración semisintética con NHANES 2017-2018.
 
 Población: los adultos (20 años o más) con IMC medido y autodeclarado válidos, tensión sistólica,
-cintura, nivel educativo y ratio de renta (n = 4037). No usamos los pesos de encuesta: tratamos
+cintura, nivel educativo y ratio de renta (n = 4034). No usamos los pesos de encuesta: tratamos
 la muestra como la población.
 
 IMC autodeclarado = peso declarado (lb) / altura declarada (in)^2, convertido a kg/m^2 y
