@@ -50,8 +50,9 @@ def z(x):
 COEF = dict(bmi=0.8, age=0.5, pir=-0.4)
 
 
-def prob_canal(df, a=-1.0):
-    return expit(a + COEF["bmi"] * z(df.bmi) + COEF["age"] * z(df.age) + COEF["pir"] * z(df.pir))
+def prob_canal(df, a=-1.0, coef_bmi=None):
+    cb = COEF["bmi"] if coef_bmi is None else coef_bmi
+    return expit(a + cb * z(df.bmi) + COEF["age"] * z(df.age) + COEF["pir"] * z(df.pir))
 
 
 def disenio(bmi_col):
@@ -61,9 +62,24 @@ def disenio(bmi_col):
         ("cat", OneHotEncoder(handle_unknown="ignore"), CAT_V)])
 
 
-def clasificador(bmi_col):
+LGB = dict(n_estimators=300, learning_rate=0.03, num_leaves=15, min_child_samples=20, subsample=0.8,
+           subsample_freq=1, colsample_bytree=0.8, verbose=-1, n_jobs=1)
+
+
+def _lgb_X(bmi_col):
+    num = NUM_V + ([bmi_col] if bmi_col else [])
+    return ColumnTransformer([("num", "passthrough", num), ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), CAT_V)])
+
+
+def clasificador(bmi_col, learner="spline"):
+    if learner == "lgbm":
+        import lightgbm as lgb
+        return make_pipeline(_lgb_X(bmi_col), lgb.LGBMClassifier(**LGB))
     return make_pipeline(disenio(bmi_col), LogisticRegression(C=1.0, max_iter=5000))
 
 
-def regresion(bmi_col):
+def regresion(bmi_col, learner="spline"):
+    if learner == "lgbm":
+        import lightgbm as lgb
+        return make_pipeline(_lgb_X(bmi_col), lgb.LGBMRegressor(**LGB))
     return make_pipeline(disenio(bmi_col), Ridge(alpha=1.0))

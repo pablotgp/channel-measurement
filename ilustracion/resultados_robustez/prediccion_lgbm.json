@@ -1,0 +1,23 @@
+{
+ "fecha": "2026-10-24T17:32:17",
+ "tarea": "lgbm",
+ "coef_bmi": 0.8,
+ "learner": "spline_pred_lgbm_est",
+ "predicciones": [
+  "B: sesgo del DR compatible con sesgo_predicho_B (|z|<3 o dentro del 25 %), negativo.",
+  "A: sesgo pequeño frente al de B (menos del 20 % de B en la cintura).",
+  "Masa de p̂ > 0,99 en el objetivo inferior al 1 % en A y en B.",
+  "C: sesgo negativo y mayor en valor absoluto que B en la cintura.",
+  "D: sesgo en la cintura menor en valor absoluto que el de B."
+ ],
+ "valores": {
+  "sbp": {
+   "theta_esperado": 130.7033745470659,
+   "sesgo_predicho_B": -0.4668384554225576
+  },
+  "waist": {
+   "theta_esperado": 109.31762187546428,
+   "sesgo_predicho_B": -2.4414125517471614
+  }
+ }
+}
