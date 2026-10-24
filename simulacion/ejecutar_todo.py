@@ -4,6 +4,7 @@
     python ejecutar_todo.py n_10000         # repetición del bootstrap de 10 000 clientes
     python ejecutar_todo.py base n_10000    # las dos, una detrás de otra
     python ejecutar_todo.py n_10000 base_bayes n_10000_bayes   # bootstrap bayesiano
+    python ejecutar_todo.py hipotesis       # comprobaciones de la hipótesis del bootstrap
     python ejecutar_todo.py base --nucleos 6
 
 Qué hace:
@@ -31,7 +32,19 @@ TAREAS = {
     "n_10000": dict(R=80, B=60, semilla=3000, pred="prediccion_bootstrap.json"),
     "base_bayes": dict(R=40, B=60, semilla=1000, pred="prediccion_bootstrap_bayesiano.json"),
     "n_10000_bayes": dict(R=40, B=60, semilla=3000, pred="prediccion_bootstrap_bayesiano.json"),
+    # Hipótesis sobre el bootstrap (prediccion_hipotesis_bootstrap.json)
+    "n_5000": dict(R=200, B=0, semilla=5000, pred="prediccion_hipotesis_bootstrap.json"),
+    "n_15000": dict(R=200, B=0, semilla=15000, pred="prediccion_hipotesis_bootstrap.json"),
+    "corte_bayes_n_10000": dict(R=40, B=60, semilla=3000, pred="prediccion_hipotesis_bootstrap.json"),
+    "corte_bayes_base": dict(R=40, B=60, semilla=1000, pred="prediccion_hipotesis_bootstrap.json"),
 }
+HIPOTESIS = ["n_5000", "n_15000", "corte_bayes_n_10000", "corte_bayes_base"]
+
+
+def escenario(nombre):
+    if nombre.startswith("corte_bayes_"):
+        return nombre[len("corte_bayes_"):]
+    return nombre[:-6] if nombre.endswith("_bayes") else nombre
 
 
 def comprobar_entorno():
@@ -61,7 +74,10 @@ def una_replica(nombre, seed, B, cs, carpeta):
     """Una réplica completa; escribe su fichero al terminar (así se puede reanudar)."""
     import json
     from bootstrap import one, one_bayes
-    if nombre.endswith("_bayes"):
+    if nombre.startswith("corte_bayes_"):
+        from corte_conocido import one_corte_bayes
+        r = one_corte_bayes(escenario(nombre), seed, B, cs)
+    elif nombre.endswith("_bayes"):
         r = one_bayes(nombre[:-6], seed, B, cs)
     else:
         r = one(nombre, seed, B, cs)
@@ -77,7 +93,7 @@ def ejecutar(nombre, nucleos, versiones):
     import json, time, shutil, zipfile, platform
     from joblib import Parallel, delayed
     t = TAREAS[nombre]
-    cs = json.load(open("c_star.json"))[nombre.replace("_bayes", "")]
+    cs = json.load(open("c_star.json"))[escenario(nombre)]
     carpeta = os.path.join("resultados_local", nombre); os.makedirs(carpeta, exist_ok=True)
     semillas = [t["semilla"] + r for r in range(t["R"])]
     hechas = {s for s in semillas if os.path.exists(os.path.join(carpeta, f"rep_{s}.json"))}
@@ -99,9 +115,17 @@ def ejecutar(nombre, nucleos, versiones):
     res = [json.load(open(os.path.join(carpeta, f"rep_{s}.json"))) for s in semillas]
     union = os.path.join(carpeta, f"boot_{nombre}_parte_local.json")
     json.dump(res, open(union, "w"))
-    salida = subprocess.run([sys.executable, "analyze_bootstrap.py", nombre, carpeta],
-                            capture_output=True, text=True)
-    informe = salida.stdout + salida.stderr
+    if t["B"] == 0:
+        import numpy as np
+        th = json.load(open("predicciones.json"))[escenario(nombre)]["theta"]
+        est = np.array([r["est"] for r in res]); se = np.array([r["se"] for r in res])
+        informe = (f"Escenario {nombre}: {len(res)} réplicas, θ = {th*100:.3f} %\n"
+                   f"Media del DR {est.mean()*100:.3f} %; DE real {est.std(ddof=1)*100:.3f} pp; "
+                   f"EE medio de Wald {se.mean()*100:.3f} pp; cobertura {np.mean(np.abs(est-th) <= 1.96*se)*100:.1f} %\n")
+    else:
+        salida = subprocess.run([sys.executable, "analyze_bootstrap.py", nombre, carpeta],
+                                capture_output=True, text=True)
+        informe = salida.stdout + salida.stderr
     print("\n" + informe)
     info = dict(versiones, sistema=platform.platform(), procesador=platform.processor(),
                 nucleos_usados=nucleos, tarea=nombre, **t)
@@ -121,6 +145,8 @@ if __name__ == "__main__":
     if "--nucleos" in args:
         i = args.index("--nucleos"); nucleos = int(args[i + 1]); del args[i:i + 2]
     tareas = args or ["base"]
+    if tareas == ["hipotesis"]:
+        tareas = HIPOTESIS
     for x in tareas:
         if x not in TAREAS:
             sys.exit(f"Tarea desconocida: {x}. Opciones: {', '.join(TAREAS)}")
@@ -132,3 +158,12 @@ if __name__ == "__main__":
     print("Consejo: deja el portátil enchufado y desactiva la suspensión mientras trabaja.")
     for x in tareas:
         ejecutar(x, nucleos, versiones)
+    if len(tareas) > 1:
+        import zipfile
+        with zipfile.ZipFile("resultados_todo.zip", "w", zipfile.ZIP_DEFLATED) as z:
+            for x in tareas:
+                carpeta = os.path.join("resultados_local", x)
+                for f in sorted(os.listdir(carpeta)):
+                    if not f.endswith(".tmp"):
+                        z.write(os.path.join(carpeta, f), f"{x}/{f}")
+        print(f"\nTodo en un solo fichero: {os.path.join(AQUI, 'resultados_todo.zip')}")

@@ -15,6 +15,8 @@ SCEN = {
     "confusion_U":     (Params(lam=0.5, nu=1.0, nu_y=1.0), False, N_BASE),
     "n_pequeno":       (BASE, False, N_BASE // 10),
     "n_10000":         (BASE, False, 10_000),
+    "n_5000":          (BASE, False, 5_000),     # escala del ruido (hipótesis del bootstrap)
+    "n_15000":         (BASE, False, 15_000),
 }
 
 if __name__ == "__main__":

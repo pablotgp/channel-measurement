@@ -11,7 +11,9 @@ name = sys.argv[1] if len(sys.argv) > 1 else "n_10000"
 folder = sys.argv[2] if len(sys.argv) > 2 else "."
 PRED = {"n_10000": "prediccion_bootstrap.json", "base": "prediccion_bootstrap_base.json",
         "base_bayes": "prediccion_bootstrap_bayesiano.json", "n_10000_bayes": "prediccion_bootstrap_bayesiano.json"}
-base_name = name.replace("_bayes", "")
+base_name = name[len("corte_bayes_"):] if name.startswith("corte_bayes_") else name.replace("_bayes", "")
+for k in ("corte_bayes_base", "corte_bayes_n_10000"):
+    PRED[k] = "prediccion_hipotesis_bootstrap.json"
 
 th = json.load(open("predicciones.json"))[base_name]["theta"]
 files = sorted(glob.glob(os.path.join(folder, f"boot_{name}_parte*.json")))
@@ -32,7 +34,10 @@ cov = {
 }
 mc = lambda c: np.sqrt(c.mean() * (1 - c.mean()) / R)
 try:
-    sd200 = np.std([r["dr"] for r in json.load(open(f"res_{base_name}_200.json"))], ddof=1)
+    if name.startswith("corte_bayes_"):
+        sd200 = np.std([r["corte"]["dr"] for r in json.load(open(f"res_corte_{base_name}_200.json"))], ddof=1)
+    else:
+        sd200 = np.std([r["dr"] for r in json.load(open(f"res_{base_name}_200.json"))], ddof=1)
     sd200_txt = f"{sd200*100:.3f}"
 except FileNotFoundError:
     sd200_txt = "no disponible"
@@ -48,4 +53,6 @@ print(f"Réplicas que cubre el bootstrap y no Wald: {np.sum(b & ~w)}; al revés:
 lo_miss = np.mean(th < lo_p); hi_miss = np.mean(th > hi_p)
 print(f"Percentil: θ queda por debajo del intervalo en {lo_miss*100:.1f} % y por encima en {hi_miss*100:.1f} %")
 if name in PRED and os.path.exists(PRED[name]):
-    print("\nPredicción registrada antes de ejecutar:\n  " + json.load(open(PRED[name]))["prediccion"])
+    reg = json.load(open(PRED[name]))
+    texto = reg.get("prediccion") or reg.get("H2_corte_conocido", {}).get("prediccion", "")
+    print("\nPredicción registrada antes de ejecutar:\n  " + texto)

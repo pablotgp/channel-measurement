@@ -90,3 +90,38 @@ if __name__ == "__main__":
     res = Parallel(n_jobs=int(os.environ.get("N_JOBS", "2")))(delayed(one_mod)(name, seed0 + r, cs) for r in range(R))
     json.dump(res, open(f"res_corte_{name}_{R}.json", "w"))
     print(f"{name}: {R} réplicas en {time.time()-t:.0f} s")
+
+
+def _fit_corte(X, Z, Y, client, XA, DA, GA, nR, inR, wt=None, wtA=None, K=5):
+    """DR con corte conocido; wt/wtA = pesos de cliente (bootstrap bayesiano) o None."""
+    cc = Z == 0
+    mh = np.zeros(len(Z)); eh = np.zeros(len(XA))
+    for tr, te in GroupKFold(K).split(X, Z, client):
+        trc = tr[cc[tr]]
+        mh[te] = lgb.LGBMRegressor(**LGB_REG).fit(X[trc], Y[trc], sample_weight=None if wt is None else wt[trc]).predict(X[te])
+    for tr, te in GroupKFold(K).split(XA, DA, GA):
+        eh[te] = lgb.LGBMClassifier(**LGB_CLF).fit(XA[tr], DA[tr], sample_weight=None if wtA is None else wtA[tr]).predict_proba(XA[te])[:, 1]
+    eh = np.clip(eh[:nR], 1e-6, 1 - 1e-6)
+    o = np.where(inR, eh / (1 - eh), 0.0)
+    if wt is None:
+        _, est, se = _hajek_dr(o, Y, mh, Z, client)
+        return est, se
+    a = wt[cc] * o[cc]
+    return np.sum(a * (Y[cc] - mh[cc])) / np.sum(a) + np.sum(wt[~cc] * mh[~cc]) / np.sum(wt[~cc]), None
+
+
+def one_corte_bayes(name, seed, B, cs):
+    """Bootstrap bayesiano (pesos Exp(1) por cliente) del estimador con corte conocido."""
+    p, _, n = SCEN[name]
+    d = sample_all(n, p, cs, np.random.default_rng(seed))
+    Z, Y, client = d["Z"], d["Y"], d["client"]
+    X = features(d["V"], d["V5"]); X1 = features(d["V_1"], d["V5_1"])
+    XA = np.r_[X, X1]; DA = np.r_[Z, np.ones(len(X1), int)]; GA = np.r_[client, d["client1"]]
+    inR = s_star(d["V"], p) <= cs
+    est, se = _fit_corte(X, Z, Y, client, XA, DA, GA, len(Z), inR)
+    brng = np.random.default_rng([seed, 2])
+    boot = np.empty(B)
+    for b in range(B):
+        wc = brng.exponential(1.0, n); wc /= wc.mean()          # un peso por cliente de la población
+        boot[b] = _fit_corte(X, Z, Y, client, XA, DA, GA, len(Z), inR, wt=wc[client], wtA=wc[GA])[0]
+    return dict(est=float(est), se=float(se), boot=boot.tolist())

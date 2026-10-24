@@ -1,0 +1,14 @@
+{
+ "registrada": "2026-10-24T13:10:18",
+ "contexto": "El bootstrap por cliente sobrestima la DE real: cociente EE_boot/DE de 1,49-1,58 con reemplazo y 1,35 con pesos Exp(1) (bayesiano), en base y n_10000. Quitar las copias no lo arregla (prediccion_bootstrap_bayesiano.json falló).",
+ "H1_escala": {
+  "diseno": "Estimador estándar con 5 000 y 15 000 clientes, 200 réplicas cada uno (semillas 5000 y 15000).",
+  "prediccion": "La DE crece más deprisa que el ritmo √n, como entre 3 000, 10 000 y 30 000: DE(15 000) entre 0,17 y 0,24 pp (√n daría 0,158) y DE(5 000) entre 0,40 y 0,70 pp (interpolación log-log entre 3 000 y 10 000: 0,56).",
+  "para_que": "Medir la curva de ruido; si el bootstrap con 30 000 (0,147-0,162) se parece a la DE real con unos 15 000-20 000, el mundo bootstrap se comporta como si tuviera la mitad de información."
+ },
+ "H2_corte_conocido": {
+  "diseno": "Bootstrap bayesiano (pesos Exp(1) por cliente) del estimador con corte conocido; 40 réplicas, B = 60, semillas 1000 (base) y 3000 (n_10000), las mismas réplicas que antes. DE real de referencia: la de 200 réplicas del corte conocido (0,098 y 0,195).",
+  "prediccion": "Si el exceso viene del ruido de re-estimar un clasificador ruidoso, con el corte conocido (mucho menos ruido en los pesos) el cociente EE_boot/DE bajará a 1,2 o menos en los dos escenarios.",
+  "alternativa": "Si se queda en torno a 1,35-1,4 (cerca de √2), el exceso es propio de remuestrear todo el procedimiento con LightGBM y no depende de lo ruidoso que sea el clasificador."
+ }
+}
