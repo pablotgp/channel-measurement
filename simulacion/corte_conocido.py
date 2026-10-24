@@ -39,7 +39,9 @@ def sample_all(n, p, cs, rng):
         Y[cc] += rng.random(cc.sum()) < pr
     out = c["D"] & ~inR                                   # premium fuera de la cola (sin usar rng)
     idx1 = np.repeat(np.flatnonzero(out), c["m"][out])
-    return dict(client=idx, Z=Z, V=V, V5=V5, Y=Y, client1=idx1, V_1=c["V"][idx1], V5_1=c["V5"][idx1])
+    C = np.where((Z == 1) & H, c["Cval"][idx], np.nan)            # como gen.sample_calls
+    C_1 = np.where(c["H"][idx1], c["Cval"][idx1], np.nan)         # premium: se registra si hay historial
+    return dict(client=idx, Z=Z, V=V, V5=V5, Y=Y, C=C, client1=idx1, V_1=c["V"][idx1], V5_1=c["V5"][idx1], C_1=C_1)
 
 
 def metrics(o, Y, mh, Z, client, g):
@@ -57,10 +59,12 @@ def metrics(o, Y, mh, Z, client, g):
 
 
 def one(name, seed, cs, K=5):
-    p, _, n = SCEN[name]
+    p, useC, n = SCEN[name]
     d = sample_all(n, p, cs, np.random.default_rng(seed))
     Z, Y, client = d["Z"], d["Y"], d["client"]; cc = Z == 0
     X = features(d["V"], d["V5"])
+    if useC:
+        X = np.c_[X, d["C"]]                       # NaN = no registrado, como en est.estimate
     g, _ = g_and_pD(d["V"], d["V5"], p)
     # estándar: idéntico a est.estimate
     ph = np.zeros(len(Z)); mh = np.zeros(len(Z))
@@ -71,6 +75,8 @@ def one(name, seed, cs, K=5):
     ph = np.clip(ph, 1e-6, 1 - 1e-6); o_std = ph / (1 - ph)
     # corte conocido: propensión de canal con todas las llamadas
     X1 = features(d["V_1"], d["V5_1"])
+    if useC:
+        X1 = np.c_[X1, d["C_1"]]
     XA = np.r_[X, X1]; DA = np.r_[Z, np.ones(len(X1), int)]; GA = np.r_[client, d["client1"]]
     eh = np.zeros(len(XA))
     for tr, te in GroupKFold(K).split(XA, DA, GA):
@@ -79,6 +85,8 @@ def one(name, seed, cs, K=5):
     o_cut = np.where(s_star(d["V"], p) <= cs, eh / (1 - eh), 0.0)
     r = {"std": metrics(o_std, Y, mh, Z, client, g), "corte": metrics(o_cut, Y, mh, Z, client, g),
          "n_premium_fuera": int(len(X1))}
+    r["std"]["eps_hat"] = float(np.mean(ph[Z == 1] > 0.99))       # masa sin soporte (clasificador seguro)
+    r["corte"]["eps_hat"] = float(np.mean(eh[Z == 1] > 0.99))     # análogo: ê ≈ 1 en el grupo objetivo
     return r
 
 

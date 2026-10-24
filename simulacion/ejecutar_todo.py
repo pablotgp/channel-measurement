@@ -5,6 +5,7 @@
     python ejecutar_todo.py base n_10000    # las dos, una detrás de otra
     python ejecutar_todo.py n_10000 base_bayes n_10000_bayes   # bootstrap bayesiano
     python ejecutar_todo.py hipotesis       # comprobaciones de la hipótesis del bootstrap
+    python ejecutar_todo.py escenarios_corte   # corte conocido en los seis escenarios restantes
     python ejecutar_todo.py base --nucleos 6
 
 Qué hace:
@@ -39,11 +40,17 @@ TAREAS = {
     "corte_bayes_base": dict(R=40, B=60, semilla=1000, pred="prediccion_hipotesis_bootstrap.json"),
 }
 HIPOTESIS = ["n_5000", "n_15000", "corte_bayes_n_10000", "corte_bayes_base"]
+# Corte conocido en los escenarios restantes (prediccion_corte_escenarios.json)
+ESC_CORTE = ["con_C", "confunde_sin_C", "confunde_con_C", "solap_medio", "solap_bajo", "confusion_U"]
+for _e in ESC_CORTE:
+    TAREAS[f"corte_{_e}"] = dict(R=200, B=0, semilla=1000, pred="prediccion_corte_escenarios.json")
 
 
 def escenario(nombre):
     if nombre.startswith("corte_bayes_"):
         return nombre[len("corte_bayes_"):]
+    if nombre.startswith("corte_"):
+        return nombre[len("corte_"):]
     return nombre[:-6] if nombre.endswith("_bayes") else nombre
 
 
@@ -77,6 +84,9 @@ def una_replica(nombre, seed, B, cs, carpeta):
     if nombre.startswith("corte_bayes_"):
         from corte_conocido import one_corte_bayes
         r = one_corte_bayes(escenario(nombre), seed, B, cs)
+    elif nombre.startswith("corte_"):
+        from corte_conocido import one as one_corte
+        r = one_corte(escenario(nombre), seed, cs)
     elif nombre.endswith("_bayes"):
         r = one_bayes(nombre[:-6], seed, B, cs)
     else:
@@ -115,7 +125,10 @@ def ejecutar(nombre, nucleos, versiones):
     res = [json.load(open(os.path.join(carpeta, f"rep_{s}.json"))) for s in semillas]
     union = os.path.join(carpeta, f"boot_{nombre}_parte_local.json")
     json.dump(res, open(union, "w"))
-    if t["B"] == 0:
+    if nombre.startswith("corte_") and not nombre.startswith("corte_bayes_"):
+        from analyze_corte import resumen
+        informe = resumen(escenario(nombre), res) + "\n"
+    elif t["B"] == 0:
         import numpy as np
         th = json.load(open("predicciones.json"))[escenario(nombre)]["theta"]
         est = np.array([r["est"] for r in res]); se = np.array([r["se"] for r in res])
@@ -147,6 +160,8 @@ if __name__ == "__main__":
     tareas = args or ["base"]
     if tareas == ["hipotesis"]:
         tareas = HIPOTESIS
+    if tareas == ["escenarios_corte"]:
+        tareas = [f"corte_{e}" for e in ESC_CORTE]
     for x in tareas:
         if x not in TAREAS:
             sys.exit(f"Tarea desconocida: {x}. Opciones: {', '.join(TAREAS)}")
