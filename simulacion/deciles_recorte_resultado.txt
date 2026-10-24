@@ -1,0 +1,4 @@
+Pesos verdaderos, deciles de w bajo P (%): [0.76 0.9  0.95 0.97 0.99 0.99 0.99 1.01 1.   0.99]  media 0.96
+Correlaciones en el grupo objetivo: (w, V1) 0.73  (g, V1) 0.45  (w, g) 0.23
+Pesos estimados, deciles de ŵ bajo P̂ (%), media de 5 réplicas: [1.11 0.95 0.93 0.93 0.94 0.94 0.93 0.94 0.94 0.92]  media 0.95
+Masa de P̂ en donantes fuera del grupo objetivo (w = 0): 0.065
