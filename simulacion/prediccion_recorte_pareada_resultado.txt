@@ -1,0 +1,16 @@
+base, población semilla 11: E_Q[w g] - theta = -0.49 milésimas
+base, población semilla 0: E_Q[w g] - theta = -0.90 milésimas
+solap_bajo, población semilla 11: E_Q[w g] - theta = -0.60 milésimas
+solap_bajo, población semilla 0: E_Q[w g] - theta = +0.35 milésimas
+base_s11_p99         original   -0.81   pareada   -0.31   fórmula   -0.39
+base_s11_p95         original   -3.47   pareada   -2.97   fórmula   -3.16
+base_s11_p90         original   -8.07   pareada   -7.58   fórmula   -7.99
+base_s0_p99          original   -1.23   pareada   -0.32   fórmula   -0.35
+base_s0_p95          original   -3.99   pareada   -3.09   fórmula   -3.21
+base_s0_p90          original   -8.66   pareada   -7.76   fórmula   -7.97
+solap_bajo_s11_p99   original   -2.70   pareada   -2.10   fórmula   -2.99
+solap_bajo_s11_p95   original  -11.22   pareada  -10.61   fórmula  -12.26
+solap_bajo_s11_p90   original  -20.36   pareada  -19.75   fórmula  -21.39
+solap_bajo_s0_p99    original   -0.42   pareada   -0.77   fórmula   -2.96
+solap_bajo_s0_p95    original   -9.54   pareada   -9.90   fórmula  -11.47
+solap_bajo_s0_p90    original  -18.81   pareada  -19.16   fórmula  -20.22
