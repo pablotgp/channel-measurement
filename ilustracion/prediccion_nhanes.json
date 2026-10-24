@@ -1,0 +1,29 @@
+{
+ "fecha": "2026-10-24T17:14:22",
+ "poblacion": 4034,
+ "replicas": 200,
+ "especificaciones": {
+  "A": "IMC medido en los dos grupos (oráculo)",
+  "B": "IMC autodeclarado en el objetivo, medido en los donantes (medición distinta)",
+  "C": "sin IMC (solo variables comunes V)",
+  "D": "IMC autodeclarado en los dos grupos (mismo instrumento, con error)"
+ },
+ "predicciones": [
+  "P1. A: sesgo medio del DR compatible con 0 (|z| < 3) en los dos resultados.",
+  "P2. B: sesgo medio del DR compatible con el sesgo predicho por el Teorema 5(3) (|z| < 3, tolerando un error de modelo de hasta el 25 % del sesgo predicho), negativo en los dos resultados.",
+  "P3. Indetectable: el AUC del clasificador en B difiere del de A en menos de 0,02, y la masa de p̂ > 0,99 en el grupo objetivo es inferior al 1 % en A y en B.",
+  "P4. C: sesgo negativo en los dos resultados, y para la cintura mayor en valor absoluto que el de B.",
+  "D se registra como exploratorio, sin predicción.",
+  "No evaluamos la cobertura: las réplicas comparten la población y solo varía la asignación, así que el EE de Wald (que incluye el muestreo de la población) no es comparable con la dispersión entre réplicas."
+ ],
+ "valores": {
+  "sbp": {
+   "theta_esperado": 130.7033745470659,
+   "sesgo_predicho_B": -0.4668384554225576
+  },
+  "waist": {
+   "theta_esperado": 109.31762187546428,
+   "sesgo_predicho_B": -2.4414125517471614
+  }
+ }
+}
