@@ -14,7 +14,7 @@ Scenario & $\theta$ & Prediction & Hájek & DR & SD & Coverage & $\neff/n_0$ (th
 \midrule
 Base & 0.958 & 0.958 & 0.958 (0.0) & 0.961 (0.4) & 0.112 & 95.5\,\% & 0.14 (0.22) \\
 With $C$ & 0.958 & H 0.940; DR 0.958 & 0.939 ($-$0.1) & 0.958 (0.0) & 0.107 & 96.5\,\% & 0.12 (0.22) \\
-$C$ confounds, without $C$ & 1.712 & 1.314 & 1.313 ($-$0.2) & 1.320 (0.7) & 0.132 & 15.5\,\% & 0.14 (0.22) \\
+$C$ confounds, without $C$ & 1.712 & 1.314 & 1.313 ($-$0.1) & 1.320 (0.6) & 0.132 & 15.5\,\% & 0.14 (0.22) \\
 $C$ confounds, with $C$ & 1.712 & H 1.281; DR 1.314 & 1.280 (0.0) & 1.320 (0.6) & 0.129 & 17.5\,\% & 0.12 (0.22) \\
 Medium overlap & 1.178 & 1.178 & 1.151 ($-$3.0) & 1.158 ($-$2.1) & 0.136 & 94.5\,\% & 0.10 (0.14) \\
 Low overlap & 1.274 & 1.274 & 1.283 (0.5) & 1.298 (1.1) & 0.300 & 91.0\,\% & 0.03 (0.03) \\
@@ -26,7 +26,7 @@ Unobserved confounding & 2.697 & 1.193 & 1.198 (0.6) & 1.204 (1.3) & 0.127 & 0.0
 
 \begin{itemize}
   \item \emph{Identification.} Without confounding or a channel variable, Hájek and DR recover $\theta$ and the interval covers 95.5\,\%.
-  \item \emph{Channel variable.} With $C$, the estimated unsupported mass was $\hat\varepsilon=0.326$, against $\kappa=0.335$ (Proposition~\ref{prop:breaks}), and Hájek converges to $\thac$, with the predicted bias of $-0.018$ points. The original prediction also assigned $\thac$ to the DR estimator and failed ($z=2.4$ and $4.3$). The DR estimator extrapolates the outcome model to the unsupported part (Corollary~\ref{cor:drnosupport}); the prediction derived from this (0.958 and 1.314) was added after the ``With $C$'' scenario and registered before running ``$C$ confounds, with $C$'', where it held ($z=0.6$).
+  \item \emph{Channel variable.} With $C$, the estimated unsupported mass was $\hat\varepsilon=0.326$, against $\kappa=0.335$ (Proposition~\ref{prop:breaks}), and Hájek converges to $\thac$ (the weighting limit of Section~\ref{sec:channel} coincides with $\thac$ here because $\delta=0$), with the predicted bias of $-0.018$ points. The original prediction also assigned $\thac$ to the DR estimator and failed ($z=2.4$ and $4.3$). The DR estimator extrapolates the outcome model to the unsupported part (Corollary~\ref{cor:drnosupport}); the prediction derived from this (0.958 and 1.314) was added after the ``With $C$'' scenario and registered before running ``$C$ confounds, with $C$'', where it held ($z=0.6$).
   \item \emph{Confounding through the history.} Without $C$, the bias is as predicted: $-0.40$ points, 23\,\% of $\theta$. With $C$, $\theta$ is not recovered either, as Section~\ref{sec:channel} says.
   \item \emph{Unobserved confounding.} The estimators converge to the limit predicted from the observables, less than half of $\theta$, with zero coverage. The standard error is well calibrated (97\,\% of the actual dispersion) and the diagnostics resemble those of the base scenario: nothing in the data reveals the problem.
   \item \emph{Overlap.} With $\chi^2=36$, the standard deviation almost triples, the estimated standard error is 87\,\% of the actual dispersion and coverage drops to 91\,\%.
@@ -53,7 +53,7 @@ With the flexible classifier and the misspecified (linear) outcome model, the DR
 
 \subsection{Trimming}\label{sec:res-trimming}
 
-We measure the effect of trimming as the paired difference, trimmed minus untrimmed, within each replication, in thousandths of a percentage point. With the true weights and the true response $m_0$, in 60 replications of the base scenario, Proposition~\ref{prop:trimming} predicts $-0.37$, $-3.19$ and $-7.98$ at the 99th, 95th and 90th percentiles, and we observe $-0.37\pm0.02$, $-3.13\pm0.06$ and $-7.81\pm0.09$: the profiles with the largest weights respond more, and trimming lowers the estimate. With the weights estimated by the classifier, the sign reverses: $+10.9\pm0.7$ at the 90th percentile, positive in all 60 replications (with the simulated purchases, noise hides it: $+6.8\pm4.7$). Within the DR estimator, the mean effect of trimming lies between $-0.1$ and $+2.1$ thousandths in the base and low-overlap scenarios, and between $+6.4$ and $+12.5$ under medium overlap, indistinguishable from zero ($|z|<2$); at the 90th percentile, the root mean squared error drops from 0.300 to 0.163 points under low overlap and from 0.111 to 0.082 in the base scenario. But the standard error computed with the trimmed weights is only 64\,\% of the actual dispersion under low overlap, and coverage falls to 78.5\,\%; with the untrimmed standard error it is 96.5--99.5\,\%, conservative in this simulation. The mechanism of the reversal is analyzed in the companion note.
+We measure the effect of trimming as the paired difference, trimmed minus untrimmed, within each replication, in thousandths of a percentage point. With the true weights and the true response $m_0$, in 60 replications of the base scenario, Proposition~\ref{prop:trimming} predicts $-0.37$, $-3.18$ and $-7.98$ at the 99th, 95th and 90th percentiles, and we observe $-0.37\pm0.02$, $-3.13\pm0.06$ and $-7.81\pm0.09$: the profiles with the largest weights respond more, and trimming lowers the estimate. With the weights estimated by the classifier, the sign reverses: $+10.9\pm0.7$ at the 90th percentile, positive in all 60 replications (with the simulated purchases, noise hides it: $+11.8\pm7.3$ in the same 60 replications). Within the DR estimator, the mean effect of trimming lies between $-0.1$ and $+2.1$ thousandths in the base and low-overlap scenarios, and between $+6.4$ and $+12.5$ under medium overlap, indistinguishable from zero ($|z|<2$); at the 90th percentile, the root mean squared error drops from 0.300 to 0.163 points under low overlap and from 0.111 to 0.082 in the base scenario. But the standard error computed with the trimmed weights is only 64\,\% of the actual dispersion under low overlap, and coverage falls to 78.5\,\%; with the untrimmed standard error it is 96.5--99.5\,\% at the 95th and 90th percentiles in the base and low-overlap scenarios, but only 78--88.5\,\% with 3{,}000 customers. The mechanism of the reversal is analyzed in the companion note.
 
 \subsection{Known-cutoff weights}\label{sec:res-cutoff}
 
@@ -61,7 +61,7 @@ We compare the estimator with the weights of Proposition~\ref{prop:cutoff} with 
 
 \begin{table}[ht]
 \centering\small
-\caption{Known-cutoff weights in the base scenario, by size. 200 replications; $\theta=0.958\,\%$. SD in points. The last column is the effect of trimming the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths; with the true weights it is $-7.8$.}\label{tab:cutoff}
+\caption{Known-cutoff weights in the base scenario, by size. 200 replications; $\theta=0.958\,\%$. SD in points. The last column is the effect of trimming the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths, over these 200 replications (the $+10.9$ in the text comes from a separate set of 60); with the true weights it is $-7.8$.}\label{tab:cutoff}
 \begin{tabular}{@{}llccccc@{}}
 \toprule
 Customers & Weights & DR (\%) & SD & Coverage & $\neff/n_0$ & Trimming p90 \\
@@ -99,7 +99,7 @@ Unobserved confounding & 0.127 $\to$ 0.109 & 0.0 $\to$ 0.0\,\% & $+23.1\to+4.6$ 
 
 In the other scenarios, with a second registered prediction (Table~\ref{tab:cutoff-scenarios}), the estimators converge to the same limits as the standard one ($|z|\le1.7$), because only the estimation of the same weights changes; with confounding, coverage with respect to $\theta$ is even lower, because the estimator is more precise around a wrong value. With the channel variable, the weights do not blow up: donors never have it recorded, and the lack of support shows up as $\hat e>0.99$ in 33.3\,\% of the target group, against $\kappa=0.335$. Under low overlap, trimming with these weights reproduces what Proposition~\ref{prop:trimming} predicts for the true weights ($-2.2$, $-12.1$ and $-20.6$ against $-3.0$, $-11.9$ and $-20.8$). The effect of trimming shrinks substantially in every scenario and becomes negative or about zero, except in ``$C$ confounds, with $C$'' and ``Unobserved confounding'', where it remains positive.
 
-Two predictions fail: the dispersion does not decrease under medium overlap, and under low overlap it increases and coverage falls from 91 to 87\,\%. Our interpretation, untested: as overlap worsens, the channel propensity approaches 1 inside the target group and its odds are estimated from few donors, whereas the standard classifier, with very few positive cases, shrinks them toward moderate values. Trimming within the DR estimator equalizes both methods: under low overlap, the root mean squared error at the 90th percentile is 0.160 with the known cutoff and 0.163 with the standard estimator, with 98\,\% coverage using the untrimmed standard error. The precision gain is therefore limited to good overlap, especially with small samples.
+Two predictions fail: the dispersion does not decrease under medium overlap, and under low overlap it increases and coverage falls from 91 to 87\,\%. Our interpretation, untested: as overlap worsens, the channel propensity approaches 1 inside the target group and its odds are estimated from few donors, whereas the standard classifier, with very few positive cases, shrinks them toward moderate values. Trimming within the DR estimator equalizes both methods: under low overlap, the root mean squared error at the 90th percentile is 0.160 with the known cutoff and 0.163 with the standard estimator, with 97.5 and 98\,\% coverage using the untrimmed standard error. The precision gain is therefore limited to good overlap, especially with small samples.
 
 \subsection{Sensitivity}\label{sec:res-sensitivity}
 
@@ -149,8 +149,8 @@ With the standard estimator, the standard deviation of the DR estimator is 0.912
 \toprule
 Customers & Actual SD & Wald & Bootstrap with replacement & Bayesian bootstrap \\
 \midrule
-30{,}000 & 0.109 & 0.102 (98\,\%) & 0.162 (100\,\%) & 0.147 (100\,\%) \\
-10{,}000 & 0.274 & 0.230 (82\,\%) & 0.432 (100\,\%) & 0.370 (98\,\%) \\
+30{,}000 & 0.109 & 0.102 (97.5\,\%) & 0.162 (100\,\%) & 0.147 (100\,\%) \\
+10{,}000 & 0.274 & 0.230 (82.5\,\%) & 0.432 (100\,\%) & 0.370 (97.5\,\%) \\
 \bottomrule
 \end{tabular}
 \end{table}

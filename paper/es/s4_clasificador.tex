@@ -45,12 +45,12 @@ Sin suponer (A3):
 \end{proof}
 
 \begin{corolario}[Cotas de identificación parcial]\label{cor:cotas}
-Si $Y\in[0,1]$, entonces $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, y el sesgo de la ponderación es $\thac-\theta=\varepsilon(\thac-\ths)$.
+Con las hipótesis del Teorema~\ref{teo:lebesgue}(3), si $Y\in[0,1]$, entonces $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, y el sesgo de la ponderación es $\thac-\theta=\varepsilon(\thac-\ths)$.
 \end{corolario}
 La anchura del intervalo es $\varepsilon$, que puede superar a la propia tasa cuando las tasas son pequeñas: si al Ejemplo~\ref{ej:juguete} se añade un perfil sin soporte con $P=(0,1;\,0,3;\,0,5;\,0,1)$, entonces $\varepsilon=0,1$, $\thac=1,39\,\%$ y el intervalo es $[1,25\,\%;\,11,25\,\%]$. Solo es informativo con un supuesto adicional; por ejemplo, si las unidades sin soporte no responden mejor que el resto del grupo, $\ths\le\thac$, el intervalo se reduce a $[(1-\varepsilon)\thac,\thac]$, aquí $[1,25\,\%;\,1,39\,\%]$, y el estimador ponderado es una cota superior de $\theta$.
 
 \begin{corolario}[Estimador doblemente robusto sin soporte]\label{cor:drsinsoporte}
-Bajo las hipótesis del Teorema~\ref{teo:lebesgue}, sea $\bar m$ con $\bar m=m_0$ $P$-casi seguro sobre $\{p<1\}$. Con los pesos $r$,
+Bajo las hipótesis del Teorema~\ref{teo:lebesgue}, sea $\bar m$ $P$-integrable con $\bar m=m_0$ $P$-casi seguro sobre $\{p<1\}$. Con los pesos $r$ (el último término es $0$ cuando $\varepsilon=0$),
 \[
 \frac{\E[r(X)(Y-\bar m(X))\mid D=0]}{\E[r(X)\mid D=0]}+\int\bar m\dd P=(1-\varepsilon)\thac+\varepsilon\,\E_P\bigl[\bar m(X)\mid p(X)=1\bigr].
 \]

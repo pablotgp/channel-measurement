@@ -45,12 +45,12 @@ Without assuming (A3):
 \end{proof}
 
 \begin{corollary}[Partial identification bounds]\label{cor:bounds}
-If $Y\in[0,1]$, then $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, and the bias of weighting is $\thac-\theta=\varepsilon(\thac-\ths)$.
+Under the hypotheses of Theorem~\ref{thm:lebesgue}(3), if $Y\in[0,1]$, then $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, and the bias of weighting is $\thac-\theta=\varepsilon(\thac-\ths)$.
 \end{corollary}
 The width of the interval is $\varepsilon$, which can exceed the rate itself when rates are small: if an unsupported profile is added to Example~\ref{ex:toy} with $P=(0.1,\,0.3,\,0.5,\,0.1)$, then $\varepsilon=0.1$, $\thac=1.39\,\%$ and the interval is $[1.25\,\%,\,11.25\,\%]$. It is informative only under an additional assumption; for instance, if unsupported units do not respond better than the rest of the group, $\ths\le\thac$, the interval shrinks to $[(1-\varepsilon)\thac,\thac]$, here $[1.25\,\%,\,1.39\,\%]$, and the weighting estimator is an upper bound for $\theta$.
 
 \begin{corollary}[Doubly robust estimator without support]\label{cor:drnosupport}
-Under the hypotheses of Theorem~\ref{thm:lebesgue}, let $\bar m=m_0$ $P$-almost surely on $\{p<1\}$. With the weights $r$,
+Under the hypotheses of Theorem~\ref{thm:lebesgue}, let $\bar m$ be $P$-integrable with $\bar m=m_0$ $P$-almost surely on $\{p<1\}$. With the weights $r$ (the last term is $0$ when $\varepsilon=0$),
 \[
 \frac{\E[r(X)(Y-\bar m(X))\mid D=0]}{\E[r(X)\mid D=0]}+\int\bar m\dd P=(1-\varepsilon)\thac+\varepsilon\,\E_P\bigl[\bar m(X)\mid p(X)=1\bigr].
 \]

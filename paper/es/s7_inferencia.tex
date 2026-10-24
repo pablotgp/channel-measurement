@@ -46,7 +46,7 @@ El corolario se refiere a la forma no normalizada $\psi$: el recorte solo sesga 
 \phi(O)=\frac1\pi\Bigl[Z\,(m_0(X)-\theta)+(1-Z)\,o(X)\,(Y-m_0(X))\Bigr],\\
 V=\E[\phi^2]=\frac{\Var_P(m_0(X))}{\pi}+\frac{\E_Q[w(X)^2\sigma^2(X)]}{1-\pi},
 \end{gather*}
-donde el término cruzado se anula porque $Z(1-Z)=0$ y el segundo sumando usa $o=\pi w/(1-\pi)$ (Teorema~\ref{teo:odds}).
+donde el término cruzado se anula porque $Z(1-Z)=0$ y el segundo sumando usa $o=\pi w/(1-\pi)$ (Teorema~\ref{teo:odds}). Esta forma cerrada corresponde a observaciones i.i.d.; con varias observaciones por unidad, véase el apéndice.
 
 \begin{proposicion}[Cuándo la varianza es finita]\label{prop:varianza}
 Si $Y$ está acotada y $0<\sigma_-^2\le\sigma^2\le\sigma_+^2$ $Q$-casi seguro, entonces $V<\infty$ si y solo si $\E_Q[w^2]<\infty$, es decir, si y solo si $\chi^2(P\|Q)=\E_Q[w^2]-1<\infty$. La continuidad absoluta $P\ll Q$ no implica esa condición.
@@ -57,7 +57,7 @@ El primer sumando de $V$ es finito porque $m_0$ está acotada; el segundo está 
 
 Así, (A3) basta para identificar $\theta$, pero no para estimarla a ritmo $n^{-1/2}$: con la varianza condicional acotada inferiormente, hace falta además $\chi^2(P\|Q)<\infty$, y la teoría estándar exige algo más fuerte, pesos acotados.
 
-\paragraph{Tamaño muestral efectivo.} El de Kish, $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ sobre las $n_0$ observaciones donantes, cumple con los pesos verdaderos $\neff/n_0\to1/\E_Q[w^2]=1/(1+\chi^2(P\|Q))$, así que estima la divergencia $\chi^2$; con pesos estimados puede moverse en los dos sentidos (el ruido de $\hat w$ lo reduce y el encogimiento de un clasificador regularizado lo aumenta), y en nuestra simulación queda por debajo del teórico. En muestra finita siempre es finito, incluso cuando $\chi^2=\infty$, y entonces tiende a cero muy despacio y con mucho ruido: en el contraejemplo de la Proposición~\ref{prop:varianza}, la mediana sobre réplicas pasa de 0,45 con $n_0=10^3$ a unos 0,21 con $n_0=10^7$, y con $n_0=10^3$ los percentiles 1 y 99 entre réplicas son 0,05 y 0,65. Un $\neff$ razonable no garantiza que $\chi^2$ sea finita; conviene examinar además la estabilidad de los cuantiles altos de $\hat w$.
+\paragraph{Tamaño muestral efectivo.} El de Kish, $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ sobre las $n_0$ observaciones donantes, cumple con los pesos verdaderos $\neff/n_0\to1/\E_Q[w^2]=1/(1+\chi^2(P\|Q))$, así que estima la divergencia $\chi^2$; con pesos estimados puede moverse en los dos sentidos (el ruido de $\hat w$ lo reduce y el encogimiento de un clasificador regularizado lo aumenta), y en nuestra simulación queda por debajo del teórico salvo con solapamiento bajo, donde el propio valor teórico es impreciso (sección~\ref{sec:diseno}). En muestra finita siempre es finito, incluso cuando $\chi^2=\infty$, y entonces tiende a cero muy despacio y con mucho ruido: en el contraejemplo de la Proposición~\ref{prop:varianza}, la mediana sobre réplicas pasa de 0,45 con $n_0=10^3$ a unos 0,22 con $n_0=10^7$, y con $n_0=10^3$ los percentiles 1 y 99 entre réplicas son 0,05 y 0,65. Un $\neff$ razonable no garantiza que $\chi^2$ sea finita; conviene examinar además la estabilidad de los cuantiles altos de $\hat w$.
 
 \begin{teorema}[Normalidad asintótica del estimador doblemente robusto]\label{teo:normalidad}
 Supongamos (A1)--(A4), $Y$ acotada y además:

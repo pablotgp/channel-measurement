@@ -46,7 +46,7 @@ The corollary concerns the unnormalized form $\psi$: trimming biases only to the
 \phi(O)=\frac1\pi\Bigl[Z\,(m_0(X)-\theta)+(1-Z)\,o(X)\,(Y-m_0(X))\Bigr],\\
 V=\E[\phi^2]=\frac{\Var_P(m_0(X))}{\pi}+\frac{\E_Q[w(X)^2\sigma^2(X)]}{1-\pi},
 \end{gather*}
-where the cross term vanishes because $Z(1-Z)=0$ and the second term uses $o=\pi w/(1-\pi)$ (Theorem~\ref{thm:odds}).
+where the cross term vanishes because $Z(1-Z)=0$ and the second term uses $o=\pi w/(1-\pi)$ (Theorem~\ref{thm:odds}). This closed form is for i.i.d. observations; with several observations per unit, see the appendix.
 
 \begin{proposition}[When the variance is finite]\label{prop:variance}
 If $Y$ is bounded and $0<\sigma_-^2\le\sigma^2\le\sigma_+^2$ $Q$-almost surely, then $V<\infty$ if and only if $\E_Q[w^2]<\infty$, that is, if and only if $\chi^2(P\|Q)=\E_Q[w^2]-1<\infty$. Absolute continuity $P\ll Q$ does not imply this condition.
@@ -57,7 +57,7 @@ The first term of $V$ is finite because $m_0$ is bounded; the second lies betwee
 
 Thus (A3) suffices to identify $\theta$ but not to estimate it at rate $n^{-1/2}$: with the conditional variance bounded below, one also needs $\chi^2(P\|Q)<\infty$, and standard theory requires something stronger, bounded weights.
 
-\paragraph{Effective sample size.} Kish's $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ over the $n_0$ donor observations satisfies, with the true weights, $\neff/n_0\to1/\E_Q[w^2]=1/(1+\chi^2(P\|Q))$, so it estimates the $\chi^2$ divergence; with estimated weights it can move either way (noise in $\hat w$ lowers it, shrinkage by a regularized classifier raises it), and in our simulation it falls below the theoretical value. In finite samples it is always finite, even when $\chi^2=\infty$, and it then goes to zero very slowly and noisily: in the counterexample of Proposition~\ref{prop:variance}, the median over replications goes from 0.45 with $n_0=10^3$ to about 0.21 with $n_0=10^7$, and with $n_0=10^3$ the 1st and 99th percentiles across replications are 0.05 and 0.65. A reasonable $\neff$ does not guarantee that $\chi^2$ is finite; one should also examine the stability of the upper quantiles of $\hat w$.
+\paragraph{Effective sample size.} Kish's $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ over the $n_0$ donor observations satisfies, with the true weights, $\neff/n_0\to1/\E_Q[w^2]=1/(1+\chi^2(P\|Q))$, so it estimates the $\chi^2$ divergence; with estimated weights it can move either way (noise in $\hat w$ lowers it, shrinkage by a regularized classifier raises it), and in our simulation it falls below the theoretical value except under low overlap, where the theoretical value is itself imprecise (Section~\ref{sec:design}). In finite samples it is always finite, even when $\chi^2=\infty$, and it then goes to zero very slowly and noisily: in the counterexample of Proposition~\ref{prop:variance}, the median over replications goes from 0.45 with $n_0=10^3$ to about 0.22 with $n_0=10^7$, and with $n_0=10^3$ the 1st and 99th percentiles across replications are 0.05 and 0.65. A reasonable $\neff$ does not guarantee that $\chi^2$ is finite; one should also examine the stability of the upper quantiles of $\hat w$.
 
 \begin{theorem}[Asymptotic normality of the doubly robust estimator]\label{thm:normality}
 Assume (A1)--(A4), bounded $Y$ and, in addition:
