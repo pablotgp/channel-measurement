@@ -1,0 +1,12 @@
+{
+ "registrada": "2026-10-24T14:40:58",
+ "diseno": "Estimador con corte conocido frente al estándar en los seis escenarios restantes (con_C, confunde_sin_C, confunde_con_C, solap_medio, solap_bajo, confusion_U), 200 réplicas cada uno con las semillas originales (1000-1199), mismos datos, mismo LightGBM y mismo modelo de resultado. En los escenarios con C, la variable de canal entra también en la propensión de canal.",
+ "predicciones": {
+  "1_limites": "El corte conocido solo cambia cómo se estiman los mismos pesos, así que converge a los mismos límites que el estándar: Hájek a lim de predicciones.json y DR a 0,958 (con_C) y 1,314 (confunde_con_C) y a lim en el resto. |z| < 2 en todos.",
+  "2_variable_de_canal": "No hay explosión de pesos: los donantes nunca tienen C registrado, así que sus pesos son finitos. La falta de soporte aparece como ê > 0,99 en las unidades del grupo objetivo con C: su fracción estará entre 0,25 y 0,40 (κ = 0,335).",
+  "3_precision": "Desviación típica del DR menor que la del estándar en con_C, confunde_sin_C, confunde_con_C, solap_medio y confusion_U.",
+  "4_solap_bajo": "Con solapamiento bajo (χ² = 36): DE del DR <= 0,300 y cobertura >= 91 %. Es la que menos confío, porque los odds de canal son extremos donde e se acerca a 1.",
+  "5_n_eff": "n_eff/n0 más cerca del teórico (0,22; 0,14; 0,03; 0,20) que con el estándar en todos los escenarios sin C."
+ },
+ "nota": "Antes de registrar esto pensé que con la variable de canal los pesos explotarían; al escribir el diseño vi que no, por la razón de la predicción 2."
+}
