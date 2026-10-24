@@ -1,0 +1,17 @@
+== debil (200 réplicas) {'coef_bmi': 0.4, 'learner': 'spline'}
+A: AUC 0.687 masa p>0,99 0.0000 neff/n0 0.611  sbp sesgo DR -0.096 (EMC 0.055)  waist sesgo DR -0.077 (EMC 0.017)
+B: AUC 0.671 masa p>0,99 0.0000 neff/n0 0.669  sbp sesgo DR -0.418 (EMC 0.054) pred -0.406  waist sesgo DR -2.257 (EMC 0.017) pred -2.193
+C: AUC 0.659 masa p>0,99 0.0000 neff/n0 0.718  sbp sesgo DR -0.946 (EMC 0.051)  waist sesgo DR -5.694 (EMC 0.040)
+D: AUC 0.685 masa p>0,99 0.0000 neff/n0 0.622  sbp sesgo DR -0.265 (EMC 0.054)  waist sesgo DR -0.612 (EMC 0.019)
+
+== fuerte (200 réplicas) {'coef_bmi': 1.2, 'learner': 'spline'}
+A: AUC 0.794 masa p>0,99 0.0000 neff/n0 0.256  sbp sesgo DR -0.168 (EMC 0.077)  waist sesgo DR -0.457 (EMC 0.031)
+B: AUC 0.763 masa p>0,99 0.0000 neff/n0 0.339  sbp sesgo DR -0.561 (EMC 0.068) pred -0.508  waist sesgo DR -2.890 (EMC 0.027) pred -2.610
+C: AUC 0.647 masa p>0,99 0.0000 neff/n0 0.756  sbp sesgo DR -2.416 (EMC 0.045)  waist sesgo DR -14.435 (EMC 0.033)
+D: AUC 0.786 masa p>0,99 0.0000 neff/n0 0.284  sbp sesgo DR -0.686 (EMC 0.068)  waist sesgo DR -2.201 (EMC 0.035)
+
+== lgbm (200 réplicas) {'coef_bmi': 0.8, 'learner': 'spline_pred_lgbm_est'}
+A: AUC 0.724 masa p>0,99 0.0000 neff/n0 0.262  sbp sesgo DR +0.010 (EMC 0.072)  waist sesgo DR -0.006 (EMC 0.026)
+B: AUC 0.705 masa p>0,99 0.0000 neff/n0 0.350  sbp sesgo DR -0.198 (EMC 0.068) pred -0.467  waist sesgo DR -2.421 (EMC 0.023) pred -2.441
+C: AUC 0.631 masa p>0,99 0.0000 neff/n0 0.594  sbp sesgo DR -1.704 (EMC 0.052)  waist sesgo DR -10.382 (EMC 0.037)
+D: AUC 0.718 masa p>0,99 0.0000 neff/n0 0.291  sbp sesgo DR -0.452 (EMC 0.064)  waist sesgo DR -1.230 (EMC 0.031)

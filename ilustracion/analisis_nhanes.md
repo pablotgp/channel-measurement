@@ -16,3 +16,22 @@ Sesgos del estimador doblemente robusto (DR): media sobre réplicas de (estimaci
 - P3 (indetectable): la masa de p̂ cerca de 1 es 0 en A y en B, así que esa parte se cumple. La parte del AUC falla tal como se escribió: baja 0,028 con logit y 0,020 con LightGBM, más que el umbral de 0,02. En la práctica esa bajada no se puede observar, porque A no está disponible. Además, n_eff/n0 *mejora* con la medición distinta (0,41 → 0,50): los diagnósticos de solapamiento ven unos pesos mejores justo cuando el estimador está sesgado.
 - P4 (C, sesgo negativo y mayor que el de B en la cintura): se cumple (−10,7 frente a −2,6).
 - D (exploratorio): medir los dos grupos con el mismo instrumento con error sesga la mitad que medirlos distinto en la cintura (−1,33 frente a −2,56), e igual en la tensión.
+
+# Robustez (ejecutada en el PC de Pablo, 200 réplicas por tarea)
+
+Las predicciones (resultados_robustez/prediccion_*.json) se registraron en el commit a989734, antes de ejecutar. Las que llegaron del PC son idénticas.
+
+| Tarea | A cintura | B cintura (pred.) | B tensión (pred.) | C cintura | D cintura | n_eff/n0 A → B |
+|---|---|---|---|---|---|---|
+| Débil (coef. IMC 0,4) | −0,08 | −2,26 (−2,19) | −0,42 (−0,41) | −5,69 | −0,61 | 0,61 → 0,67 |
+| Base (0,8), splines | −0,18 | −2,56 (−2,44) | −0,48 (−0,47) | −10,70 | −1,33 | 0,41 → 0,50 |
+| Fuerte (1,2) | −0,46 | −2,89 (−2,61) | −0,56 (−0,51) | −14,44 | −2,20 | 0,26 → 0,34 |
+| Base (0,8), LightGBM | −0,01 | −2,42 (−2,44) | −0,20 (−0,47) | −10,38 | −1,23 | 0,26 → 0,35 |
+
+Contraste: se cumplen 14 de las 15 predicciones registradas.
+- B ≈ predicción del Teorema 5: se cumple en 5 de 6 casos. Falla la tensión con LightGBM: −0,20 frente a −0,47 (z = 4,0). Interpretación, sin contrastar: la tensión depende poco del IMC y, con un resultado tan ruidoso, LightGBM aplana esa dependencia, así que traslada solo una parte del error de medición. La predicción usa mu ajustada con splines.
+- A pequeño frente a B (menos del 20 %): se cumple en los tres casos (3 %, 16 % y 0 %). Con LightGBM el sesgo de A desaparece (−0,006). Esto confirma que el −0,18 de la ejecución base venía de los modelos de splines.
+- Masa de p̂ > 0,99 nula: se cumple en todos los casos.
+- C negativo y mayor que B en la cintura: se cumple en los tres casos.
+- |D| < |B| en la cintura: se cumple en los tres casos.
+- No registrado, pero consistente en los cuatro diseños: n_eff/n0 mejora con la medición distinta.
