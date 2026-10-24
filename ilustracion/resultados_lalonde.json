@@ -1,0 +1,109 @@
+{
+ "referencia": {
+  "theta": 4554.80078125,
+  "se": 340.09306751928784,
+  "theta_cap": 4501.26708984375,
+  "media_tratados": 6349.14404296875,
+  "media_cps": 14846.6591796875
+ },
+ "medicion": {
+  "re74": {
+   "tope_cps": 25862.3203125,
+   "frac_cps_en_tope": 0.19084542271135568,
+   "frac_tratados_sobre_tope": 0.010810810810810811,
+   "n_tratados_sobre_tope": 2
+  },
+  "re75": {
+   "tope_cps": 25243.55078125,
+   "frac_cps_en_tope": 0.18803151575787894,
+   "frac_tratados_sobre_tope": 0.0,
+   "n_tratados_sobre_tope": 0
+  },
+  "re78": {
+   "tope_cps": 25564.669921875,
+   "frac_cps_en_tope": 0.259192096048024,
+   "frac_tratados_sobre_tope": 0.02702702702702703,
+   "n_tratados_sobre_tope": 5
+  }
+ },
+ "estimaciones": [
+  {
+   "clasificador": "logit",
+   "cap_X": false,
+   "cap_Y": false,
+   "hajek": 5091.675509350832,
+   "dr": 4782.720527263564,
+   "se_dr": 397.1408308712804,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 250.99919341855116,
+   "neff_n0": 0.015695297237278086,
+   "peso_max_frac": 0.015569617714737648
+  },
+  {
+   "clasificador": "logit",
+   "cap_X": true,
+   "cap_Y": false,
+   "hajek": 5069.185320837743,
+   "dr": 4772.248552895776,
+   "se_dr": 391.6175908983715,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 251.75787598440138,
+   "neff_n0": 0.015742738618334255,
+   "peso_max_frac": 0.015718836896009176
+  },
+  {
+   "clasificador": "logit",
+   "cap_X": true,
+   "cap_Y": true,
+   "hajek": 5069.185320837743,
+   "dr": 4772.248552895776,
+   "se_dr": 391.6175908983715,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 251.75787598440138,
+   "neff_n0": 0.015742738618334255,
+   "peso_max_frac": 0.015718836896009176
+  },
+  {
+   "clasificador": "lgbm",
+   "cap_X": false,
+   "cap_Y": false,
+   "hajek": 3990.3556985137843,
+   "dr": 4716.045602206787,
+   "se_dr": 875.8289337129735,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 32.73729495646616,
+   "neff_n0": 0.0020471044870226463,
+   "peso_max_frac": 0.11860451427465483
+  },
+  {
+   "clasificador": "lgbm",
+   "cap_X": true,
+   "cap_Y": false,
+   "hajek": 3986.8237011326582,
+   "dr": 4727.53631450483,
+   "se_dr": 873.6444499347821,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 32.84020650425035,
+   "neff_n0": 0.0020535396763538237,
+   "peso_max_frac": 0.11839132753372147
+  },
+  {
+   "clasificador": "lgbm",
+   "cap_X": true,
+   "cap_Y": true,
+   "hajek": 3986.8237011326582,
+   "dr": 4727.53631450483,
+   "se_dr": 873.6444499347821,
+   "masa_p_099": 0.0,
+   "masa_p_0999": 0.0,
+   "neff": 32.84020650425035,
+   "neff_n0": 0.0020535396763538237,
+   "peso_max_frac": 0.11839132753372147
+  }
+ ]
+}
