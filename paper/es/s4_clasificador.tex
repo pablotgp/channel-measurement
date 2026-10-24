@@ -12,7 +12,7 @@ Si $M(A)=0$, entonces $\pi P(A)+(1-\pi)Q(A)=0$ y, como ambos coeficientes son po
 \end{proof}
 
 \begin{teorema}[Cociente de odds]\label{teo:odds}
-Sea $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ sobre $\{p<1\}$ y $r=0$ sobre $\{p=1\}$. Entonces $Q(\{p=1\})=0$ y, para todo $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. En particular, bajo (A3), $r=dP/dQ$ $Q$-casi seguro.
+Tomemos una versión de $p$ con valores en $[0,1]$ y sea $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ sobre $\{p<1\}$ y $r=0$ sobre $\{p=1\}$. Entonces $Q(\{p=1\})=0$ y, para todo $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. En particular, bajo (A3), $r=dP/dQ$ $Q$-casi seguro.
 \end{teorema}
 \begin{proof}
 Por el Lema~\ref{lem:mezcla}, $Q(\{p=1\})=\int_{\{p=1\}}\frac{1-p}{1-\pi}\dd M=0$. Para $A\in\A$, por la regla de la cadena,
@@ -33,11 +33,11 @@ Sin suponer (A3):
 \begin{enumerate}
   \item $P\ll Q$ si y solo si $P(\{p=1\})=0$.
   \item La descomposición de Lebesgue de $P$ respecto de $Q$ es $P=\Pac+\Ps$, con $\Pac(A)=P(A\cap\{p<1\})$, $\Ps(A)=P(A\cap\{p=1\})$ y $d\Pac/dQ=r$.
-  \item Sea $\varepsilon=P(\{p=1\})$. Si $\varepsilon<1$ y (A2) se cumple sobre $\{p<1\}$, la ponderación autonormalizada con $r$ recupera
+  \item Sea $\varepsilon=P(\{p=1\})$. Si $\varepsilon<1$, (A2) se cumple sobre $\{p<1\}$ y $\int_{\{p<1\}}\E[|Y|\mid X=x,D=0]\,P(dx)<\infty$, la ponderación autonormalizada con $r$ recupera
   \[
   \frac{\E[r(X)\,Y\mid D=0]}{\E[r(X)\mid D=0]}=\thac:=\E\bigl[Y(0)\mid S=1,\ p(X)<1\bigr],
   \]
-  y $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, con $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$ no identificado.
+  y $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, con $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$, definido cuando $\varepsilon>0$, no identificado.
 \end{enumerate}
 \end{teorema}
 \begin{proof}

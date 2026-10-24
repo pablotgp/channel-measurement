@@ -2,7 +2,7 @@
 
 Si falla (A2), $\theta$ deja de estar identificado. El modelo de sensibilidad marginal acota cuánto puede alejarse $\theta$ del valor identificado en función de un único parámetro $\Lambda\ge1$.
 
-\paragraph{Modelo.} Seguimos a \citet{tan2006} y \citet{dorn2023}. Supongamos que existe una variable no observada $U$ tal que la intercambiabilidad vale dado $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. En la muestra combinada de la sección~\ref{sec:clasificador}, sea $\lambda(X,U)$ el cociente entre los odds de pertenecer al grupo objetivo dado $(X,U)$ y dado $X$ solo. El modelo MSM($\Lambda$) supone $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: conocer $U$ puede multiplicar o dividir esos odds como mucho por $\Lambda$. Con $\Lambda=1$ se recupera (A2).
+\paragraph{Modelo.} Seguimos a \citet{tan2006} y \citet{dorn2023}; \citet{zhao2019} dan intervalos de sensibilidad para estimadores ponderados bajo este modelo mediante el bootstrap de percentiles. Supongamos que hay una variable no observada $U$ tal que la intercambiabilidad vale dado $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. En la muestra combinada de la sección~\ref{sec:clasificador}, sea $\lambda(X,U)$ el cociente entre los odds de pertenecer al grupo objetivo dado $(X,U)$ y dado $X$ solo. El modelo MSM($\Lambda$) supone $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: conocer $U$ puede multiplicar o dividir esos odds como mucho por $\Lambda$. Con $\Lambda=1$ se recupera (A2).
 
 \begin{proposicion}[Cotas de sensibilidad]\label{prop:sensibilidad}
 Supongamos (A1), (A3), (A4), $Y\ge0$ y MSM($\Lambda$), y sea $\theta_0=\int m_0\dd P$ el valor identificado bajo (A2).

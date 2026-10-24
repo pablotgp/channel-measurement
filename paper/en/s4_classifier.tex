@@ -12,7 +12,7 @@ If $M(A)=0$, then $\pi P(A)+(1-\pi)Q(A)=0$ and, both coefficients being positive
 \end{proof}
 
 \begin{theorem}[Odds ratio]\label{thm:odds}
-Let $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ on $\{p<1\}$ and $r=0$ on $\{p=1\}$. Then $Q(\{p=1\})=0$ and, for all $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. In particular, under (A3), $r=dP/dQ$ $Q$-almost surely.
+Take a version of $p$ with values in $[0,1]$, and let $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ on $\{p<1\}$ and $r=0$ on $\{p=1\}$. Then $Q(\{p=1\})=0$ and, for all $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. In particular, under (A3), $r=dP/dQ$ $Q$-almost surely.
 \end{theorem}
 \begin{proof}
 By Lemma~\ref{lem:mixture}, $Q(\{p=1\})=\int_{\{p=1\}}\frac{1-p}{1-\pi}\dd M=0$. For $A\in\A$, by the chain rule,
@@ -33,11 +33,11 @@ Without assuming (A3):
 \begin{enumerate}
   \item $P\ll Q$ if and only if $P(\{p=1\})=0$.
   \item The Lebesgue decomposition of $P$ with respect to $Q$ is $P=\Pac+\Ps$, with $\Pac(A)=P(A\cap\{p<1\})$, $\Ps(A)=P(A\cap\{p=1\})$ and $d\Pac/dQ=r$.
-  \item Let $\varepsilon=P(\{p=1\})$. If $\varepsilon<1$ and (A2) holds on $\{p<1\}$, self-normalized weighting with $r$ recovers
+  \item Let $\varepsilon=P(\{p=1\})$. If $\varepsilon<1$, (A2) holds on $\{p<1\}$ and $\int_{\{p<1\}}\E[|Y|\mid X=x,D=0]\,P(dx)<\infty$, self-normalized weighting with $r$ recovers
   \[
   \frac{\E[r(X)\,Y\mid D=0]}{\E[r(X)\mid D=0]}=\thac:=\E\bigl[Y(0)\mid S=1,\ p(X)<1\bigr],
   \]
-  and $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, with $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$ not identified.
+  and $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, with $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$, defined when $\varepsilon>0$, not identified.
 \end{enumerate}
 \end{theorem}
 \begin{proof}

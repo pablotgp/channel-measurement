@@ -2,7 +2,7 @@
 
 If (A2) fails, $\theta$ is no longer identified. The marginal sensitivity model bounds how far $\theta$ can move from the identified value as a function of a single parameter $\Lambda\ge1$.
 
-\paragraph{Model.} We follow \citet{tan2006} and \citet{dorn2023}. Suppose there is an unobserved variable $U$ such that exchangeability holds given $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. In the pooled sample of Section~\ref{sec:classifier}, let $\lambda(X,U)$ be the ratio of the odds of belonging to the target group given $(X,U)$ and given $X$ alone. The model MSM($\Lambda$) assumes $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: knowing $U$ can multiply or divide those odds by at most $\Lambda$. With $\Lambda=1$ we recover (A2).
+\paragraph{Model.} We follow \citet{tan2006} and \citet{dorn2023}; \citet{zhao2019} give sensitivity intervals for weighting estimators under this model via the percentile bootstrap. Suppose there is an unobserved variable $U$ such that exchangeability holds given $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. In the pooled sample of Section~\ref{sec:classifier}, let $\lambda(X,U)$ be the ratio of the odds of belonging to the target group given $(X,U)$ and given $X$ alone. The model MSM($\Lambda$) assumes $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: knowing $U$ can multiply or divide those odds by at most $\Lambda$. With $\Lambda=1$ we recover (A2).
 
 \begin{proposition}[Sensitivity bounds]\label{prop:sensitivity}
 Assume (A1), (A3), (A4), $Y\ge0$ and MSM($\Lambda$), and let $\theta_0=\int m_0\dd P$ be the value identified under (A2).
