@@ -1,0 +1,57 @@
+\section{Ilustraciones con datos públicos}\label{sec:ilustraciones}
+
+Completamos la simulación con dos conjuntos de datos públicos en los que la verdad es conocida. En el primero existen, para las mismas personas, las dos versiones de una covariable medida de forma distinta, así que el sesgo que predice el Teorema~\ref{teo:medicion} se puede comprobar exactamente. En el segundo, un grupo de control experimental da la referencia para $\theta$. No usamos datos privados.
+
+\subsection{Índice de masa corporal declarado frente a medido}\label{sec:nhanes}
+
+\paragraph{Datos.} Usamos el ciclo 2017--2018 de la Encuesta Nacional de Salud y Nutrición de EE.\,UU. \citep{nchs2020}: los 4\,034 adultos de 20 años o más con talla y peso medidos y declarados, tensión arterial sistólica (media de hasta tres lecturas), perímetro de cintura, nivel educativo y ratio de renta sobre el umbral de pobreza. No usamos los pesos de la encuesta y tratamos la muestra como la población. El IMC declarado se calcula con el peso y la talla declarados y se redondea a 0,1, la precisión con la que se publica el IMC medido; sin ese redondeo, las dos versiones tomarían valores en conjuntos disjuntos y el soporte fallaría artificialmente. El IMC declarado es de media 0,81 menor que el medido (desviación típica 1,99), y la diferencia crece con el IMC: de 0,00 en el cuartil más bajo del IMC medido a $-1,65$ en el más alto, en línea con la literatura sobre antropometría declarada \citep{connorgorber2007}. Es una medición distinta en el sentido de la sección~\ref{sec:canal}: el error depende del valor latente.
+
+\paragraph{Diseño.} Cada réplica asigna a cada persona al canal objetivo con probabilidad $\sigma\bigl(-1+\beta_b z(\mathrm{IMC})+0,5\,z(\mathrm{edad})-0,4\,z(\mathrm{renta})\bigr)$, donde el IMC es el medido, $z$ estandariza y $\beta_b=0,8$; alrededor del 30\,\% acaba en el grupo objetivo. El canal es sintético, pero las covariables, los resultados y el error de medición son reales. Como la asignación depende solo de las covariables verdaderas, la intercambiabilidad latente y el soporte se cumplen por construcción, y $\theta$, el resultado medio del grupo objetivo, se observa en cada réplica. Comparamos cuatro especificaciones, todas con edad, sexo, raza, nivel educativo y renta: (A) IMC medido en los dos grupos; (B) IMC declarado en el grupo objetivo y medido en los donantes, el caso de medición por canal del Teorema~\ref{teo:medicion}; (C) sin IMC; (D) IMC declarado en los dos grupos. El estimador es el doblemente robusto con \emph{cross-fitting} en cinco pliegues, con un clasificador logístico y una regresión ridge sobre splines cúbicos; hay 200 réplicas.
+
+\paragraph{Predicciones registradas.} Antes de ejecutar calculamos el límite de la especificación B con el Teorema~\ref{teo:medicion}(3), con $\mu(V,b)=\E[Y\mid V,\mathrm{IMC}=b]$ ajustada con toda la muestra: promediando sobre las probabilidades de asignación $\pi_i$, el sesgo predicho es $\sum_i\pi_i[\mu(V_i,b_i^{\mathrm{decl}})-\mu(V_i,b_i)]/\sum_i\pi_i$, es decir, $-0,47$\,mmHg en la tensión y $-2,44$\,cm en la cintura. Predijimos además ausencia de sesgo en A, ninguna masa de $\hat p$ cercana a 1 en A ni en B, una diferencia de AUC entre A y B inferior a 0,02 y, en C, un sesgo negativo y mayor que el de B en la cintura.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, diseño base (200 réplicas). Sesgo medio del estimador DR con su error de Monte Carlo entre paréntesis. En ninguna réplica hubo unidades objetivo con $\hat p>0,99$.}\label{tab:nhanes}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Especificación & Tensión (mmHg) & Cintura (cm) & AUC & $\neff/n_0$ \\
+\midrule
+A: medido en los dos & $-0,11$ (0,06) & $-0,18$ (0,02) & 0,743 & 0,41 \\
+B: medición distinta & $-0,48$ (0,06) & $-2,56$ (0,02) & 0,715 & 0,50 \\
+\quad predicción (Teorema~\ref{teo:medicion}) & $-0,47$ & $-2,44$ & & \\
+C: sin IMC & $-1,78$ (0,05) & $-10,70$ (0,04) & 0,653 & 0,74 \\
+D: declarado en los dos & $-0,47$ (0,06) & $-1,33$ (0,03) & 0,737 & 0,44 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Resultados.} La tabla~\ref{tab:nhanes} confirma la predicción del Teorema~\ref{teo:medicion}: $-0,48$ frente a $-0,47$\,mmHg ($z=-0,3$) y $-2,56$ frente a $-2,44$\,cm; descontando el pequeño sesgo de A, $-2,37$ frente a $-2,44$. Nada en los datos observados delata el problema. Ninguna unidad objetivo tiene $\hat p>0,99$, y $\neff/n_0$ \emph{mejora} de 0,41 a 0,50: la covariable con más ruido separa menos los grupos, así que los pesos parecen mejores justo cuando el estimador está sesgado. El AUC baja de 0,743 a 0,715, pero la especificación A no está disponible en la práctica, así que esa bajada no se puede observar. Quitar el IMC es mucho peor ($-10,70$\,cm), porque el IMC determina la asignación. Fallan dos predicciones registradas: A tiene un sesgo de $-0,18$\,cm en la cintura ($z=-8,3$), que desaparece con LightGBM ($-0,01$) y procede, por tanto, de los modelos de splines y no de la medición; y el AUC baja más que el umbral registrado de 0,02.
+
+La especificación D, registrada como exploratoria, deja una lección práctica inesperada: usar el IMC declarado en \emph{los dos} grupos reduce a la mitad el sesgo de la cintura respecto de B. Medir los dos grupos con el mismo instrumento impreciso deja confusión residual, pero no evalúa el modelo de resultado en un argumento desplazado. No tenemos un resultado general sobre cuándo se da este orden; la tabla~\ref{tab:nhanes-robust} muestra que se dio en los tres diseños que probamos.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, robustez (200 réplicas cada uno). Sesgo medio del estimador DR en la cintura (cm), salvo donde se indica; entre paréntesis, la predicción registrada.}\label{tab:nhanes-robust}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Diseño & A & B & B, tensión (mmHg) & C & D \\
+\midrule
+Asignación débil ($\beta_b=0,4$) & $-0,08$ & $-2,26$ ($-2,19$) & $-0,42$ ($-0,41$) & $-5,69$ & $-0,61$ \\
+Base ($\beta_b=0,8$), splines & $-0,18$ & $-2,56$ ($-2,44$) & $-0,48$ ($-0,47$) & $-10,70$ & $-1,33$ \\
+Asignación fuerte ($\beta_b=1,2$) & $-0,46$ & $-2,89$ ($-2,61$) & $-0,56$ ($-0,51$) & $-14,44$ & $-2,20$ \\
+Base, LightGBM & $-0,01$ & $-2,42$ ($-2,44$) & $-0,20$ ($-0,47$) & $-10,38$ & $-1,23$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Robustez.} Variamos la fuerza con la que el IMC determina la asignación y sustituimos los splines por LightGBM, registrando de nuevo las predicciones antes de ejecutar (tabla~\ref{tab:nhanes-robust}). De las 15 predicciones registradas se cumplen 14. En los cuatro diseños, ninguna unidad objetivo tiene $\hat p>0,99$ y $\neff/n_0$ es mayor en B que en A. El fallo es la tensión con LightGBM: $-0,20$ frente a $-0,47$ ($z=4,0$). Nuestra interpretación, sin contrastar: la tensión depende poco del IMC y tiene mucho ruido, así que LightGBM aplana esa dependencia y solo transmite parte del error de medición; la predicción usa una $\mu$ ajustada con splines, así que también depende del modelo cuando el resultado depende poco de la covariable mal medida.
+
+\subsection{Una referencia experimental: NSW y CPS}\label{sec:lalonde}
+
+\paragraph{Datos.} Usamos la submuestra de \citet{dehejia1999} del experimento National Supported Work, con 185 participantes y 260 controles aleatorizados, y el grupo de comparación CPS-1 de \citet{lalonde1986}, con 15\,992 personas. El grupo objetivo son los participantes; los donantes, la CPS. El estimando es la media de sus ingresos de 1978 sin el programa, cuya referencia experimental es la media de los controles: 4\,555 dólares (error típico 340). Las covariables son edad, años de estudio, raza, estado civil, falta de título, ingresos de 1974 y 1975 con indicadores de ingresos nulos, y los cuadrados de la edad y los años de estudio. Este análisis no se registró de antemano; damos la mediana sobre cinco particiones del \emph{cross-fitting}.
+
+\paragraph{Resultados.} La media de la CPS sin ajustar es 14\,847 dólares. La ponderación sola da 5\,092 con un clasificador logístico y 3\,990 con LightGBM, mientras que el estimador doblemente robusto da 4\,783 y 4\,716 (errores típicos 397 y 876), ambos a menos de un error típico de la referencia. El solapamiento es malo: con LightGBM, $\neff$ es 33 de 15\,992 donantes.
+
+\paragraph{Medición distinta.} Las dos fuentes registran los ingresos de forma distinta \citep{smith2005}. Una diferencia es visible: los ingresos de la CPS están censurados por arriba (el 19\,\% de los ingresos de 1974 está exactamente en el tope de 25\,862 dólares) y los del NSW no. Dos participantes (1,1\,\%) ganaron más que el tope en 1974, así que sus perfiles no tienen soporte por construcción, la situación de la Proposición~\ref{prop:rompe}; pero ningún clasificador aísla a dos unidades, y ningún participante tiene $\hat p>0,99$. Aplicar el tope a los dos grupos cambia las estimaciones menos de 30 dólares. La lección es que una masa sin soporte tan pequeña escapa al diagnóstico del clasificador, aunque aquí también es demasiado pequeña para importar. Otras diferencias en cómo se recogieron los ingresos, si conservan el soporte, no son detectables en absoluto (Teorema~\ref{teo:medicion}).

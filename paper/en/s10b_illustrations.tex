@@ -1,0 +1,57 @@
+\section{Illustrations with public data}\label{sec:illustrations}
+
+We complement the simulation with two public data sets in which the truth is known. In the first, both versions of a differentially measured covariate exist for the same people, so the bias predicted by Theorem~\ref{thm:measurement} can be checked exactly. In the second, an experimental control group provides the benchmark for $\theta$. No proprietary data are used.
+
+\subsection{Self-reported versus measured body mass index}\label{sec:nhanes}
+
+\paragraph{Data.} We use the 2017--2018 cycle of the US National Health and Nutrition Examination Survey \citep{nchs2020}: the 4{,}034 adults aged 20 or more with measured and self-reported height and weight, systolic blood pressure (mean of up to three readings), waist circumference, education and income-to-poverty ratio. We do not use the survey weights and treat the sample as the population. Self-reported BMI is computed from the reported weight and height and rounded to 0.1, the precision of the published measured BMI; without rounding, the two versions would take values on disjoint sets and support would fail artificially. Self-reported BMI is on average 0.81 lower than measured BMI (standard deviation 1.99), and the gap grows with BMI: from 0.00 in the lowest quartile of measured BMI to $-1.65$ in the highest, in line with the literature on self-reported anthropometry \citep{connorgorber2007}. This is differential measurement in the sense of Section~\ref{sec:channel}: the error depends on the latent value.
+
+\paragraph{Design.} Each replication assigns every person to the target channel with probability $\sigma\bigl(-1+\beta_b z(\mathrm{BMI})+0.5\,z(\mathrm{age})-0.4\,z(\mathrm{income})\bigr)$, where BMI is the measured value, $z$ standardizes and $\beta_b=0.8$; about 30\,\% end up in the target group. The channel is synthetic, but covariates, outcomes and measurement error are real. Since the assignment depends only on the true covariates, latent exchangeability and support hold by construction, and $\theta$, the mean outcome of the target group, is observed in each replication. We compare four specifications, all with age, sex, race, education and income: (A) measured BMI in both groups; (B) self-reported BMI in the target group and measured BMI in the donors, the channel-measurement case of Theorem~\ref{thm:measurement}; (C) without BMI; (D) self-reported BMI in both groups. The estimator is the doubly robust one with five-fold cross-fitting, with a logistic classifier and a ridge regression on cubic splines; there are 200 replications.
+
+\paragraph{Registered predictions.} Before running, we computed the limit of specification B from Theorem~\ref{thm:measurement}(3), with $\mu(V,b)=\E[Y\mid V,\mathrm{BMI}=b]$ fitted on the whole sample: averaging over the assignment probabilities $\pi_i$, the predicted bias is $\sum_i\pi_i[\mu(V_i,b_i^{\mathrm{self}})-\mu(V_i,b_i)]/\sum_i\pi_i$, namely $-0.47$\,mmHg for blood pressure and $-2.44$\,cm for the waist. We also predicted no bias in A, no mass of $\hat p$ close to 1 in A or B, an AUC difference between A and B below 0.02, and in C a negative bias larger than that of B for the waist.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, base design (200 replications). Mean bias of the DR estimator with its Monte Carlo error in parentheses. No replication had any target unit with $\hat p>0.99$.}\label{tab:nhanes}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Specification & Blood pressure (mmHg) & Waist (cm) & AUC & $\neff/n_0$ \\
+\midrule
+A: measured in both & $-0.11$ (0.06) & $-0.18$ (0.02) & 0.743 & 0.41 \\
+B: differential & $-0.48$ (0.06) & $-2.56$ (0.02) & 0.715 & 0.50 \\
+\quad prediction (Theorem~\ref{thm:measurement}) & $-0.47$ & $-2.44$ & & \\
+C: without BMI & $-1.78$ (0.05) & $-10.70$ (0.04) & 0.653 & 0.74 \\
+D: self-reported in both & $-0.47$ (0.06) & $-1.33$ (0.03) & 0.737 & 0.44 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Results.} Table~\ref{tab:nhanes} confirms the prediction of Theorem~\ref{thm:measurement}: $-0.48$ against $-0.47$\,mmHg ($z=-0.3$) and $-2.56$ against $-2.44$\,cm; net of the small bias of A, $-2.37$ against $-2.44$. Nothing in the observed data signals the problem. No target unit has $\hat p>0.99$, and $\neff/n_0$ \emph{improves} from 0.41 to 0.50: the noisier covariate separates the groups less, so the weights look better precisely when the estimator is biased. The AUC falls from 0.743 to 0.715, but specification A is not available in practice, so this fall cannot be observed. Dropping BMI is much worse ($-10.70$\,cm), because BMI drives the assignment. Two registered predictions fail: A has a bias of $-0.18$\,cm in the waist ($z=-8.3$), which disappears with LightGBM ($-0.01$) and therefore comes from the spline models, not from measurement; and the AUC falls by more than the registered 0.02.
+
+Specification D, registered as exploratory, gives an unexpected practical lesson: using the self-reported BMI in \emph{both} groups halves the bias of the waist relative to B. Measuring both groups with the same imprecise instrument leaves residual confounding, but does not evaluate the outcome model at a shifted argument. We have no general result on when this ordering holds; Table~\ref{tab:nhanes-robust} shows that it held in the three designs we tried.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, robustness (200 replications each). Mean bias of the DR estimator in the waist (cm), except where noted; in parentheses, the registered prediction.}\label{tab:nhanes-robust}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Design & A & B & B, blood pressure (mmHg) & C & D \\
+\midrule
+Weak assignment ($\beta_b=0.4$) & $-0.08$ & $-2.26$ ($-2.19$) & $-0.42$ ($-0.41$) & $-5.69$ & $-0.61$ \\
+Base ($\beta_b=0.8$), splines & $-0.18$ & $-2.56$ ($-2.44$) & $-0.48$ ($-0.47$) & $-10.70$ & $-1.33$ \\
+Strong assignment ($\beta_b=1.2$) & $-0.46$ & $-2.89$ ($-2.61$) & $-0.56$ ($-0.51$) & $-14.44$ & $-2.20$ \\
+Base, LightGBM & $-0.01$ & $-2.42$ ($-2.44$) & $-0.20$ ($-0.47$) & $-10.38$ & $-1.23$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Robustness.} We varied the strength with which BMI drives the assignment and replaced the splines by LightGBM, again registering the predictions before running (Table~\ref{tab:nhanes-robust}). Of the 15 registered predictions, 14 hold. In all four designs, no target unit has $\hat p>0.99$ and $\neff/n_0$ is larger in B than in A. The failure is blood pressure with LightGBM: $-0.20$ against $-0.47$ ($z=4.0$). Our interpretation, untested: blood pressure depends weakly on BMI and is noisy, so LightGBM flattens that dependence and transmits only part of the measurement error; the prediction uses $\mu$ fitted with splines, so it is itself model-dependent when the outcome depends weakly on the mismeasured covariate.
+
+\subsection{An experimental benchmark: NSW and CPS}\label{sec:lalonde}
+
+\paragraph{Data.} We use the subsample of \citet{dehejia1999} of the National Supported Work experiment, with 185 participants and 260 randomized controls, and the CPS-1 comparison group of \citet{lalonde1986}, with 15{,}992 people. The target group is the participants; the donors, the CPS. The estimand is the mean of their 1978 earnings without the program, whose experimental benchmark is the mean of the controls: 4{,}555 dollars (standard error 340). The covariates are age, education, race, marital status, lack of a degree, earnings in 1974 and 1975 with indicators of zero earnings, and the squares of age and education. This analysis was not registered in advance; we report the median over five cross-fitting partitions.
+
+\paragraph{Results.} The unadjusted CPS mean is 14{,}847 dollars. Weighting alone gives 5{,}092 with a logistic classifier and 3{,}990 with LightGBM, whereas the doubly robust estimator gives 4{,}783 and 4{,}716 (standard errors 397 and 876), both within one standard error of the benchmark. Overlap is poor: with LightGBM, $\neff$ is 33 out of 15{,}992 donors.
+
+\paragraph{Differential measurement.} The two sources record earnings differently \citep{smith2005}. One difference is visible: CPS earnings are top-coded (19\,\% of 1974 earnings sit exactly at the cap of 25{,}862 dollars) and NSW earnings are not. Two participants (1.1\,\%) earned more than the cap in 1974, so their profiles have no support by construction, the situation of Proposition~\ref{prop:breaks}; but no classifier isolates two units, and no participant has $\hat p>0.99$. Applying the cap to both groups changes the estimates by less than 30 dollars. The lesson is that an unsupported mass this small escapes the classifier diagnostic, although here it is also too small to matter. Other differences in how earnings were collected, if they preserve support, are not detectable at all (Theorem~\ref{thm:measurement}).
