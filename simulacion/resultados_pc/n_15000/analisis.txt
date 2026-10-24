@@ -1,0 +1,2 @@
+Escenario n_15000: 200 réplicas, θ = 0.958 %
+Media del DR 0.971 %; DE real 0.183 pp; EE medio de Wald 0.175 pp; cobertura 92.0 %
