@@ -5,7 +5,7 @@ Under (A1)--(A4), the counterfactual mean $\theta$ is the mean of the observed o
 \begin{theorem}[Identification]\label{thm:identification}
 Assume (A1)--(A4) and, in addition, $\int_\X\E\bigl[|Y|\mid X=x,D=0\bigr]\,P(dx)<\infty$. Let $w=dP/dQ$, which exists by (A3). Then
 \[
-\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{for every }\tilde w=c\,w,\ c>0.
+\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{for every }\tilde w=a\,w,\ a>0.
 \]
 \end{theorem}
 The additional condition holds whenever $Y$ is bounded.
@@ -32,7 +32,7 @@ Under (A1)--(A4), let $\bar w\ge0$ and $\bar m$ be measurable, with the followin
 Then $\psi(\bar w,\bar m)-\theta=\int_\X(\bar w-w)(m_0-\bar m)\dd Q$. In particular, $\psi(\bar w,\bar m)=\theta$ if $\bar w=w$ or $\bar m=m_0$, $Q$-almost surely.
 \end{proposition}
 \begin{proof}
-By Step 4 of the previous proof applied to $\bar w$, the first term equals $\int\bar w(m_0-\bar m)\dd Q$. By Step 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Adding gives the result.
+By Step 4 of the proof of Theorem~\ref{thm:identification} applied to $\bar w$, the first term equals $\int\bar w(m_0-\bar m)\dd Q$. By its Step 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Adding gives the result.
 \end{proof}
 
 The error is a product of the two estimation errors. This structure is what allows slow rates for each model and still $\sqrt n$ normality (Theorem~\ref{thm:normality}).

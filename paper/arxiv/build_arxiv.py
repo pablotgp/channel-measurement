@@ -23,6 +23,9 @@ tex = flatten(os.path.join(EN, "paper_en.tex"), EN)
 # fontspec (XeLaTeX) -> pdflatex: Palatino vía mathpazo con codificación T1
 tex = re.sub(r"\\usepackage\[no-math\]\{fontspec\}\n\\setmainfont\{[^\n]*\n[^\n]*\n", "\\\\usepackage[T1]{fontenc}\n\\\\usepackage[utf8]{inputenc}\n\\\\renewcommand{\\\\ttdefault}{pcr}\n", tex)
 assert "fontspec" not in tex and "setmainfont" not in tex
+for marca in ("NOMBRE-COMPLETO", "AFILIACION", "CORREO", "REPOSITORIO"):
+    if marca in tex:
+        print("AVISO: falta rellenar", marca)
 tex = re.sub(r"(?m)^%.*\n", "", tex)  # quita líneas de comentario
 open(os.path.join(HERE, "main.tex"), "w", encoding="utf-8").write(tex)
 for _ in range(2):

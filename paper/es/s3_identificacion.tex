@@ -5,7 +5,7 @@ Bajo (A1)--(A4), la media contrafactual $\theta$ es la media del resultado obser
 \begin{teorema}[Identificación]\label{teo:identificacion}
 Supongamos (A1)--(A4) y además $\int_\X\E\bigl[|Y|\mid X=x,D=0\bigr]\,P(dx)<\infty$. Sea $w=dP/dQ$, que existe por (A3). Entonces
 \[
-\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{para todo }\tilde w=c\,w,\ c>0.
+\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{para todo }\tilde w=a\,w,\ a>0.
 \]
 \end{teorema}
 La condición adicional se cumple siempre que $Y$ esté acotada.
@@ -32,7 +32,7 @@ Bajo (A1)--(A4), sean $\bar w\ge0$ y $\bar m$ medibles, con las integrales sigui
 Entonces $\psi(\bar w,\bar m)-\theta=\int_\X(\bar w-w)(m_0-\bar m)\dd Q$. En particular, $\psi(\bar w,\bar m)=\theta$ si $\bar w=w$ o $\bar m=m_0$, $Q$-casi seguro.
 \end{proposicion}
 \begin{proof}
-Por el paso 4 de la prueba anterior aplicado a $\bar w$, el primer sumando vale $\int\bar w(m_0-\bar m)\dd Q$. Por el paso 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Sumando se obtiene el resultado.
+Por el paso 4 de la prueba del Teorema~\ref{teo:identificacion} aplicado a $\bar w$, el primer sumando vale $\int\bar w(m_0-\bar m)\dd Q$. Por su paso 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Sumando se obtiene el resultado.
 \end{proof}
 
 El error es un producto de los dos errores de estimación. Esa estructura es la que permite tasas lentas en cada modelo y, aun así, normalidad a ritmo $\sqrt n$ (Teorema~\ref{teo:normalidad}).

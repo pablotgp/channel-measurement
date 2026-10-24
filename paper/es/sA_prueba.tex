@@ -2,15 +2,15 @@
 
 El estimador doblemente robusto es $\theta$ más una media de términos i.i.d. de media cero, más restos de orden $o_P(n^{-1/2})$; el teorema central del límite hace el resto.
 
-\paragraph{Notación.} Trabajamos primero con observaciones i.i.d. $O=(Z,X,Y)$; el caso con varias observaciones por unidad se trata al final. $P_nf=n^{-1}\sum_if(O_i)$; $\E f$ es la esperanza poblacional; $\|h\|_Q$ y $\|h\|_P$ son normas de $L^2(Q)$ y $L^2(P)$. Sean $\bar o=(1-\eta)/\eta$ y $\bar w=(1-\pi)\bar o/\pi$: por la condición 1 y el Teorema~\ref{teo:odds}, $o\le\bar o$ y $w\le\bar w$, y por la condición 2, $\hat o\le\bar o$. Las observaciones están acotadas: $|Y|\le M$ y $|\hat m|\le M$. En el bloque $k$, con $n_k$ observaciones, $(\hat o_k,\hat m_k)$ se entrenan con los datos de fuera del bloque; $\E_k$ y $\PP_k$ denotan esperanza y probabilidad condicionadas a esos datos, y $P_{n,k}$ la media empírica dentro del bloque.
+\paragraph{Notación.} Trabajamos primero con observaciones i.i.d. $O=(Z,X,(1-Z)Y)$; el caso con varias observaciones por unidad se trata al final. $P_nf=n^{-1}\sum_if(O_i)$; $\E f$ es la esperanza poblacional; $\|h\|_Q$ y $\|h\|_P$ son normas de $L^2(Q)$ y $L^2(P)$. Sean $o_{\max}=(1-\eta)/\eta$ y $w_{\max}=(1-\pi)o_{\max}/\pi$: por la condición 1 y el Teorema~\ref{teo:odds}, $o\le o_{\max}$ y $w\le w_{\max}$, y por la condición 2, $\hat o\le o_{\max}$. Las observaciones están acotadas: $|Y|\le B_Y$ y $|\hat m|\le B_Y$. En el bloque $k$, con $n_k$ observaciones, $(\hat o_k,\hat m_k)$ se entrenan con los datos de fuera del bloque; $\E_k$ y $\PP_k$ denotan esperanza y probabilidad condicionadas a esos datos, y $P_{n,k}$ la media empírica dentro del bloque.
 
 \paragraph{Tres identidades.} Para toda $h$ medible y acotada:
 \begin{align*}
 &\text{(I1)}\quad \E[(1-Z)\,o(X)\,h(X)]=\pi\,\E_P[h],\\
 &\text{(I2)}\quad \E[(1-Z)\,h(X)\,(Y-m_0(X))]=0,\\
-&\text{(I3)}\quad \|h\|_P^2\le\bar w\,\|h\|_Q^2 .
+&\text{(I3)}\quad \|h\|_P^2\le w_{\max}\,\|h\|_Q^2 .
 \end{align*}
-(I1): $\E[(1-Z)oh]=(1-\pi)\E_Q[oh]$, y $o=\pi w/(1-\pi)$ por el Teorema~\ref{teo:odds}, luego vale $\pi\E_Q[wh]=\pi\E_P[h]$. (I2): torre condicionando en $X$ sobre $\{Z=0\}$, donde $\E[Y\mid X,Z=0]=m_0(X)$. (I3): $\|h\|_P^2=\E_Q[wh^2]\le\bar w\,\E_Q[h^2]$.
+(I1): $\E[(1-Z)oh]=(1-\pi)\E_Q[oh]$, y $o=\pi w/(1-\pi)$ por el Teorema~\ref{teo:odds}, luego vale $\pi\E_Q[wh]=\pi\E_P[h]$. (I2): torre condicionando en $X$ sobre $\{Z=0\}$, donde $\E[Y\mid X,Z=0]=m_0(X)$. (I3): $\|h\|_P^2=\E_Q[wh^2]\le w_{\max}\,\E_Q[h^2]$.
 
 \paragraph{Paso 1 (la función $\psi$ y su sesgo).} Para funciones acotadas $(o',m')$, sea $\psi(O;o',m')=(1-Z)\,o'(X)\,(Y-m'(X))+Z\,(m'(X)-\theta)$. Entonces $\pi\phi=\psi(\cdot;o,m_0)$ y
 \[
@@ -28,9 +28,9 @@ Los pasos 3 y 4 muestran que el primer término es $P_n\phi+o_P(n^{-1/2})$; el p
 \[
 \PP_k\Bigl(\bigl|(P_{n,k}-\E_k)\Delta_k\bigr|>\epsilon\,n^{-1/2}\Bigr)\le\frac{n}{n_k}\,\frac{\E_k[\Delta_k^2]}{\epsilon^2}.
 \]
-Como $\Delta=(1-Z)[(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)]+Z(\hat m-m_0)$ y $|Y-m_0|\le2M$, la desigualdad $(a+b+c)^2\le3(a^2+b^2+c^2)$ y (I3) dan
+Como $\Delta=(1-Z)[(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)]+Z(\hat m-m_0)$ y $|Y-m_0|\le2B_Y$, la desigualdad $(a+b+c)^2\le3(a^2+b^2+c^2)$ y (I3) dan
 \[
-\E_k[\Delta_k^2]\le3\Bigl[4M^2(1-\pi)\,\|\hat o_k-o\|_Q^2+\bigl((1-\pi)\bar o^{\,2}+\pi\bar w\bigr)\|\hat m_k-m_0\|_Q^2\Bigr],
+\E_k[\Delta_k^2]\le3\Bigl[4B_Y^2(1-\pi)\,\|\hat o_k-o\|_Q^2+\bigl((1-\pi)o_{\max}^{\,2}+\pi w_{\max}\bigr)\|\hat m_k-m_0\|_Q^2\Bigr],
 \]
 que tiende a 0 en probabilidad por la condición 3. Como $n/n_k\to K$, la probabilidad condicional tiende a 0 en probabilidad, y al estar acotada por 1, la convergencia dominada da que la probabilidad sin condicionar también tiende a 0. Luego $(P_{n,k}-\E_k)\Delta_k=o_P(n^{-1/2})$ para cada uno de los $K$ bloques.
 
@@ -42,7 +42,7 @@ Sumando sobre los bloques con pesos $n_k/n$, $P_n\psi(\cdot;\hat o,\hat m)=P_n\p
 
 \paragraph{Paso 5 (normalizaciones).} Descomponemos los factores del paso 2 en una parte i.i.d. y una de error de los parámetros auxiliares:
 \begin{itemize}
-  \item $\hat A=P_n[(1-Z)o(Y-m_0)]+P_n[(1-Z)\{(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)\}]$. El primer sumando es $O_P(n^{-1/2})$ por el teorema central del límite. En el segundo, la parte centrada es $o_P(n^{-1/2})$ con el argumento del paso 3, y su media condicional, por (I2), es $(1-\pi)\E_Q[\hat o_k(m_0-\hat m_k)]$, acotada por $(1-\pi)\bar o\,r_m$. Luego $\hat A=O_P(n^{-1/2})+O_P(r_m)$.
+  \item $\hat A=P_n[(1-Z)o(Y-m_0)]+P_n[(1-Z)\{(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)\}]$. El primer sumando es $O_P(n^{-1/2})$ por el teorema central del límite. En el segundo, la parte centrada es $o_P(n^{-1/2})$ con el argumento del paso 3, y su media condicional, por (I2), es $(1-\pi)\E_Q[\hat o_k(m_0-\hat m_k)]$, acotada por $(1-\pi)o_{\max}\,r_m$. Luego $\hat A=O_P(n^{-1/2})+O_P(r_m)$.
   \item Del mismo modo, $\hat B-\pi=(P_n-\E)[(1-Z)o]+P_n[(1-Z)(\hat o-o)]=O_P(n^{-1/2})+O_P(r_o)$, usando $\E[(1-Z)o]=\pi$ por (I1) y que la norma de $L^1(Q)$ no supera a la de $L^2(Q)$.
   \item $P_n[Z(\hat m-\theta)]=P_n[Z(m_0-\theta)]+P_n[Z(\hat m-m_0)]=O_P(n^{-1/2})+O_P(r_m)$, usando $\E[Z(m_0-\theta)]=0$ y (I3). Además, $1/\hat\pi-1/\pi=O_P(n^{-1/2})$.
 \end{itemize}
@@ -52,12 +52,12 @@ Como $\hat B\to\pi>0$ en probabilidad,
 \]
 y el tercer término del paso 2 es $O_P(n^{-1/2})\cdot[O_P(n^{-1/2})+O_P(r_m)]=o_P(n^{-1/2})$.
 
-\paragraph{Paso 6 (conclusión).} $\hat\theta-\theta=P_n\phi+o_P(n^{-1/2})$. Las $\phi(O_i)$ son i.i.d., con $\E\phi=0$ y $\E\phi^2=V<\infty$, porque $\phi$ está acotada. El teorema central del límite y el lema de Slutsky dan $\sqrt n(\hat\theta-\theta)\to N(0,V)$.
+\paragraph{Paso 6 (conclusión).} $\hat\theta-\theta=P_n\phi+o_P(n^{-1/2})$. Las $\phi(O_i)$ son i.i.d., con $\E\phi=0$ y $\E\phi^2=\mathcal V<\infty$, porque $\phi$ está acotada. El teorema central del límite y el lema de Slutsky dan $\sqrt n(\hat\theta-\theta)\to N(0,\mathcal V)$.
 
-\paragraph{Paso 7 (estimación de $V$).} El estimador implementado usa
+\paragraph{Paso 7 (estimación de $\mathcal V$).} El estimador implementado usa
 \[
-\hat\phi(O)=\frac{(1-Z)\,\hat o(X)\,\bigl(Y-\hat m(X)-\hat A/\hat B\bigr)}{\hat B}+\frac{Z\,(\hat m(X)-\hat C)}{\hat\pi},\qquad\hat C=\frac{P_n[Z\hat m]}{\hat\pi}.
+\hat\phi(O)=\frac{(1-Z)\,\hat o(X)\,\bigl(Y-\hat m(X)-\hat A/\hat B\bigr)}{\hat B}+\frac{Z\,(\hat m(X)-\hat\mu_1)}{\hat\pi},\qquad\hat\mu_1=\frac{P_n[Z\hat m]}{\hat\pi}.
 \]
-Todas las funciones están acotadas, así que $|\hat\phi-\phi|\le c\,(|\hat o-o|+|\hat m-m_0|+|\hat C-\theta|+|\hat A/\hat B|+|\hat B-\pi|+|\hat\pi-\pi|)$ para una constante $c$ (aleatoria, pero acotada en ese suceso). Las medias condicionales de los cuadrados de los dos primeros términos tienden a 0 por bloques, y los escalares tienden a 0 en probabilidad, así que $P_n(\hat\phi-\phi)^2=o_P(1)$. Con $P_n\phi^2\to V$ por la ley de los grandes números y Cauchy--Schwarz, $|P_n\hat\phi^2-P_n\phi^2|\le P_n(\hat\phi-\phi)^2+2[P_n(\hat\phi-\phi)^2\cdot P_n\phi^2]^{1/2}\to0$. Así $\hat V\to V$ en probabilidad, y por Slutsky el intervalo $\hat\theta\pm z_{1-\alpha/2}(\hat V/n)^{1/2}$ tiene cobertura asintótica $1-\alpha$.
+Todas las funciones están acotadas, así que $|\hat\phi-\phi|\le C_0\,(|\hat o-o|+|\hat m-m_0|+|\hat\mu_1-\theta|+|\hat A/\hat B|+|\hat B-\pi|+|\hat\pi-\pi|)$ para una constante $c$ (aleatoria, pero acotada en ese suceso). Las medias condicionales de los cuadrados de los dos primeros términos tienden a 0 por bloques, y los escalares tienden a 0 en probabilidad, así que $P_n(\hat\phi-\phi)^2=o_P(1)$. Con $P_n\phi^2\to \mathcal V$ por la ley de los grandes números y Cauchy--Schwarz, $|P_n\hat\phi^2-P_n\phi^2|\le P_n(\hat\phi-\phi)^2+2[P_n(\hat\phi-\phi)^2\cdot P_n\phi^2]^{1/2}\to0$. Así $\hat{\mathcal V}\to \mathcal V$ en probabilidad, y por Slutsky el intervalo $\hat\theta\pm z_{1-\alpha/2}(\hat{\mathcal V}/n)^{1/2}$ tiene cobertura asintótica $1-\alpha$.
 
-\paragraph{Varias observaciones por unidad.} Si cada unidad $i$ aporta un bloque de $m_i\le\bar m$ observaciones con el mismo $Z_i$, las unidades son i.i.d. y $P$ y $Q$ se definen como leyes a nivel de observación, todo lo anterior se repite con cantidades de bloque. Las identidades (I1)--(I3) valen para sumas de bloque por linealidad, con $\pi$ y $1-\pi$ sustituidos por $\bar N_1=\E[\sum_jZ_{ij}]$ y $\bar N_0=\E[\sum_j(1-Z_{ij})]$, los números esperados de observaciones objetivo y donantes por unidad (que pueden superar 1), y $o$ por los odds a nivel de observación, de modo que $o=\bar N_1w/\bar N_0$. El \emph{cross-fitting} por unidad mantiene la independencia entre el bloque evaluado y los datos de entrenamiento, y $m_i\le\bar m$ mantiene todo acotado. La función de influencia por unidad es $\sum_j\psi(O_{ij};o,m_0)/\bar N_1$, y $\sqrt n$ se refiere al número de unidades; el error típico agrupado es su versión muestral. Con dependencia dentro de las unidades, $V$ es la varianza de esta función de influencia por bloques, no la forma cerrada de la sección~\ref{sec:inferencia}, que corresponde al caso i.i.d.
+\paragraph{Varias observaciones por unidad.} Si cada unidad $i$ aporta un bloque de $N_i\le N_{\max}$ observaciones con el mismo $Z_i$, las unidades son i.i.d. y $P$ y $Q$ se definen como leyes a nivel de observación, todo lo anterior se repite con cantidades de bloque. Las identidades (I1)--(I3) valen para sumas de bloque por linealidad, con $\pi$ y $1-\pi$ sustituidos por $\bar N_1=\E[\sum_jZ_{ij}]$ y $\bar N_0=\E[\sum_j(1-Z_{ij})]$, los números esperados de observaciones objetivo y donantes por unidad (que pueden superar 1), y $o$ por los odds a nivel de observación, de modo que $o=\bar N_1w/\bar N_0$. El \emph{cross-fitting} por unidad mantiene la independencia entre el bloque evaluado y los datos de entrenamiento, y $N_i\le N_{\max}$ mantiene todo acotado. La función de influencia por unidad es $\sum_j\psi(O_{ij};o,m_0)/\bar N_1$, y $\sqrt n$ se refiere al número de unidades; el error típico agrupado es su versión muestral. Con dependencia dentro de las unidades, $\mathcal V$ es la varianza de esta función de influencia por bloques, no la forma cerrada de la sección~\ref{sec:inferencia}, que corresponde al caso i.i.d.
