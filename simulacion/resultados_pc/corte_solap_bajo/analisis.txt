@@ -1,0 +1,6 @@
+== solap_bajo (200 réplicas), θ = 1.274 %, límite predicho Hájek 1.274 %, DR 1.274 %
+  std    Hájek 1.283 (z +0.5)  DR 1.298 (z +1.1)  DE DR 0.300  EE/DE 0.87  cobertura 91.0 % (± 2.0)  n_eff/n0 0.033  ε̂ 0.000
+         recorte del Hájek con g (milésimas): p99 +16.90 ± 0.54; p95 +29.18 ± 0.69; p90 +34.52 ± 0.80
+  corte  Hájek 1.295 (z +0.9)  DR 1.298 (z +1.0)  DE DR 0.342  EE/DE 0.82  cobertura 87.0 % (± 2.4)  n_eff/n0 0.028  ε̂ 0.001
+         recorte del Hájek con g (milésimas): p99 -2.24 ± 0.51; p95 -12.07 ± 0.64; p90 -20.56 ± 0.71
+  diferencia pareada DR corte − estándar: -0.0005 ± 0.0162 pp

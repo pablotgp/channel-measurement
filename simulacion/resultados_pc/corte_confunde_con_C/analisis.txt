@@ -1,0 +1,6 @@
+== confunde_con_C (200 réplicas), θ = 1.712 %, límite predicho Hájek 1.281 %, DR 1.314 %
+  std    Hájek 1.280 (z -0.0)  DR 1.320 (z +0.6)  DE DR 0.129  EE/DE 0.98  cobertura 17.5 % (± 2.7)  n_eff/n0 0.124  ε̂ 0.326
+         recorte del Hájek con g (milésimas): p99 +6.92 ± 0.28; p95 +18.71 ± 0.49; p90 +32.00 ± 0.64
+  corte  Hájek 1.284 (z +0.4)  DR 1.315 (z +0.2)  DE DR 0.113  EE/DE 0.95  cobertura 6.5 % (± 1.7)  n_eff/n0 0.189  ε̂ 0.333
+         recorte del Hájek con g (milésimas): p99 +2.84 ± 0.14; p95 +4.93 ± 0.33; p90 +3.88 ± 0.47
+  diferencia pareada DR corte − estándar: -0.0046 ± 0.0061 pp
