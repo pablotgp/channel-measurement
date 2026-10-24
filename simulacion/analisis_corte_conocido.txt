@@ -1,0 +1,22 @@
+Predicción registrada: 2026-10-24T10:45:51
+
+== base (200 réplicas), θ = 0.958 %
+  std    Hájek 0.958 (z +0.0)  DR 0.961 (z +0.4)  DE DR 0.112  RECM 0.111  EE/DE 0.92  cobertura 95.5 % (± 1.5)  n_eff/n0 0.144
+         recorte del Hájek con g (milésimas): p99 +3.08 ± 0.14 (98 % > 0); p95 +6.49 ± 0.22 (99 % > 0); p90 +10.35 ± 0.28 (99 % > 0)
+  corte  Hájek 0.961 (z +0.5)  DR 0.960 (z +0.4)  DE DR 0.098  RECM 0.098  EE/DE 0.93  cobertura 92.5 % (± 1.9)  n_eff/n0 0.199
+         recorte del Hájek con g (milésimas): p99 +0.23 ± 0.07 (50 % > 0); p95 -1.89 ± 0.15 (18 % > 0); p90 -6.21 ± 0.22 (4 % > 0)
+  diferencia pareada DR corte − estándar: -0.0006 ± 0.0053 pp
+
+== n_10000 (200 réplicas), θ = 0.958 %
+  std    Hájek 0.948 (z -0.5)  DR 0.962 (z +0.2)  DE DR 0.294  RECM 0.294  EE/DE 0.82  cobertura 88.0 % (± 2.3)  n_eff/n0 0.070
+         recorte del Hájek con g (milésimas): p99 +4.65 ± 0.47 (78 % > 0); p95 +11.64 ± 0.65 (90 % > 0); p90 +19.83 ± 0.76 (98 % > 0)
+  corte  Hájek 0.953 (z -0.4)  DR 0.957 (z -0.0)  DE DR 0.195  RECM 0.195  EE/DE 0.88  cobertura 91.0 % (± 2.0)  n_eff/n0 0.168
+         recorte del Hájek con g (milésimas): p99 +0.77 ± 0.16 (62 % > 0); p95 -0.68 ± 0.29 (36 % > 0); p90 -4.77 ± 0.39 (20 % > 0)
+  diferencia pareada DR corte − estándar: -0.0051 ± 0.0151 pp
+
+== n_pequeno (200 réplicas), θ = 0.958 %
+  std    Hájek 0.887 (z -1.2)  DR 0.883 (z -1.2)  DE DR 0.912  RECM 0.913  EE/DE 0.64  cobertura 70.0 % (± 3.2)  n_eff/n0 0.019
+         recorte del Hájek con g (milésimas): p99 +11.49 ± 2.12 (64 % > 0); p95 +29.28 ± 2.71 (82 % > 0); p90 +50.01 ± 2.94 (92 % > 0)
+  corte  Hájek 0.953 (z -0.2)  DR 0.944 (z -0.5)  DE DR 0.371  RECM 0.370  EE/DE 0.99  cobertura 87.0 % (± 2.4)  n_eff/n0 0.110
+         recorte del Hájek con g (milésimas): p99 -0.64 ± 0.40 (44 % > 0); p95 -4.25 ± 0.74 (29 % > 0); p90 -10.18 ± 0.99 (19 % > 0)
+  diferencia pareada DR corte − estándar: +0.0618 ± 0.0588 pp
