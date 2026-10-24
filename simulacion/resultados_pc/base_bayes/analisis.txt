@@ -1,0 +1,13 @@
+Escenario: base_bayes; ficheros: 1
+Réplicas: 40; remuestreos por réplica: 60; θ = 0.958 %
+DE real del DR en estas réplicas: 0.109 pp (en las 200 del escenario: 0.112)
+EE medio de Wald: 0.102 pp;  EE medio bootstrap: 0.147 pp
+Media de las réplicas bootstrap menos la estimación (sesgo bootstrap medio): +0.007 pp
+  Wald (EE agrupado)      : cobertura 97.5 % ± 2.5
+  Wald con EE bootstrap   : cobertura 100.0 % ± 0.0
+  Percentil bootstrap     : cobertura 100.0 % ± 0.0
+Réplicas que cubre el bootstrap y no Wald: 1; al revés: 0
+Percentil: θ queda por debajo del intervalo en 0.0 % y por encima en 0.0 %
+
+Predicción registrada antes de ejecutar:
+  Si la hipótesis es cierta, el EE bootstrap bayesiano medio estará cerca de la DE real: entre 0,10 y 0,14 pp en base y entre 0,24 y 0,34 en n_10000. Si sale cerca del bootstrap estándar (unos 0,165 y 0,43), la causa no son las filas duplicadas sino el ruido de re-estimar los modelos con menos información efectiva (los pesos Exp(1) también reducen el tamaño efectivo a la mitad).
