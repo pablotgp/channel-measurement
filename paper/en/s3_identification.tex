@@ -19,7 +19,7 @@ The additional condition holds whenever $Y$ is bounded.
 \emph{Step 2 (exchangeability).} By (A2), $\theta=\int m_0\dd P$.
 \emph{Step 3 (Radon--Nikodym).} By (A3) there is a measurable $w\ge0$ with $P(A)=\int_A w\dd Q$ for all $A$. The change-of-measure formula, valid for indicators, for simple functions by linearity and for nonnegative functions by monotone convergence, extends to every $P$-integrable $g$: $\int g\dd P=\int g\,w\dd Q$. With $g=m_0$, $\theta=\int m_0\,w\dd Q$.
 \emph{Step 4 (back to the data).} The additional condition is equivalent to $\E[w(X)|Y|\mid D=0]<\infty$, so $w(X)Y$ is integrable under $\PP(\cdot\mid D=0)$, and taking out what is known, $\E[w(X)Y\mid D=0]=\E[w(X)m_0(X)\mid D=0]=\int m_0\,w\dd Q=\theta$.
-The self-normalized form follows from $\E[w(X)\mid D=0]=\int w\dd Q=P(\X)=1$: the ratio equals $\theta$ for $w$ and is invariant to multiplying $w$ by $c>0$.
+The self-normalized form follows from $\E[w(X)\mid D=0]=\int w\dd Q=P(\X)=1$: the ratio equals $\theta$ for $w$ and is invariant to multiplying $w$ by $a>0$.
 \end{proof}
 
 This invariance is what allows us, in Section~\ref{sec:classifier}, to use weights known only up to a constant.
