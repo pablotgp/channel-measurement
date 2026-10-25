@@ -1,0 +1,943 @@
+\documentclass[twoside,11pt]{article}
+\PassOptionsToPackage{longnamesfirst}{natbib}
+\usepackage{obs_study_style}
+
+% The journal style numbers all results with one counter and defines proof;
+% these environments are released so that each type keeps its own numbering and amsthm is used.
+\makeatletter
+\let\proof\@undefined \let\endproof\@undefined
+\@for\obs@env:=theorem,lemma,proposition,remark,corollary,definition,conjecture,axiom,example\do{%
+  \expandafter\let\csname\obs@env\endcsname\@undefined
+  \expandafter\let\csname end\obs@env\endcsname\@undefined
+  \expandafter\let\csname c@\obs@env\endcsname\@undefined
+  \expandafter\let\csname the\obs@env\endcsname\@undefined}
+\makeatother
+
+\usepackage{amsmath,amsthm,mathtools}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\setlist{itemsep=0.2em,topsep=0.3em}
+% Computer Modern glyphs (avoids bitmap TS1 fonts when cm-super is not installed)
+\renewcommand{\labelitemi}{$\bullet$}
+\DeclareRobustCommand{\copyright}{{\ooalign{\hfil\raise.07ex\hbox{c}\hfil\crcr\mathhexbox20D}}}
+\setlength{\emergencystretch}{3em}
+
+% Notación
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\Pac}{P_{\mathrm{ac}}}
+\newcommand{\Ps}{P_{\mathrm{s}}}
+\newcommand{\thac}{\theta_{\mathrm{ac}}}
+\newcommand{\ths}{\theta_{\mathrm{s}}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\odds}{\operatorname{odds}}
+\newcommand{\neff}{n_{\mathrm{eff}}}
+\newcommand{\vacio}{\varnothing}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+
+% Preprint: neutral first-page header and footer (the style is used only for its layout)
+\makeatletter
+\def\ps@jmlrtps{\let\@mkboth\@gobbletwo
+\def\@oddhead{\normalsize Preprint, version 2 \hfill October 2026}%
+\def\@oddfoot{\scriptsize \copyright\ 2026 Pablo Antonio Garc\'ia Pastor. \hfill}%
+\def\@evenhead{}\def\@evenfoot{}}
+\makeatother
+\AtBeginDocument{\thispagestyle{jmlrtps}}
+\ShortHeadings{Invisible bias: when channels measure covariates differently}{Garc\'ia Pastor}
+\firstpageno{1}
+
+\begin{document}
+
+\title{Invisible bias: when channels measure covariates differently}
+
+\author{\name Pablo Antonio Garc\'ia Pastor \email pablotgp2002@gmail.com \\
+       \addr MSc student, ICADE, Universidad Pontificia Comillas\\
+       Madrid, Spain}
+
+\maketitle
+
+\begin{abstract}
+Organizations often want to know what a group of customers would achieve if served by a different channel, using only observational data. The standard answer reweights the units of the other channel, with weights from a calibrated classifier. We show how this answer can fail when, as is typical of channel data, each channel records covariates in its own way. A variable recorded by only one channel breaks support by construction; the ideal classifier reveals it, and dropping the variable is safe when it does not predict the basic-channel outcome given the others. A variable measured with a different instrument in each channel is worse: support can survive, and the estimators target a shifted value that no analysis of the observed data can distinguish from the truth. We derive that shift exactly. With public data in which both instruments exist for the same people (self-reported and measured body mass index in NHANES), the observed bias is within a pre-specified tolerance of the derived shift in 7 of 8 design--outcome comparisons, and the usual overlap diagnostics improve, relative to correct measurement, rather than flag it. Along the way, we read support failure in the classifier through the Lebesgue decomposition, show that the doubly robust estimator silently extrapolates where support fails, give weights for target groups defined by a known score cutoff, and adapt sensitivity bounds for unobserved confounding. An experimental benchmark (NSW/CPS) and a simulation whose predictions were registered before running it (we report those that failed) complete the evidence.
+\end{abstract}
+
+\begin{keywords}
+Covariate shift, density ratio, differential measurement error, doubly robust estimation, positivity, propensity score weighting
+\end{keywords}
+
+\section{Introduction}\label{sec:intro}
+
+Organizations allocate their users across channels of different quality and cost: a specialized service center versus a general one, a hospital versus primary care, a personal advisor versus an app. Before reallocating, they want to know how much would be lost by moving a group to the basic channel. A randomized experiment would answer this, but it is often expensive, slow or infeasible; what is available are observational data from each channel. The standard approach reweights the units that the basic channel serves today so that they resemble the target group, with weights estimated by a classifier. Formally, this is a change of measure.
+
+This paper is about a feature of channel data that the standard approach ignores: \emph{each channel records covariates in its own way}. A personal advisor writes down a commercial history that the app never stores; a hospital runs tests that primary care does not; one channel records what customers declare, while another measures it. We show that this breaks reweighting in two ways, one visible and one invisible.
+\begin{itemize}
+  \item \textbf{A variable recorded by only one channel} breaks support by construction, however comparable the units are: the unsupported mass is at least the fraction of the target group with data, and the ideal classifier reveals it by being certain ($p=1$) on those profiles (Proposition~\ref{prop:breaks}). Estimated classifiers need not show it: in an experimental benchmark (NSW versus CPS), a top-coded earnings variable breaks support at its edge, and neither of two estimated classifiers comes close to certainty there (Section~\ref{sec:lalonde}). Dropping the variable restores identification when it does not predict the basic-channel outcome given the other covariates (Proposition~\ref{prop:drop}); if it does, neither keeping nor dropping it identifies the estimand.
+  \item \textbf{A variable measured with a different instrument in each channel} can preserve support. The estimators then target a shifted value, which we derive exactly, and which no analysis of the observed data can distinguish from the truth (Theorem~\ref{thm:measurement}). With public data in which both instruments exist for the same people (self-reported and measured body mass index in NHANES), the observed bias is within a pre-specified tolerance of the derived shift in 7 of 8 design--outcome comparisons, and statistically indistinguishable from it in 4 (the exception to the first count, blood pressure with LightGBM, is explained by the outcome model), and the usual overlap diagnostics improve, relative to correct measurement, rather than flag it (Section~\ref{sec:nhanes}).
+\end{itemize}
+
+To state these results we need the reweighting machinery in measure-theoretic form (Section~\ref{sec:identification}). Most of it is known, and we do not claim it: the estimand is the counterfactual mean that enters an average treatment effect on the treated, the odds weights $p/(1-p)$ are those of \citet{hirano2003}, estimating density ratios with classifiers is standard \citep{bickel2009,qin1998,sugiyama2012}, and the doubly robust theory with cross-fitting is that of \citet{chernozhukov2018}. Two elementary readings are central here, and Sections~\ref{sec:channel} and~\ref{sec:instruments} rely on them. The unsupported part of the target law is exactly its restriction to $\{p=1\}$, which is von Neumann's construction of the Lebesgue decomposition \citep[Theorem 6.10]{rudin1987} read through the classifier; and without support the doubly robust estimator silently fills that part by extrapolating the outcome model (Theorem~\ref{thm:lebesgue} and Corollary~\ref{cor:drnosupport}; extrapolation without positivity is also discussed by \citet{petersen2012}).
+
+We also give tools for practice. When the target group is a cutoff on a known score, the weights are the ordinary channel propensity with the cutoff imposed (Proposition~\ref{prop:cutoff}), as in subgroup analysis \citep{rassen2012}; estimating that propensity with all units of the premium channel reduced the dispersion by up to 59\,\% in our simulation when overlap was good, but not when it was poor. We give the exact bias of capping the true weights with normalization (Proposition~\ref{prop:trimming}), which complements \citet{ma2020}, and adapt the bounds of the marginal sensitivity model \citep{dorn2023,tan2006} to this estimand, with a calibration through the channel model (Section~\ref{sec:sensitivity}). Besides the two public-data analyses, a simulation tests the other results: for each scenario we computed the limit of each estimator, and registered further predictions, before running it, and we report the predictions that failed (Sections~\ref{sec:design} and~\ref{sec:results}). Trimming with estimated weights and the behavior of the bootstrap are the subject of a companion note in preparation; here we only summarize the results.
+
+Section~\ref{sec:setup} sets up the problem and Section~\ref{sec:identification} the reweighting machinery. Sections~\ref{sec:channel} and~\ref{sec:instruments} contain the two failures, each followed by public data: the visible one with the NSW/CPS benchmark (Section~\ref{sec:lalonde}), the invisible one with NHANES (Section~\ref{sec:nhanes}). Sections~\ref{sec:cutoff}--\ref{sec:sensitivity} collect tools for practice that do not depend on the measurement problem: known-cutoff weights, trimming and inference, and sensitivity bounds. Sections~\ref{sec:design} and~\ref{sec:results} report the simulation, and Section~\ref{sec:discussion} concludes. Proofs are in the appendices.
+
+We use the language of measure theory (Radon--Nikodym derivatives) rather than density ratios. This is not a contribution but the standard formulation; it handles mixed covariates (continuous, categorical and with missing values) without assuming that densities exist.
+
+\paragraph{Related work.} The same estimand, odds weights and doubly robust influence function appear in the literature on generalizing and transporting trial results to a target population \citep{dahabreh2019,westreich2017}. \citet{heckman1997} found empirically that matching removes much of the bias when the comparison group comes from the same market and answers the same questionnaire as participants; Theorem~\ref{thm:measurement} formalizes that lesson as an indistinguishability result. \citet{cook2008} and \citet{steiner2011} also document the importance of measuring covariates in the same way and reliably, and that differential measurement error cannot be corrected without external information is known in the measurement-error literature; \citet{imai2010} study nonparametric identification and sensitivity analysis under differential measurement error of the treatment. Closest to Theorem~\ref{thm:measurement} is the literature on covariate measurement error in propensity-score methods. \citet{hong2017} treat a covariate measured differently in the two treatment groups and correct for it with Bayesian models whose priors on the error act as sensitivity parameters; \citet{webbvargas2017} impute the true covariate from an external calibration sample in which both versions are measured; and \citet{rudolph2016} adapt sensitivity analyses for unobserved confounding to covariate measurement error. These methods correct the bias given a model of the error or external data. Our results are complementary: we characterize the limit of the weighting and doubly robust estimators under channel-specific instruments, show that without such information the bias is not identified, which is why those corrections need priors or validation data, treat the limiting case of a variable recorded in only one channel, and show that the usual overlap diagnostics can improve as the bias grows. On partially observed covariates, the missingness-pattern approach \citep{blake2020,dagostino2000} requires the variable not to confound where it is missing; our channel variables are the case in which the treatment fixes the pattern, and the condition we use is an outcome-based covariate selection criterion in the sense of \citet{deluna2011}. On diagnostics, \citet{westreich2011} show that a high AUC of the propensity model is neither necessary nor sufficient to control confounding; our simulation adds that it does not measure overlap either. For diagnosing positivity violations, see \citet{petersen2012} and \citet{damour2021}. For limited overlap and trimming, see \citet{crump2009}, \citet{ma2020,ma2023}, \citet{liu2023} and \citet{manamkoong2025}, who bound the bias from limited overlap through how irregular the outcome function would have to be; we discuss them where they arise (Section~\ref{sec:inference}).
+\section{Setup}\label{sec:setup}
+
+We work on a probability space $(\Omega,\mathcal F,\PP)$. The covariates are a random variable $X\colon\Omega\to\X$, with $(\X,\A)$ a standard Borel space; this guarantees regular conditional distributions and allows mixed vectors of continuous, categorical and missing variables.
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$D\in\{0,1\}$ & Channel serving the unit (1 = premium, 0 = basic) \\
+$S\in\{0,1\}$ & Membership in the target group, with $\{S=1\}\subseteq\{D=1\}$ \\
+$Y(0),\,Y(1)$ & Potential outcomes if served by the basic or the premium channel \\
+$Y$ & Observed outcome \\
+$P$ & Law of $X$ in the target group: $P(A)=\PP(X\in A\mid S=1)$ \\
+$Q$ & Law of $X$ in the donor channel: $Q(A)=\PP(X\in A\mid D=0)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+We assume $\PP(S=1)>0$ and $\PP(D=0)>0$. A typical case is $S=\ind\{D=1,\ s(X)\le c\}$: the target group consists of the premium-channel units whose score $s(X)$ falls below a threshold, for instance the tail with the lowest purchase propensity.
+
+\paragraph{Estimand.} The counterfactual mean of the target group in the basic channel,
+\[
+\theta=\E\bigl[Y(0)\mid S=1\bigr].
+\]
+The loss from diverting the group is $L=\E[Y\mid S=1]-\theta$; its first term is observed directly. When units generate several observations, $P$, $Q$ and $\theta$ are taken at the observation level (Section~\ref{sec:estimators}).
+
+\paragraph{Regressions.} Let $m_0$ be a version of $\E[Y\mid X,D=0]$, that is, an $\A$-measurable, $Q$-integrable function such that, for all $A\in\A$,
+\[
+\E\bigl[Y\,\ind\{X\in A\}\mid D=0\bigr]=\int_A m_0\dd Q .
+\]
+It exists by the Radon--Nikodym theorem applied to the measure $A\mapsto\E[Y\ind\{X\in A\}\mid D=0]$, which is absolutely continuous with respect to $Q$, and it is unique $Q$-almost surely. With discrete $X$, $m_0(x)$ is the mean outcome of profile $x$ (a rate when $Y$ is binary); the definition through sets is needed because, with continuous $X$, each single value has probability zero. Similarly, $m_0^S$ is a version of $\E[Y(0)\mid X,S=1]$, unique $P$-almost surely.
+
+\paragraph{Assumptions.}
+\begin{enumerate}[label=(A\arabic*)]
+  \item \emph{Consistency.} $Y=Y(0)$ on $\{D=0\}$. It fails if the basic channel changes when it receives the diverted units, for instance through congestion.
+  \item \emph{Conditional mean exchangeability.} $m_0^S=m_0$ $P$-almost surely, where, by (A1), $m_0$ is also a version of $\E[Y(0)\mid X,D=0]$. It concerns only the basic channel: among units with the same profile, those in the target group would obtain there, on average, the same outcome as the units the basic channel serves today. It says nothing about $Y(1)$ and cannot be tested with the data.
+  \item \emph{Support.} $P\ll Q$: every set of profiles with probability zero in the donor channel has probability zero in the target group.
+  \item \emph{Integrability.} $\E[|Y(0)|\mid S=1]<\infty$ and $\E[|Y|\mid D=0]<\infty$; it holds if $Y$ is bounded.
+\end{enumerate}
+
+\begin{remark}[A2 presupposes A3]\label{rem:a2a3}
+Since $m_0$ is determined only $Q$-almost surely, the $P$-almost-sure equality in (A2) depends on the chosen version unless $P\ll Q$. If $P$ has mass where $Q$ has none, $m_0$ is arbitrary there and no donor data pin it down. This reappears in Theorem~\ref{thm:lebesgue}: the unsupported part of the target group is not estimable, not merely hard to estimate.
+\end{remark}
+
+\begin{remark}[Structural decomposition of the loss]\label{rem:decomposition}
+If the outcome is a sum of components, $Y=\sum_kY_k$ (for example, purchases of different products), and the basic channel cannot produce the components in a set $K_{\mathrm{ex}}$, that is, $Y_k(0)=0$ almost surely for $k\in K_{\mathrm{ex}}$, then, by linearity,
+\[
+L=\sum_{k\in K_{\mathrm{ex}}}\E[Y_k\mid S=1]+\sum_{k\notin K_{\mathrm{ex}}}\bigl(\E[Y_k\mid S=1]-\E[Y_k(0)\mid S=1]\bigr).
+\]
+Reading $L$ as the causal loss requires consistency also in the premium channel ($Y=Y(1)$ on $\{D=1\}$). The first sum is observed without any identification assumption; only the second needs Section~\ref{sec:identification}. An error $\epsilon$ in $\theta_{\mathrm{com}}=\sum_{k\notin K_{\mathrm{ex}}}\E[Y_k(0)\mid S=1]$ produces an error $-\epsilon$ in $\hat L$, so the conclusion about $L$ is insensitive to failures of (A2) or (A3) when $\theta_{\mathrm{com}}/L$ is small. A large structural part is not enough on its own: with $a_{\mathrm{ex}}$ and $a_{\mathrm{com}}$ the two sums of $\E[Y_k\mid S=1]$ and $\rho=a_{\mathrm{ex}}/L$, we have $\theta_{\mathrm{com}}/L=a_{\mathrm{com}}/L-(1-\rho)$, which can be large even when $\rho$ is close to 1. Two caveats: if the unit later obtains the component through another route, $L$ is an upper bound on the loss to the organization; and with a binary ``buys anything'' outcome the decomposition is not additive, so one must work with the component indicators. The full swap, which also moves a group from the basic channel into the premium one, is the same construction with the roles of the channels exchanged.
+\end{remark}
+\section{The reweighting machinery}\label{sec:identification}
+
+This section sets out the tools that Sections~\ref{sec:channel} and~\ref{sec:instruments} use: identification as a change of measure, the classifier that estimates the weights, the reading of support failure in that classifier, and the estimators. Most of it is known; Theorem~\ref{thm:lebesgue} and Corollary~\ref{cor:drnosupport} are the readings we add.
+
+\subsection{Identification as a change of measure}
+
+Under (A1)--(A4), the counterfactual mean $\theta$ is the mean of the observed outcome in the donor channel weighted by $w=dP/dQ$. No part of the argument uses densities with respect to Lebesgue measure.
+
+\begin{theorem}[Identification]\label{thm:identification}
+Assume (A1)--(A4) and, in addition, $\int_\X\E\bigl[|Y|\mid X=x,D=0\bigr]\,P(dx)<\infty$. Let $w=dP/dQ$, which exists by (A3). Then
+\[
+\theta=\E\bigl[w(X)\,Y\mid D=0\bigr]=\frac{\E[\tilde w(X)\,Y\mid D=0]}{\E[\tilde w(X)\mid D=0]}\qquad\text{for every }\tilde w=a\,w,\ a>0.
+\]
+\end{theorem}
+The additional condition holds whenever $Y$ is bounded.
+
+
+This invariance is what allows us, in Section~\ref{sec:classifier}, to use weights known only up to a constant.
+
+\begin{example}\label{ex:toy}
+Let three profiles A, B and C have $Q=(0.5,\,0.3,\,0.2)$, $P=(0.1,\,0.3,\,0.6)$ and $m_0=(4\,\%,\,2\,\%,\,0.5\,\%)$. The naive donor mean is $2.7\,\%$, but $\theta=0.1\cdot4\,\%+0.3\cdot2\,\%+0.6\cdot0.5\,\%=1.3\,\%$. The weights $w=P/Q=(0.2,\,1,\,3)$ recover it from the donor channel: $0.5\cdot0.2\cdot4\,\%+0.3\cdot1\cdot2\,\%+0.2\cdot3\cdot0.5\,\%=1.3\,\%$. The naive mean doubles $\theta$ because the donor channel consists mostly of A profiles, which respond more.
+\end{example}
+
+\begin{proposition}[Double robustness]\label{prop:dr}
+Under (A1)--(A4), let $\bar w\ge0$ and $\bar m$ be measurable, with the following integrals finite, and
+\[
+\psi(\bar w,\bar m)=\E\bigl[\bar w(X)\,(Y-\bar m(X))\mid D=0\bigr]+\int\bar m\dd P .
+\]
+Then $\psi(\bar w,\bar m)-\theta=\int_\X(\bar w-w)(m_0-\bar m)\dd Q$. In particular, $\psi(\bar w,\bar m)=\theta$ if $\bar w=w$ or $\bar m=m_0$, $Q$-almost surely.
+\end{proposition}
+
+The error is a product of the two estimation errors. This structure is what allows slow rates for each model and still $\sqrt n$ normality (Theorem~\ref{thm:normality}).
+\subsection{The classifier identifies the Radon--Nikodym derivative}\label{sec:classifier}
+
+A calibrated classifier that separates the target group from the donor channel yields $w$ up to a constant, and the set where that classifier is certain, $\{p=1\}$, is exactly the unsupported part of the target group.
+
+\paragraph{Construction.} We pool both populations with a label: $(\tilde X,Z)$ with $Z\sim\mathrm{Bernoulli}(\pi)$, $\pi\in(0,1)$, $\tilde X\mid Z=1\sim P$ and $\tilde X\mid Z=0\sim Q$. The law of $\tilde X$ is the mixture $M=\pi P+(1-\pi)Q$, and the ideal classifier is a version $p(x)$ of $\PP(Z=1\mid\tilde X=x)$. In practice $\pi$ is the fraction of the target group in the pooled sample; it does not affect the estimand.
+
+\begin{lemma}\label{lem:mixture}
+$P\ll M$ and $Q\ll M$, with $dP/dM=p/\pi$ and $dQ/dM=(1-p)/(1-\pi)$, $M$-almost surely.
+\end{lemma}
+
+\begin{theorem}[Odds ratio]\label{thm:odds}
+Take a version of $p$ with values in $[0,1]$, and let $r=\frac{1-\pi}{\pi}\,\frac{p}{1-p}$ on $\{p<1\}$ and $r=0$ on $\{p=1\}$. Then $Q(\{p=1\})=0$ and, for all $A\in\A$, $\int_A r\dd Q=P(A\cap\{p<1\})$. In particular, under (A3), $r=dP/dQ$ $Q$-almost surely.
+\end{theorem}
+
+Combined with the invariance in Theorem~\ref{thm:identification}, the odds $p/(1-p)$ suffice: the constant $(1-\pi)/\pi$ cancels. With a classifier of log-odds $F$, the weight is $e^{F}$. The theorem requires $p$ to be the true conditional probability: a classifier that ranks well but is miscalibrated orders units correctly and still gives biased weights.
+
+\paragraph{Example~\ref{ex:toy} (continued).}
+With $\pi=0.2$, the ideal classifier takes the values $p=(0.048,\,0.200,\,0.429)$ in A, B and C, with odds $(0.05,\,0.25,\,0.75)=w/4$, and the self-normalized estimator gives $1.3\,\%$. The classifier $\tilde p=p^2$ ranks identically (same AUC), but its odds $(0.0023,\,0.042,\,0.225)$ give $0.89\,\%$, a 32\,\% bias. Calibration matters, not only discrimination.
+
+
+\begin{theorem}[Support and Lebesgue decomposition]\label{thm:lebesgue}
+Assume (A1) and (A4); (A3) is not assumed.
+\begin{enumerate}
+  \item $P\ll Q$ if and only if $P(\{p=1\})=0$.
+  \item The Lebesgue decomposition of $P$ with respect to $Q$ is $P=\Pac+\Ps$, with $\Pac(A)=P(A\cap\{p<1\})$, $\Ps(A)=P(A\cap\{p=1\})$ and $d\Pac/dQ=r$.
+  \item Let $\varepsilon=P(\{p=1\})$. If $\varepsilon<1$, (A2) holds on $\{p<1\}$ and $\int_{\{p<1\}}\E[|Y|\mid X=x,D=0]\,P(dx)<\infty$, self-normalized weighting with $r$ recovers
+  \[
+  \frac{\E[r(X)\,Y\mid D=0]}{\E[r(X)\mid D=0]}=\thac:=\E\bigl[Y(0)\mid S=1,\ p(X)<1\bigr],
+  \]
+  and $\theta=(1-\varepsilon)\thac+\varepsilon\,\ths$, with $\ths=\E[Y(0)\mid S=1,\ p(X)=1]$, defined when $\varepsilon>0$, not identified.
+\end{enumerate}
+\end{theorem}
+
+\begin{corollary}[Partial identification bounds]\label{cor:bounds}
+Under the hypotheses of Theorem~\ref{thm:lebesgue}(3), if $Y(0)\in[0,1]$ in the target group and $Y\in[0,1]$ in the donor channel, then $(1-\varepsilon)\thac\le\theta\le(1-\varepsilon)\thac+\varepsilon$, and the bias of weighting is $\thac-\theta=\varepsilon(\thac-\ths)$.
+\end{corollary}
+The width of the interval is $\varepsilon$, which can exceed $\theta$ itself when the outcome is rare: if an unsupported profile is added to Example~\ref{ex:toy} with $P=(0.1,\,0.3,\,0.5,\,0.1)$, then $\varepsilon=0.1$, $\thac=1.39\,\%$ and the interval is $[1.25\,\%,\,11.25\,\%]$. It is informative only under an additional assumption; for instance, if unsupported units do not respond better than the rest of the group, $\ths\le\thac$, the interval shrinks to $[(1-\varepsilon)\thac,\thac]$, here $[1.25\,\%,\,1.39\,\%]$, and the weighting estimator is an upper bound for $\theta$.
+
+\begin{corollary}[Doubly robust estimator without support]\label{cor:drnosupport}
+Under the hypotheses of Theorem~\ref{thm:lebesgue}(3), let $\bar m$ be $P$-integrable with $\bar m=m_0$ $P$-almost surely on $\{p<1\}$. With the weights $r$ (the last term is $0$ when $\varepsilon=0$),
+\[
+\frac{\E[r(X)(Y-\bar m(X))\mid D=0]}{\E[r(X)\mid D=0]}+\int\bar m\dd P=(1-\varepsilon)\thac+\varepsilon\,\E_P\bigl[\bar m(X)\mid p(X)=1\bigr].
+\]
+\end{corollary}
+
+Unlike the weighting estimator, which keeps the supported part, the doubly robust estimator fills the unsupported part with the extrapolation of the outcome model. It recovers $\theta$ if and only if that extrapolation is right on average, $\E_P[\bar m\mid p=1]=\ths$, an additional, untestable assumption. Without support, correct weights no longer protect it against a wrong outcome model either: for a general $P$-integrable $\bar m$, the same computation adds $\varepsilon\,\bigl(\thac-\E_P[\bar m\mid p<1]\bigr)$ to the right-hand side, because the self-normalized first term rescales the residuals by $1/(1-\varepsilon)$. \citet{manamkoong2025} propose making it explicit under a smoothness assumption and bounding its effect with a sensitivity analysis.
+
+\paragraph{Practical reading.} In finite samples one never observes $\hat p=1$ exactly. A natural diagnostic is the estimated mass $\hat P(\hat p>1-t)$ for small $t$, although how close $\hat p$ can get to 1 depends on $\pi$; when the target group is a small fraction of the pooled sample, the odds relative to the prior odds, $\hat o\,(1-\pi)/\pi$, an estimate of the weight $w$, is the more informative scale; an AUC close to 1 is a warning sign, because it indicates that $P$ and $Q$ are close to mutually singular, not that the classifier is good. Below that extreme the AUC is not a monotone measure of overlap: when the target group is a cutoff on a score, it is high even with good overlap (Section~\ref{sec:design}).
+
+\subsection{Estimators}\label{sec:estimators}
+
+\paragraph{Sampling.} We observe an i.i.d. pooled sample $O_i=(Z_i,X_i,(1-Z_i)Y_i)$, $i=1,\dots,n$, with $\PP(Z=1)=\pi$, $X\mid Z=1\sim P$ and $X\mid Z=0\sim Q$; for $\theta$ only the outcomes of donor units are needed. When a unit (a customer) generates several observations (calls), $O_i$ is the whole block of that unit and everything below applies at the unit level. We assume that the channel and target-group membership are properties of the unit, constant across its observations, and that $P$, $Q$, $m_0$ and $\theta$ are defined at the observation level, so that each unit is weighted by its number of observations. If that number depends on $Y(0)$ given $X$, the unit-level and observation-level estimands, and the corresponding versions of (A2), differ.
+
+\paragraph{Estimators.} With $\hat o=\hat p/(1-\hat p)$ and $n_1$ the number of target-group observations,
+\[
+\hat\theta_{\mathrm{H}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,Y_i}{\sum_{i:Z_i=0}\hat o(X_i)},\qquad
+\hat\theta_{\mathrm{DR}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,(Y_i-\hat m(X_i))}{\sum_{i:Z_i=0}\hat o(X_i)}+\frac1{n_1}\sum_{i:Z_i=1}\hat m(X_i).
+\]
+The first is the Hájek weighting estimator. The second is the doubly robust (DR) estimator, the sample version of $\psi$ in Proposition~\ref{prop:dr} with the normalized weights $\bar w=\hat o/\E_Q[\hat o]$. Both use cross-fitting: units are split into $K$ folds and, for observations in fold $k$, $\hat p$ and $\hat m$ are trained on the other folds.
+
+\paragraph{Diagnostics and evidence.} Three diagnostics are routinely read off a fitted classifier: the estimated unsupported mass $\hat\varepsilon=\hat P(\hat p>1-t)$, the fraction of target observations with $\hat p>1-t$ for a small $t$ (Theorem~\ref{thm:lebesgue}); the AUC; and Kish's \citeyearpar{kish1965} effective sample size $\neff=(\sum_i\hat o(X_i))^2/\sum_i\hat o(X_i)^2$, with sums over the $n_0$ donor observations, whose ratio $\neff/n_0$ estimates $1/(1+\chi^2(P\|Q))$ (Section~\ref{sec:inference}). Sections~\ref{sec:channel} and~\ref{sec:instruments} ask what these diagnostics show when channels record covariates differently. Throughout, $z$ denotes (mean $-$ prediction)/(Monte Carlo error) over replications, and a prediction is \emph{registered} when it was committed, with a time stamp, to the public repository (Section~\ref{sec:design}) before the corresponding run.
+\section{Variables recorded by only one channel: the visible failure}\label{sec:channel}
+
+A covariate recorded in only one channel breaks support even if the units are comparable. If it does not predict the outcome given the others, dropping it restores identification; if it confounds, neither using it nor dropping it identifies $\theta$.
+
+\paragraph{Measurement model.} Each unit has latent covariates $X^*=(V,C^*)$, where $C^*$ takes values in $\mathcal C\cup\{\vacio\}$ and $C^*=\vacio$ means ``no actual data''. What is recorded depends on the channel: $X=(V,C)$, with $C=C^*$ if $D=1$ and $C=\vacio$ if $D=0$. Section~\ref{sec:instruments} treats the general case $X=\varphi_D(X^*)$. Examples: a commercial history kept only by premium-channel advisors, or diagnostic tests performed only in hospital. We write $P^*$ and $Q^*$ for the laws of $X^*$ in the target group and in the donor channel.
+
+\begin{lemma}[Singular mass]\label{lem:singular}
+$\varepsilon=\Ps(\X)=\sup\{P(B):\ B\in\A,\ Q(B)=0\}$.
+\end{lemma}
+
+\begin{proposition}[A channel variable breaks support]\label{prop:breaks}
+Under the measurement model, let $\kappa=\PP(C^*\ne\vacio\mid S=1)$ be the fraction of the target group with actual data. Then $\varepsilon\ge\kappa$, and the ideal classifier equals 1 $M$-almost surely on the profiles with $C\ne\vacio$. If $\kappa>0$, (A3) fails regardless of how the units compare.
+\end{proposition}
+
+Throughout, $g$ denotes a version of $\E[Y(0)\mid V,D=0]$, and $P_V$ and $Q_V$ the laws of $V$ in the target group and in the donor channel.
+
+\begin{proposition}[Dropping a variable that does not predict the outcome]\label{prop:drop}
+Assume (A1), (A4) and:
+\begin{enumerate}
+  \item \emph{Latent support:} $P^*\ll Q^*$.
+  \item \emph{Latent (A2):} $\E[Y(0)\mid X^*,S=1]=\E[Y(0)\mid X^*,D=0]$, $P^*$-almost surely.
+  \item \emph{$C^*$ does not predict the outcome in the basic channel given $V$:} $\E[Y(0)\mid X^*,D=0]=\E[Y(0)\mid V,D=0]$, $Q^*$-almost surely.
+\end{enumerate}
+Then, with $V$ as the only covariates, (a) $P_V\ll Q_V$ and (b) $\E[Y(0)\mid V,S=1]=\E[Y(0)\mid V,D=0]$ $P_V$-almost surely, so Theorems~\ref{thm:identification}--\ref{thm:lebesgue} apply with $X=V$.
+\end{proposition}
+
+Condition (3) is an outcome-based covariate selection criterion \citep{deluna2011}: it suffices even if $C^*$ is associated with the channel.
+
+\paragraph{When the variable does confound.} If (1) and (2) hold but (3) fails, let $\mu^*(x^*)=\E[Y(0)\mid X^*=x^*,D=0]$; then $\theta=\int\mu^*\dd P^*$. Using only $V$, the weighting functional equals $\int g\dd P_V=\int g(V)\dd P^*$, with bias
+\[
+\int g\dd P_V-\theta=-\int_{\X^*}(\mu^*-g)\dd P^*.
+\]
+Under $Q^*$ this integral is zero by definition of $g$. Under $P^*$ it can be nonzero only if $C^*$ predicts $Y(0)$ given $V$ and its distribution given $V$ differs between groups: the two conditions of the classical definition of a confounder, necessary but not sufficient, because the effects could offset. The exact condition for (A2) with $V$ as covariates is $\E_{P^*}[\mu^*-g\mid V]=0$ $P_V$-almost surely; the bias itself vanishes if and only if $\int(\mu^*-g)\dd P^*=0$, which can also happen by cancellation. (3) is sufficient for both and does not involve $P^*$. When the bias is nonzero, neither option identifies $\theta$: without $C$, (A2) fails, and with $C$, (A3) fails and, as shown next, (A2) on the supported part generally fails too. Hence the bounds of Corollary~\ref{cor:bounds}, which assume (A2) there, do not apply either. What remains is a sensitivity analysis on (3).
+
+\paragraph{Keeping the variable does not fix the supported part.} With $C$ among the covariates, the supported part is $\{C=\vacio\}$. But ``$\vacio$'' does not mean the same in both groups: in the donor channel it mixes units with $C^*=\vacio$ and $C^*\ne\vacio$, because $C$ is never recorded there; in the target group it means $C^*=\vacio$. Since the whole donor channel has $C=\vacio$, $m_0(v,\vacio)=g(v)$, and the weighting functional equals $\E_{P^*}[g(V)\mid C^*=\vacio]$, which in general is neither $\theta$ nor $\thac$. Indeed, (A2) on $\{C=\vacio\}$ requires $\mu^*(V,\vacio)=g(V)$ $P^*$-almost surely on $\{C^*=\vacio\}$, that is, that among donors with the same $V$ those with and without a history respond alike in the basic channel; (3) implies it, but it is weaker. The doubly robust estimator, in addition, extrapolates the outcome model to units with data (Corollary~\ref{cor:drnosupport}). That model is fitted in the donor channel, where $C$ never varies; if it does not depend on $C$ outside the support, as with trees, which cannot split on a variable that is constant in training, it extrapolates $g(V)$, and the doubly robust estimator targets $\E_{P^*}[g(V)]$, as if $C$ were not used.
+
+\paragraph{Testability.} Condition (3) concerns $Y(0)$ in the basic channel, where $C^*$ is not observed, so it cannot be tested directly. That $C$ predicts the outcome in the premium channel is a hint but not proof, because $Y(1)$ is observed there.
+
+\paragraph{Relation to the missingness-pattern approach.} \citet{dagostino2000} and \citet{blake2020} estimate the propensity within each missingness pattern and require the partially observed variable not to confound in the pattern where it is missing. A channel variable is the case in which the treatment determines the pattern: in the observed pattern there are no donor units (Proposition~\ref{prop:breaks}), and in the missing one it requires $\mu^*(V,\vacio)=g(V)$, which (3) implies.
+
+\paragraph{Practical diagnostic.} Removing a channel variable should visibly reduce the classifier's AUC and the estimated mass $\hat P(\hat p>1-t)$; a large jump in that mass, or in the estimated weights on the $\pi$-invariant scale of Section~\ref{sec:classifier}, when a variable is included is the signature of Proposition~\ref{prop:breaks}. In the simulation, the estimated unsupported mass with the channel variable is $0.326$ against $\kappa=0.335$, and the doubly robust estimator behaves as Corollary~\ref{cor:drnosupport} predicts rather than as the weighting estimator does (Section~\ref{sec:res-main}).
+
+\subsection{Illustration: an experimental benchmark with a top-coded covariate}\label{sec:lalonde}
+
+A covariate need not be missing to break support: it suffices that one channel records it with a ceiling. Public data with an experimental benchmark show such a failure, and show that estimated classifiers barely register it.
+
+\paragraph{Data.} We use the subsample of \citet{dehejia1999} of the National Supported Work experiment, with 185 participants and 260 randomized controls, and the CPS-1 comparison group of \citet{lalonde1986}, with 15{,}992 people, in the copies distributed by \citet{cunningham2021}. The target group is the participants and the donors are the CPS sample. The estimand is the mean of their 1978 earnings without the program, whose experimental benchmark is the mean of the controls: 4{,}555 dollars (standard error 340). The covariates are age, education, race, marital status, lack of a degree, earnings in 1974 and 1975 with indicators of zero earnings, and the squares of age and education. This analysis was not registered in advance; we report the median over five cross-fitting partitions.
+
+\paragraph{Results.} The unadjusted CPS mean is 14{,}847 dollars. Weighting alone gives 5{,}092 with a logistic classifier and 3{,}990 with LightGBM \citep{ke2017}, whereas the doubly robust estimator gives 4{,}783 and 4{,}716 (standard errors 397 and 876), both within one standard error of the benchmark (340). Overlap is poor: with LightGBM, $\neff$ is 33 out of 15{,}992 donors.
+
+\paragraph{Top-coding in one source.} The two sources record earnings differently \citep{smith2005}. One difference is visible: CPS earnings are top-coded (19\,\% of 1974 earnings sit exactly at the cap of 25{,}862 dollars) and NSW earnings are not. Two participants (1.1\,\%) earned more than the cap in 1974, so their profiles have no support by construction: a singular mass in the sense of Lemma~\ref{lem:singular}, on which the ideal classifier equals 1. No estimated classifier comes close. The participant with 35{,}040 dollars gets $\hat p$ between 0.008 and 0.012 with the logistic classifier, about the base rate $\pi=0.011$, and at most 0.001 with LightGBM, in all five partitions: the donors at the cap make high earnings look donor-like. The participant only 67 dollars above the cap gets $\hat p$ between 0.17 and 0.33 with the logistic classifier, 18 to 42 times the prior odds, a noticeable but far from conclusive signal, and between 0.002 and 0.20 with LightGBM. Here the failure does not matter: applying the cap to both groups changes the estimates by less than 30 dollars. The outcome is also top-coded: 26\,\% of CPS 1978 earnings sit at the cap, which biases the donor outcome model downward; applying the cap to the controls lowers the benchmark by 54 dollars, to 4{,}501, small relative to the standard errors. But the example shows that classifier-based diagnostics can miss a support failure that a histogram of each covariate by source, with a fifth of the donor values piled at the maximum, reveals at once. Top-coding is in fact a channel-specific instrument, $x\mapsto\min(x,c)$, that breaks support only at its edge. Section~\ref{sec:instruments} turns to instruments that do not break support at all; other differences in how the two sources collected earnings would be of that kind.
+\section{Different measurement instruments: the invisible bias}\label{sec:instruments}
+
+A variable missing in one channel is the most visible case of a general problem: each channel measures with its own instrument. Keeping the notation of Section~\ref{sec:channel}, let $X^*$ be the latent covariate, taking values in a standard Borel space $\X^*$, with laws $P^*$ and $Q^*$ in the target group and the donor channel. Each channel records $X=\varphi_D(X^*)$, with $\varphi_0,\varphi_1\colon\X^*\to\X$ measurable, so that $P=P^*\circ\varphi_1^{-1}$ and $Q=Q^*\circ\varphi_0^{-1}$. Let $\mu^*(x^*)=\E[Y(0)\mid X^*=x^*,D=0]$.
+
+\begin{theorem}[Different measurement instruments]\label{thm:measurement}
+Assume (A1), (A4), latent support $P^*\ll Q^*$ and latent (A2): $\E[Y(0)\mid X^*,S=1]=\mu^*(X^*)$ $P^*$-almost surely.
+\begin{enumerate}
+  \item \emph{Common variables.} For every measurable map $\xi$ on $\X^*$, $P^*\circ\xi^{-1}\ll Q^*\circ\xi^{-1}$. In particular, if a measurable $\upsilon$ on $\X$ satisfies $\upsilon\circ\varphi_0=\upsilon\circ\varphi_1$ (variables both channels measure the same way), the laws of $U=\upsilon(X)$ in the two groups satisfy $P_U\ll Q_U$.
+  \item \emph{Identification with the common variables.} If, in addition, $\mu^*(X^*)=\E[Y(0)\mid U,D=0]$ $Q^*$-almost surely, Theorems~\ref{thm:identification}--\ref{thm:lebesgue} apply with $U$ as covariates.
+  \item \emph{Differential measurement with support.} If $\varphi_0$ is injective and $P\ll Q$ (on standard Borel spaces, $\varphi_0$ then has a Borel image and a measurable inverse by the Lusin--Souslin theorem \citep[Corollary 15.2]{kechris1995}, and $\varphi_1(X^*)$ lies in that image $P^*$-almost surely because $Q$ is concentrated on it) and $Y$ is bounded, the weighting functional with $X$ as covariates, $\E[w(X)\,Y\mid D=0]$ with $w=dP/dQ$, equals
+  \[
+  \theta_X=\int_{\X^*}\mu^*\bigl(\varphi_0^{-1}(\varphi_1(x^*))\bigr)\,P^*(dx^*),\qquad
+  \theta_X-\theta=\int_{\X^*}\bigl[\mu^*\circ\varphi_0^{-1}\circ\varphi_1-\mu^*\bigr]\dd P^*.
+  \]
+  \item \emph{Indistinguishability.} Under the conditions of 3, there is a world without measurement error, with $\varphi_1=\varphi_0$ and the latent law of the target group equal to $P^*\circ(\varphi_0^{-1}\circ\varphi_1)^{-1}$, that reproduces the law of the target-group and donor-channel data (and of all observed data if, in addition, the law of the recorded covariates in the whole premium channel is absolutely continuous with respect to $Q$), satisfies the maintained assumptions and has $\theta=\theta_X$. No procedure based only on the target-group and donor-channel data (or, under the additional condition, on all observed data) distinguishes $\theta$ from $\theta_X$.
+\end{enumerate}
+\end{theorem}
+
+By part 3, $\theta_X$, not $\theta$, is the functional that weighting estimators target: one whose normalized weights converge to $w$ in $L^1(Q)$ converges to $\theta_X$ for bounded $Y$. The doubly robust estimator targets the same functional when either its weights or its outcome model is correct and the other converges to a fixed integrable limit, because the algebra of Proposition~\ref{prop:dr}, with $\int m_0\dd P$ in place of $\theta$, uses only $P\ll Q$. Part 4 is a form of the untestability of (A2), but with a specific content: the alternative world has no measurement error and the same outcome model $\mu^*$, so the bias $\theta_X-\theta$ is indistinguishable from a real difference in the latent covariates of the target group. In applications $\varphi_0$ is injective only up to the recording precision (BMI rounded to 0.1, say), which we ignore.
+
+\begin{remark}[Stochastic instruments]\label{rem:stochastic}
+Parts 3 and 4 use the target group's instrument only through the law $P$ of its recorded covariates. They therefore hold verbatim when that instrument is stochastic, $X=\varphi_1(X^*,\zeta)$ with $\zeta$ an auxiliary random variable such as the error of a self-report: if $\varphi_0$ is injective and $P\ll Q$, the weighting functional equals $\theta_X=\E[\mu^*(\varphi_0^{-1}(X))\mid S=1]$, and the world in which the latent covariates of the target group are distributed as $\varphi_0^{-1}(X)$ given $S=1$ reproduces the target-group and donor data. No condition on how $\zeta$ relates to $Y(0)$ is needed, because the limit involves the outcome only through $m_0$, which the donor channel fixes.
+\end{remark}
+
+\paragraph{Reading.} A variable measured differently is more dangerous than a missing one. The missing one breaks support, and the ideal classifier shows it by being certain, $p=1$; estimated classifiers showed it clearly in our simulation ($\hat\varepsilon>0$, Section~\ref{sec:channel}) but only faintly at the edge of a ceiling (Section~\ref{sec:lalonde}). The differently measured one can preserve support, and the classifier interprets the measurement difference as a real difference between units. In an example with $P^*=N(1,1)$, $Q^*=N(0,1)$, $\mu^*(x)=\sigma(-3-0.8x)$, with $\sigma(t)=1/(1+e^{-t})$, and a premium channel that records the variable shifted by $\Delta$, a shift of $\Delta=\pm0.3$ standard deviations produces biases of $-20.5\,\%$ and $+25.4\,\%$ on $\theta=2.92\,\%$. In a simulation of this example with 400{,}000 donor and 100{,}000 target observations and 20 replications (code and output in the repository), the weighting estimator with a logistic classifier matches $\theta_X$ ($z=+0.6$ in both cases). The population AUC, $\Phi(\delta/\sqrt2)$ for a mean difference $\delta$, changes (0.76 without error; 0.82 and 0.69 with it), but in a way that a real population difference would also produce. The only way out is information external to the design: units measured with both instruments, for instance customers who switched channels, which allow estimating $\varphi_0^{-1}\circ\varphi_1$, as in the external calibration of \citet{webbvargas2017}.
+
+\subsection{Evidence from public data: self-reported versus measured body mass index}\label{sec:nhanes}
+
+Theorem~\ref{thm:measurement} can be checked directly with data in which both instruments exist for the same people.
+
+\paragraph{Data.} We use the 2017--2018 cycle of the US National Health and Nutrition Examination Survey \citep{nchs2020}: the 4{,}034 adults aged 20 or more with measured and self-reported height and weight, systolic blood pressure (mean of up to three readings), waist circumference, education and income-to-poverty ratio. We do not use the survey weights. The 4{,}034 adults form the finite population over which each target group is drawn; the theory, however, concerns a superpopulation with smooth regressions, of which they are a sample. Literally, in the finite population the recorded profiles $(V,\text{self-reported BMI})$ of the target group rarely coincide with any donor profile, so $P\ll Q$ holds only in that superpopulation, and both the estimators and our prediction reach it through smooth fitted models. Self-reported BMI is computed from the reported weight and height and rounded to 0.1, the precision of the published measured BMI, for comparability. Self-reported BMI is on average 0.81 lower than measured BMI (standard deviation 1.99), and the gap grows with BMI: from 0.00 in the lowest quartile of measured BMI to $-1.66$ in the highest, in line with the literature on self-reported anthropometry \citep{connorgorber2007}. Using it in one channel only is differential measurement in the sense of Theorem~\ref{thm:measurement}; that the error is not classical (it grows with BMI) is what makes the bias sizeable.
+
+\paragraph{Design.} Each replication assigns every person to the target group (a synthetic premium channel) with probability $\sigma\bigl(-1+\beta_b \tilde{\mathrm{BMI}}+0.5\,\tilde{\mathrm{age}}-0.4\,\tilde{\mathrm{income}}\bigr)$, where BMI is the measured value, the tilde denotes standardization and $\beta_b=0.8$; about 30\,\% end up in the target group. The channel is synthetic, but covariates, outcomes and measurement error are real. Since the assignment depends only on the true covariates, latent exchangeability and support hold by construction, and $\theta$, the mean outcome of the target group, is observed in each replication. We compare four specifications, all with age, sex, race, education and income: (A) measured BMI in both groups; (B) self-reported BMI in the target group and measured BMI in the donors, the channel-measurement case of Theorem~\ref{thm:measurement}; (C) without BMI; (D) self-reported BMI in both groups. The estimator is the doubly robust one with five-fold cross-fitting, with a penalized logistic classifier and a ridge regression, both additive in cubic splines; there are 200 replications. The replications share the population and only the assignment varies, so we evaluate bias, not coverage.
+
+\paragraph{Registered predictions.} Before running, we registered the predictions below (Section~\ref{sec:estimators}). We computed the limit of specification B from Theorem~\ref{thm:measurement}(3), with $\mu$, fitted on the whole sample, an estimate of $m_0(v,b)=\E[Y\mid V=v,\mathrm{BMI}=b,D=0]$, which here equals $\E[Y\mid V=v,\mathrm{BMI}=b]$ because the assignment depends only on $(V,\mathrm{BMI})$. Averaging over the assignment probabilities $q_i$, the predicted bias is $\sum_iq_i[\mu(V_i,b_i^{\mathrm{self}})-\mu(V_i,b_i)]/\sum_iq_i$, namely $-0.47$\,mmHg for blood pressure and $-2.44$\,cm for the waist. The self-report is not a function of the measured value, so this is the stochastic-instrument case of Remark~\ref{rem:stochastic}. The registered criterion was ``$|z|<3$, tolerating a model error of up to 25\,\% of the predicted bias'', which we operationalized, as the robustness files state explicitly, as $|z|<3$ or a deviation within 25\,\% of the prediction; under the alternative reading, $|z|<3$ after allowing a 25\,\% band, the LightGBM blood-pressure cell below would also pass, so our count is the more conservative. The $z$ values are conditional on the fitted $\mu$. Because the prediction uses a fitted $\mu$ of the same model class as the DR outcome model, agreement partly reflects that shared model, a point we return to below. We also predicted no bias in A, no mass of $\hat p$ close to 1 in A or B, an AUC difference between A and B below 0.02, and in C a negative bias larger in absolute value than that of B for the waist.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, base design (200 replications). Mean bias of the DR and H\'ajek estimators; Monte Carlo errors of the DR bias in parentheses. No replication had any target individual with $\hat p>0.99$. The outcome standard deviations in the population are 19.7\,mmHg and 17.1\,cm.}\label{tab:nhanes}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{2}{c}{Blood pressure (mmHg)} & \multicolumn{2}{c}{Waist (cm)} & & \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Specification & DR & H\'ajek & DR & H\'ajek & AUC & $\neff/n_0$ \\
+\midrule
+A: measured in both & $-0.11$ (0.06) & $-0.26$ & $-0.18$ (0.02) & $-0.73$ & 0.743 & 0.41 \\
+B: differential & $-0.48$ (0.06) & $-0.54$ & $-2.56$ (0.02) & $-2.86$ & 0.715 & 0.50 \\
+\quad prediction (Theorem~\ref{thm:measurement}) & $-0.47$ & & $-2.44$ & & & \\
+C: without BMI & $-1.78$ (0.05) & $-1.79$ & $-10.70$ (0.04) & $-10.70$ & 0.653 & 0.74 \\
+D: self-reported in both & $-0.47$ (0.06) & $-0.60$ & $-1.32$ (0.03) & $-1.77$ & 0.737 & 0.44 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Results.} Table~\ref{tab:nhanes} confirms the prediction for the DR estimator approximately: $-0.48$ against $-0.47$\,mmHg ($z=-0.3$) and $-2.56$ against $-2.44$\,cm. The waist deviation, 5\,\%, is within the registered tolerance but statistically distinguishable from zero ($z=-5.7$); net of the bias of A, $-2.37$ against $-2.44$. The bias in B is not negligible: for the waist it is 0.15 standard deviations, and about a quarter of the bias from omitting BMI altogether ($-10.70$\,cm), so adjusting for a mismeasured BMI removes only three quarters of the confounding it should remove. For blood pressure, which depends weakly on BMI, it is small (0.02 standard deviations); the two outcomes thus give a strong and a weak test of the theory.
+
+Nothing in the observed data signals the problem. No target individual has $\hat p>0.99$, and $\neff/n_0$ \emph{improves} from 0.41 to 0.50: the target group, selected for high BMI, reports a BMI shifted down toward the donors, so the groups separate less and the weights look better precisely when the estimator is biased (noise alone, in D, moves $\neff/n_0$ only to 0.44). The AUC falls from 0.743 to 0.715, but specification A is not available in practice, so this fall cannot be observed. Two registered predictions fail: A has a bias of $-0.18$\,cm in the waist ($z=-8.3$), which grows with the strength of the assignment and vanishes with LightGBM ($-0.01$; Table~\ref{tab:nhanes-robust}), so it comes from the spline models; and the AUC falls by more than the registered 0.02. The H\'ajek estimator, to which Theorem~\ref{thm:measurement}(3) literally refers, has a larger finite-sample bias already in A ($-0.73$\,cm in the waist), from the estimated weights alone, and lies further from the prediction in B ($-2.86$\,cm; $-2.13$ net of A); we registered predictions for the DR estimator only.
+
+Specification D, registered as exploratory, suggests a practical lesson with limits: using the self-reported BMI in \emph{both} groups halves the bias of the waist relative to B, but not that of blood pressure ($-0.47$ against $-0.48$). Measuring both groups with the same imprecise instrument leaves residual confounding, but does not evaluate the outcome model at a shifted argument; which effect dominates depends on the outcome. Table~\ref{tab:nhanes-robust} shows that for the waist D beat B in all four designs, by 24 to 73\,\%, whereas for blood pressure it was worse in two of them.
+
+\begin{table}[ht]
+\centering
+\caption{NHANES, robustness (200 replications each). Mean bias of the DR estimator in the waist (cm) and, in the last two columns, in blood pressure (BP). For B, the registered prediction and the $z$ of the deviation are given in parentheses.}\label{tab:nhanes-robust}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Design & A & B & C & D & B, BP (mmHg) & D, BP (mmHg) \\
+\midrule
+Weak assignment ($\beta_b=0.4$) & $-0.08$ & $-2.26$ ($-2.19$; $-3.8$) & $-5.69$ & $-0.61$ & $-0.42$ ($-0.41$; $-0.2$) & $-0.27$ \\
+Base ($\beta_b=0.8$), splines & $-0.18$ & $-2.56$ ($-2.44$; $-5.7$) & $-10.70$ & $-1.32$ & $-0.48$ ($-0.47$; $-0.3$) & $-0.47$ \\
+Strong assignment ($\beta_b=1.2$) & $-0.46$ & $-2.89$ ($-2.61$; $-10.4$) & $-14.44$ & $-2.20$ & $-0.56$ ($-0.51$; $-0.8$) & $-0.69$ \\
+Base, LightGBM & $-0.01$ & $-2.42$ ($-2.44$; $+0.9$) & $-10.38$ & $-1.23$ & $-0.20$ ($-0.47$; $+4.0$) & $-0.45$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Robustness.} We varied the strength with which BMI drives the assignment and replaced the splines by LightGBM in the estimators (Table~\ref{tab:nhanes-robust}). These predictions were registered after the base results had been seen and before the three new designs were run. For each design we registered five: B within the criterion above; the bias of A in the waist below 20\,\% of that of B (a relative criterion, chosen because the base run had shown a model bias in A; under $|z|<3$, A would also fail in the weak and strong designs); no target individual with $\hat p>0.99$ in A or B; C negative and larger than B in absolute value in the waist; and D smaller than B in absolute value in the waist. Of these 15 predictions, 14 hold. In all four designs, no target individual has $\hat p>0.99$ and $\neff/n_0$ is larger in B than in A.
+
+Across the eight design--outcome comparisons for B, the observed bias is within the registered criterion in 7 and, conditional on the fitted $\mu$, not distinguishable from the prediction at $|z|<3$ in 4. The three spline-based waist cells deviate by 3, 5 and 11\,\% of the prediction, with $z$ between $-3.8$ and $-10.4$, and the deviation grows with the strength of the assignment, as does the model bias of A; the prediction captures the size of the bias but not to within Monte Carlo error. The failure is blood pressure with LightGBM: $-0.20$ against $-0.47$ ($z=4.0$). Blood pressure depends weakly on BMI and is noisy, so LightGBM flattens that dependence and transmits only part of the measurement error, while the prediction used $\mu$ fitted with splines. A check that was not registered supports this: with $\mu$ fitted by LightGBM, the predicted bias is $-0.31$, and the observed $-0.20$ is at $z=1.7$ from it (for the waist, $-2.40$ instead of $-2.44$). The prediction is thus a property of the fitted superpopulation model as much as of the data: when the outcome depends weakly on the mismeasured covariate, it depends on the model class.
+\section{Target group defined by a known cutoff}\label{sec:cutoff}
+
+Sections~\ref{sec:channel} and~\ref{sec:instruments} concerned what the recorded covariates mean. This and the next two sections take the covariates as given and concern how well the weights are estimated and how to report uncertainty; this one starts with the most common way of defining the target group.
+
+In the typical case, the target group is a cutoff on a score the organization knows, $S=D\cdot\ind\{s(X)\le c\}$. Then no classifier separating the target group from the donor channel is needed: the ordinary channel propensity suffices, with the cutoff imposed by hand.
+
+\begin{proposition}[Known-cutoff weights]\label{prop:cutoff}
+Let $S=D\cdot\ind\{s(X)\le c\}$, with $s$ measurable and known, and let $e$ be a version of $\PP(D=1\mid X)$. Under (A3), there is $k>0$ such that
+\[
+\frac{dP}{dQ}(x)=k\,\ind\{s(x)\le c\}\,\frac{e(x)}{1-e(x)}\qquad Q\text{-almost surely.}
+\]
+\end{proposition}
+
+The identity is elementary, but it changes the estimation problem. The classifier of Theorem~\ref{thm:odds} must learn a sharp jump at $\{s=c\}$, with the few target-group cases as positives. The channel propensity is usually a smooth function and is estimated with all the units of the premium channel. The constant $k$ cancels under normalization, and the support diagnostic of Theorem~\ref{thm:lebesgue} is read from $\hat e$: support fails where $\hat e\to1$ inside $\{s\le c\}$. The same identity, applied to the covariates augmented by an unobserved $U$, gives the calibration Lemma~\ref{lem:calibration} of Section~\ref{sec:sensitivity}.
+
+\paragraph{Relation to the literature.} The identity is not new in substance. In subgroup analysis with propensity scores it is common practice to estimate the propensity in the full cohort and apply it within the subgroup \citep{rassen2012}, and \citet{dong2020} study when that model is preferable to one fitted within each subgroup, which balances better within the subgroup at the cost of more variance. What we add is the comparison with the ``target versus donors'' classifier, the usual choice when the change of measure is framed as density-ratio estimation \citep{bickel2009,sugiyama2012}, in the case where the target group is a cutoff on a score of the covariates themselves. With flexible models, both approaches are consistent and the differences are finite-sample ones, but they affect things the subgroup literature does not examine: the sign of trimming, the effective sample size and the validity of the bootstrap (Section~\ref{sec:res-cutoff}).
+
+\paragraph{Estimation.} In the estimators of Section~\ref{sec:estimators}, $\hat o$ is replaced by $\ind\{s\le c\}\,\hat e/(1-\hat e)$, and the sample also includes the premium units outside the target group. Under population sampling of $(D,S,X,Y)$, the corresponding influence function is $\PP(S=1)^{-1}\bigl[S(m_0-\theta)+(1-D)\,\ind\{s\le c\}\,e/(1-e)\,(Y-m_0)\bigr]$; we expect an analogue of Theorem~\ref{thm:normality} but do not prove it.
+\section{Trimming, variance and inference}\label{sec:inference}
+
+\subsection{Weight trimming}\label{sec:trimming}
+
+Trimming the weights changes the estimand. For $\tau>0$, let $w_\tau=\min(w,\tau)$ and $\varrho_\tau(t)=\min(1,\tau/t)$ for $t>0$. With the true weights, the trimmed self-normalized estimator converges to
+\[
+\theta_\tau=\frac{\E[w_\tau(X)\,Y\mid D=0]}{\E[w_\tau(X)\mid D=0]}.
+\]
+
+\begin{proposition}[Trimming bias]\label{prop:trimming}
+Under (A1)--(A4):
+\begin{enumerate}
+  \item $\displaystyle\theta_\tau-\theta=\frac{\Cov_P\bigl(m_0(X),\varrho_\tau(w(X))\bigr)}{\E_P[\varrho_\tau(w(X))]}$.
+  \item If $h(t)=\E_P[m_0(X)\mid w(X)=t]$ has a nonincreasing version, $\theta_\tau\ge\theta$; if it has a nondecreasing version, $\theta_\tau\le\theta$.
+  \item If $Y\ge0$, the unnormalized version is always below: $\E[w_\tau(X)\,Y\mid D=0]\le\theta$.
+\end{enumerate}
+\end{proposition}
+
+\paragraph{Interpretation.} A large $w(x)$ means that profile $x$ is much more frequent in the target group than in the donor channel. There is no default direction: it depends on whether, within the target group, the profiles most typical of the premium channel respond more or less in the basic channel. If they respond less, $h$ is decreasing and trimming overestimates $\theta$ and hence underestimates the loss; in our simulation they respond more (Section~\ref{sec:res-trimming}). The condition concerns $h$ as a function of the weight, not of $X$, and it can be checked approximately, because $m_0$ is identified on the support.
+
+\paragraph{Example~\ref{ex:toy} (trimming).} With $\tau=2$, the weights $(0.2,\,1,\,3)$ become $(0.2,\,1,\,2)$ and $\theta_\tau=1.2\,\%/0.8=1.5\,\%$, against $\theta=1.3\,\%$. The formula agrees: $\varrho_\tau=(1,\,1,\,2/3)$, $\E_P[\varrho_\tau]=0.8$ and the covariance is $0.16$ points, so the bias is $0.2$ points. The unnormalized version gives $1.2\,\%$, below $\theta$.
+
+\begin{corollary}[Trimming with the doubly robust estimator]\label{cor:drtrimming}
+By Proposition~\ref{prop:dr} with $\bar w=w_\tau$, $\psi(w_\tau,\bar m)-\theta=-\int_{\{w>\tau\}}(w-\tau)(m_0-\bar m)\dd Q$.
+\end{corollary}
+The corollary concerns the unnormalized form $\psi$: trimming biases only to the extent that the outcome model is wrong in the trimmed region. For the normalized form we use, the bias is $\E_Q[w_\tau(m_0-\bar m)]/\E_Q[w_\tau]-\E_P[m_0-\bar m]$, which vanishes if $\bar m=m_0$ on the whole support, but not necessarily if the model is right only in the trimmed region. Since Proposition~\ref{prop:dr} holds for any weights, when estimated weights are trimmed the bias depends on both errors, and it vanishes if $\bar m=m_0$.
+
+\paragraph{Estimated weights.} In practice $\hat w$ is trimmed, and trimming removes both true weight and estimation noise, so the sign in Proposition~\ref{prop:trimming} is not guaranteed. In a companion note in preparation we show that it is preserved if the estimation error is a profile-independent multiplicative noise with a log-concave density. Before trimming, the effect of trimming computed with $\hat m$ instead of $Y$, or $\hat m$ by mass deciles of $\hat w$, indicates which way it will push. \citet{crump2009} trim on the propensity and redefine the estimand; \citet{ma2020} keep the estimand and characterize the bias of trimming by discarding in the unnormalized estimator, of which Proposition~\ref{prop:trimming}(3) is the version for capping; the contribution of Proposition~\ref{prop:trimming} is the normalized case, with its exact formula. \citet{liu2023} treat truncation as a change of estimand for the effect on the treated.
+
+\subsection{Variance and asymptotic normality}
+
+\paragraph{Influence function.} Let $o=p/(1-p)$ and $\sigma^2(x)=\Var(Y\mid X=x,D=0)$. The influence function of the doubly robust estimator, of the same form as the efficient one for the counterfactual mean of the treated \citep{hahn1998}, is
+\begin{gather*}
+\phi(O)=\frac1\pi\Bigl[Z\,(m_0(X)-\theta)+(1-Z)\,o(X)\,(Y-m_0(X))\Bigr],\\
+\mathcal V=\E[\phi^2]=\frac{\Var_P(m_0(X))}{\pi}+\frac{\E_Q[w(X)^2\sigma^2(X)]}{1-\pi},
+\end{gather*}
+where the cross term vanishes because $Z(1-Z)=0$ and the second term uses $o=\pi w/(1-\pi)$ (Theorem~\ref{thm:odds}). This closed form is for i.i.d. observations; with several observations per unit, see Appendix~\ref{app:proof}.
+
+\begin{proposition}[When the variance is finite]\label{prop:variance}
+If $Y$ is bounded and $0<\sigma_-^2\le\sigma^2\le\sigma_+^2$ $Q$-almost surely, then $\mathcal V<\infty$ if and only if $\E_Q[w^2]<\infty$, that is, if and only if $\chi^2(P\|Q)=\E_Q[w^2]-1<\infty$. Absolute continuity $P\ll Q$ does not imply this condition.
+\end{proposition}
+
+Thus (A3) suffices to identify $\theta$ but not to estimate it at rate $n^{-1/2}$: with the conditional variance bounded below, one also needs $\chi^2(P\|Q)<\infty$, and standard theory requires something stronger, bounded weights.
+
+\paragraph{Effective sample size.} Kish's $\neff$ (Section~\ref{sec:estimators}) satisfies, with the true weights, $\neff/n_0\to1/\E_Q[w^2]=1/(1+\chi^2(P\|Q))$, so it estimates the $\chi^2$ divergence; with estimated weights it can move either way (noise in $\hat w$ lowers it, shrinkage by a regularized classifier raises it), and in our simulation it falls below the theoretical value except under low overlap, where the theoretical value is itself imprecise (Section~\ref{sec:design}). In finite samples it is always finite, even when $\chi^2=\infty$, and it then goes to zero very slowly and noisily: in the counterexample of Proposition~\ref{prop:variance}, the median over replications goes from 0.45 with $n_0=10^3$ to about 0.22 with $n_0=10^7$, and with $n_0=10^3$ the 1st and 99th percentiles across replications are 0.05 and 0.65. A reasonable $\neff$ does not guarantee that $\chi^2$ is finite; one should also examine the stability of the upper quantiles of $\hat w$.
+
+\begin{theorem}[Asymptotic normality of the doubly robust estimator]\label{thm:normality}
+Assume (A1)--(A4), bounded $Y$ and, in addition:
+\begin{enumerate}
+  \item \emph{Strong overlap:} $p(X)\le1-\eta$ $Q$-almost surely for some $\eta>0$, that is, bounded $w$.
+  \item Cross-fitting by unit with a fixed number $K$ of folds of size proportional to $n$, with $\hat p\le1-\eta$ and $\hat m$ bounded by the same bounds as $Y$.
+  \item \emph{Rates:} $r_o=\max_k\|\hat o_k-o\|$ and $r_m=\max_k\|\hat m_k-m_0\|$ in $L^2(Q)$ go to 0 in probability, and $r_o\,r_m=o_P(n^{-1/2})$.
+\end{enumerate}
+Then $\sqrt n(\hat\theta_{\mathrm{DR}}-\theta)\to N(0,\mathcal V)$ in distribution, and the sample mean of $\hat\phi(O_i)^2$ estimates $\mathcal V$ consistently.
+\end{theorem}
+The proof, in Appendix~\ref{app:proof}, adapts Theorem 3.1 of \citet{chernozhukov2018} and its example of the effect on the treated: by Proposition~\ref{prop:dr}, the bias is bilinear in the errors of the auxiliary parameters (Neyman orthogonality), cross-fitting controls the empirical-process term without complexity conditions, and the denominator is handled by the delta method.
+
+\paragraph{Beyond strong overlap.} Condition 1 is stronger than (A3) and than $\chi^2<\infty$. If the weights are unbounded but $\chi^2<\infty$, $\mathcal V$ is finite, although the standard proof does not cover the case. If $\chi^2=\infty$ and the conditional variance is bounded below, no regular estimator converges at rate $\sqrt n$: this is the irregular identification case of \citet{khan2010}. \citet{ma2020} show that the limit may then be non-normal and propose subsampling inference, and \citet{ma2023} give adaptive inference for doubly robust estimators with trimming and bias correction. Our simulation (Section~\ref{sec:design}) lies in this regime: its channel index, linear in normal covariates, is unbounded inside the target region, so the weights are unbounded while $\chi^2$ is finite, and the implementation clips $\hat p$ to $[10^{-6},1-10^{-6}]$ rather than to $1-\eta$; its coverage results are evidence outside the conditions of Theorem~\ref{thm:normality}.
+
+\paragraph{Intervals.} We use $\hat\theta_{\mathrm{DR}}\pm1.96\,(\hat{\mathcal V}/n)^{1/2}$. Theorem~\ref{thm:normality} covers neither weight trimming nor the bootstrap, which we evaluate in the simulation (Sections~\ref{sec:res-trimming} and~\ref{sec:res-bootstrap}). If the target group is defined with an estimated threshold $\hat c$, its uncertainty adds a term to $\mathcal V$ that we do not include: we treat the selection rule as fixed.
+\section{Sensitivity to unobserved confounding}\label{sec:sensitivity}
+
+Theorem~\ref{thm:measurement} and the unobserved-confounding scenario of the simulation (Section~\ref{sec:design}) share one feature: the data cannot reveal the bias. The usual response to such biases is a sensitivity analysis. Here we adapt the standard one for unobserved confounding; extending it to differential measurement is open (Section~\ref{sec:discussion}). If (A2) fails, $\theta$ is no longer identified; the marginal sensitivity model bounds how far $\theta$ can move from the identified value as a function of a single parameter $\Lambda\ge1$.
+
+\paragraph{Model.} We follow \citet{tan2006} and \citet{dorn2023}; \citet{zhao2019} give sensitivity intervals for weighting estimators under this model via the percentile bootstrap. Suppose there is an unobserved variable $U$ such that exchangeability holds given $(X,U)$: $\E[Y(0)\mid X,U,S=1]=\E[Y(0)\mid X,U,D=0]$. In the pooled sample of Section~\ref{sec:classifier}, let $\lambda(X,U)$ be the ratio of the odds of belonging to the target group given $(X,U)$ and given $X$ alone. The model MSM($\Lambda$) assumes $\Lambda^{-1}\le\lambda(X,U)\le\Lambda$: knowing $U$ can multiply or divide those odds by at most $\Lambda$. With $\Lambda=1$ we recover (A2).
+
+\begin{proposition}[Sensitivity bounds]\label{prop:sensitivity}
+Assume (A1), (A3), (A4), $Y\ge0$ and MSM($\Lambda$), and let $\theta_0=\int m_0\dd P$ be the value identified under (A2).
+\begin{enumerate}
+  \item \emph{Validity.} $\theta\in[\theta_0/\Lambda,\ \Lambda\theta_0]$.
+  \item \emph{Sharpness for rare outcomes.} If, in addition, $\PP(Y>0\mid X,D=0)\le1/(1+\Lambda)$ $Q$-almost surely, both bounds are attained: there is a world compatible with MSM($\Lambda$) and with everything observed in which $\theta=\Lambda\theta_0$, and another in which $\theta=\theta_0/\Lambda$.
+  \item \emph{General binary case.} For $Y\in\{0,1\}$ with $m=m_0(x)$, the sharp bounds integrate with respect to $P$ the values $\min\bigl(\Lambda m,\,1-(1-m)/\Lambda\bigr)$ (upper) and $\max\bigl(m/\Lambda,\,1-\Lambda(1-m)\bigr)$ (lower); this is the quantile rule of \citet{dorn2023} carried over to $\theta$.
+\end{enumerate}
+\end{proposition}
+
+\paragraph{Practical use.} Given a confidence interval $[\hat\ell,\hat u]$ for $\theta_0$, the interval $[\hat\ell/\Lambda,\ \hat u\Lambda]$ combines sampling and confounding uncertainty. The \emph{breakdown $\Lambda$} is the smallest $\Lambda$ that changes the conclusion; for instance, the loss $\E[Y\mid S=1]-\theta$ remains positive for every $\Lambda<\E[Y\mid S=1]/\theta_0$.
+
+\paragraph{Calibrating $\Lambda$.} Comparing with observed covariates, dropping each from the propensity model and measuring how much the odds change, is established practice \citep{baitairian2025,mcclean2024}. When the target group is a cutoff on a score of the covariates themselves, this must be done with the channel model, not with the ``target versus donors'' model.
+
+\begin{lemma}[Calibration with the channel model]\label{lem:calibration}
+Let $S=D\cdot\ind\{s(X)\le c\}$ with $s$ observed. On the region $R=\{s(X)\le c\}$,
+\[
+\lambda(X,U)=\frac{\odds(D=1\mid X,U)}{\odds(D=1\mid X)}.
+\]
+\end{lemma}
+
+Outside $R$, the target-group model is dominated by the cutoff, which is not confounding. Inside $R$, the lemma allows calibrating with an ordinary channel propensity model. We define the \emph{benchmark} of covariate $j$ as $\Lambda_j(q)$, the $q$-quantile on $R$ of $\max(\lambda_j,1/\lambda_j)$, with $\lambda_j=\odds(D=1\mid X)/\odds(D=1\mid X\text{ without }j)$, both estimated out of sample. We use quantiles rather than the sample maximum, which grows with the sample size; they are a scale for comparison, not a verification of the model. Two caveats: that a hidden confounder is weaker than the strongest observed covariate is an assumption, not a consequence of the data; and dropping covariates one at a time understates confounding when several correlated covariates share it \citep{mcclean2024}.
+\section{Simulation design}\label{sec:design}
+
+The simulation uses a generator with known $\theta$ and varies one factor at a time around a base scenario, so that each theoretical result other than Theorem~\ref{thm:measurement}, which Section~\ref{sec:nhanes} tests on public data, has a scenario that tests it against a prior numerical prediction.
+
+\paragraph{Generator.}
+\begin{enumerate}
+  \item \emph{Covariates:} $V=(V_1,\dots,V_4)$ normal with correlations $0.3^{|j-k|}$, plus a three-level categorical $V_5$ whose distribution depends on $V_1$; all are customer characteristics. An unobserved $U$, independent of $V$, enters only the unobserved-confounding scenario.
+  \item \emph{Latent channel variable:} $H=\ind\{C^*\ne\vacio\}$ indicates an actual history, with $\PP(H=1\mid V)=\sigma(-0.4+0.8V_1+0.3V_3)$; if $H=1$, the history takes the value $N(0.5V_1,1)$. It is recorded if $D=1$ and $H=1$, and $C=\vacio$ otherwise.
+  \item \emph{Channel:} $\PP(D=1\mid V,H,U)=\sigma(\alpha_0+\omega\,\alpha^\top V+\zeta H+\nu U)$. The parameter $\omega$ controls overlap, and $\zeta\ne0$ makes the distribution of $C^*$ given $V$ differ between channels, a necessary condition for $C^*$ to confound.
+  \item \emph{Outcomes:} two common products, $\PP(Y_k(d)=1\mid X^*,U)=\sigma(\beta_{k0}+\gamma_k d+\beta_k^\top V+\delta H+\nu'U+b)$ for $k=1,2$, with $\sigma$ the logistic function and $b$ a customer random effect, and a product exclusive to the premium channel with $Y_3(0)=0$. The outcome used by the estimators is $Y=Y_1+Y_2$.
+  \item \emph{Target group:} $S=\ind\{D=1,\ s^*(V)\le c^*\}$, with $s^*$ the true purchase-propensity index in the premium channel and $c^*$ its 10th percentile in that channel. The rule is fixed, so $\theta$ does not change across replications.
+  \item \emph{Units and observations:} each customer generates between 1 and 5 calls, a number drawn independently of all other variables, with channel and covariates constant across them; the unit- and observation-level estimands therefore coincide.
+  \item \emph{Truth:} $\theta$ and the theoretical limit of each estimator are computed on a population of 1.5 million customers; the true conditional means and $dP_V/dQ_V$ are obtained by integrating out $H$, $U$ and the customer effect with Gauss--Hermite quadrature. Their Monte Carlo error, about 0.001 points (0.006 under confounding through the history and 0.015 under unobserved confounding), is negligible relative to that of the replication means. Trimming effects, much smaller, are predicted as paired differences within the population.
+\end{enumerate}
+
+\paragraph{Scenarios and predictions.} The base scenario excludes $C$, has $\zeta\ne0$ and $\delta=\nu=\nu'=0$, high overlap ($\omega=0.5$; $\chi^2=3.6$), LightGBM \citep{ke2017} with five-fold cross-fitting by customer for $\hat p$ and $\hat m$, and 30{,}000 customers per replication: about 62{,}000 donor calls and 2{,}800 target-group calls. Around it we vary the inclusion of $C$, confounding through the history ($\delta=1.2$), overlap ($\omega=1.5$ and $3$; $\chi^2=6.3$ and about 36; the latter is unstable because $w^2$ is very heavy-tailed: on six populations of 1.5 million customers it ranged from 33 to 63, so the theoretical $\neff/n_0$ under low overlap, 0.03, is only indicative), model specification, unobserved confounding ($\nu=\nu'=1$), trimming at the 99th, 95th and 90th percentiles of the donor weights, and size (3{,}000 to 30{,}000 customers). Each scenario has 200 replications (the bootstrap and trimming sign-test runs have fewer; Section~\ref{sec:results}), so that 95\,\% coverage is estimated with a standard error of about 1.5 points. Predictions that do not follow directly from the theory were registered, with a date, before running the corresponding scenario; the code, the predictions with their commit timestamps, and the raw results are available at \url{https://github.com/pablotgp/channel-measurement} (archived at \href{https://doi.org/10.5281/zenodo.23639437}{doi:10.5281/zenodo.23639437}). Registration here means a time-stamped commit in that repository before the run, not a third-party registry.
+
+\paragraph{The AUC does not measure overlap.} When setting $\omega$, the AUC of the ideal classifier stayed between 0.89 and 0.93 for $\omega$ between 0.3 and 2, while $\chi^2$ ranged from 3.5 to about 11, not monotonically (it is smallest for $\omega$ between 0.5 and 1). The definition of the target group, a cutoff on a score, already separates it from the donor channel. We therefore set the levels by $\chi^2$, which is what governs the variance (Proposition~\ref{prop:variance}).
+\section{Simulation results}\label{sec:results}
+
+\subsection{Channel variables, identification and specification}\label{sec:res-main}
+
+In the eight scenarios of Table~\ref{tab:main}, the means of the estimators are close to their predicted limits (all $|z|\le1.3$ except under medium overlap, discussed next). With small samples, dispersion and coverage fail, not the mean (Section~\ref{sec:res-bootstrap}). A discrepancy under medium overlap ($z=-3.0$ for Hájek and $-2.1$ for DR) did not reappear in a replication with 200 new seeds ($z=+0.8$ and $+1.5$; with all 400 replications, $-1.4$ and $-0.3$). This replication was not planned in advance; with about 40 comparisons, one $|z|\ge3$ by chance has a probability of roughly 10\,\%.
+
+\begin{table}[ht]
+\centering\small
+\caption{Main results. Rates in \%; in parentheses, $z=$ (mean $-$ prediction)/(Monte Carlo error). SD: standard deviation of the DR estimator across replications. Coverage of the DR Wald interval at 95\,\%, with respect to $\theta$. In the scenarios with $C$, the theoretical $\neff/n_0$ is computed with the supported part; it is practically the same as without $C$ (0.217), because $\PP(H=0\mid V,D=1)$ varies little on the target region.}\label{tab:main}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccc c@{}}
+\toprule
+Scenario & $\theta$ & Prediction & Hájek & DR & SD & Coverage & $\neff/n_0$ (theoretical) \\
+\midrule
+Base & 0.958 & 0.958 & 0.958 (0.0) & 0.961 (0.4) & 0.112 & 95.5\,\% & 0.14 (0.22) \\
+With $C$ & 0.958 & H 0.940; DR 0.958 & 0.939 ($-$0.1) & 0.958 (0.0) & 0.107 & 96.5\,\% & 0.12 (0.22) \\
+$C$ confounds, without $C$ & 1.712 & 1.314 & 1.313 ($-$0.1) & 1.320 (0.6) & 0.132 & 15.5\,\% & 0.14 (0.22) \\
+$C$ confounds, with $C$ & 1.712 & H 1.281; DR 1.314 & 1.280 (0.0) & 1.320 (0.6) & 0.129 & 17.5\,\% & 0.12 (0.22) \\
+Medium overlap & 1.178 & 1.178 & 1.151 ($-$3.0) & 1.158 ($-$2.1) & 0.136 & 94.5\,\% & 0.10 (0.14) \\
+Low overlap & 1.274 & 1.274 & 1.283 (0.5) & 1.298 (1.1) & 0.300 & 91.0\,\% & 0.03 (0.03) \\
+Unobserved confounding & 2.697 & 1.193 & 1.198 (0.6) & 1.204 (1.3) & 0.127 & 0.0\,\% & 0.14 (0.20) \\
+3{,}000 customers & 0.958 & 0.958 & 0.887 ($-$1.2) & 0.883 ($-$1.2) & 0.912 & 70.0\,\% & 0.02 (0.22) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \emph{Channel variable.} With $C$, the estimated unsupported mass was $\hat\varepsilon=0.326$, against $\kappa=0.335$ (Proposition~\ref{prop:breaks}), and Hájek converges to $\thac$ (the weighting limit of Section~\ref{sec:channel} coincides with $\thac$ here because $\delta=0$), with the predicted bias of $-0.018$ points. The original prediction also assigned $\thac$ to the DR estimator and failed ($z=2.4$ and $4.3$). The DR estimator extrapolates the outcome model to the unsupported part (Corollary~\ref{cor:drnosupport}); the prediction derived from this (0.958 and 1.314) was added after the ``With $C$'' scenario and registered before running ``$C$ confounds, with $C$'', where it held ($z=0.6$).
+  \item \emph{Confounding through the history.} Without $C$, the bias is as predicted: $-0.40$ points, 23\,\% of $\theta$. With $C$, $\theta$ is not recovered either, as Section~\ref{sec:channel} says.
+  \item \emph{Identification.} Without confounding or a channel variable, Hájek and DR recover $\theta$ and the interval covers 95.5\,\%.
+  \item \emph{Unobserved confounding.} The estimators converge to the limit predicted from the observables, less than half of $\theta$, with zero coverage. The standard error is well calibrated (97\,\% of the actual dispersion) and the diagnostics resemble those of the base scenario: nothing in the data reveals the problem.
+  \item \emph{Overlap.} Under low overlap ($\chi^2\approx36$, Section~\ref{sec:design}), the standard deviation almost triples, the estimated standard error is 87\,\% of the actual dispersion and coverage drops to 91\,\%.
+\end{itemize}
+
+\begin{table}[ht]
+\centering\small
+\caption{Specification (base scenario). Rates in \%.}\label{tab:specification}
+\begin{tabular}{@{}llllcc@{}}
+\toprule
+Classifier & Outcome model & Estimator & Prediction & Mean ($z$) & Coverage \\
+\midrule
+LightGBM & LightGBM & DR & 0.958 & 0.961 (0.4) & 95.5\,\% \\
+LightGBM & linear in $V_1$ & DR & 0.958 & 0.955 ($-$0.3) & 95.0\,\% \\
+Linear logistic & LightGBM & DR & 0.958 & 0.946 ($-$2.3) & 88.0\,\% \\
+Linear logistic & --- & Hájek & 1.024 & 1.023 ($-$0.4) & --- \\
+Linear logistic & linear in $V_1$ & DR & 1.157 & 1.150 ($-$1.5) & 13.5\,\% \\
+--- & linear in $V_1$ & Regression & 1.069 & 1.075 (1.4) & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With the flexible classifier and the misspecified (linear) outcome model, the DR estimator is unbiased and covers 95\,\%; with both misspecified, it converges to the predicted limit, far from $\theta$ (Table~\ref{tab:specification}). With the misspecified (linear) classifier and the flexible outcome model, a bias of $-0.012$ points and 88\,\% coverage remain: the outcome model is a LightGBM, not $m_0$, and the product of errors is not negligible at these sizes. Even so, the DR estimator reduces the bias of the corresponding Hájek estimator by 82\,\%.
+
+\subsection{Trimming}\label{sec:res-trimming}
+
+With the true weights and $m_0$, trimming at the 99th, 95th and 90th percentiles lowers the estimate by $0.37$, $3.13$ and $7.81$ thousandths of a percentage point, as Proposition~\ref{prop:trimming} predicts ($0.37$, $3.18$ and $7.98$): the profiles with the largest weights respond more. With estimated weights the sign reverses ($+10.9\pm0.7$ at the 90th percentile, positive in all 60 replications). Within the DR estimator the effect of trimming is indistinguishable from zero and lowers the root mean squared error (from 0.300 to 0.163 points under low overlap). Its standard error must be computed with the untrimmed weights: with the trimmed ones, coverage falls to 78.5\,\% under low overlap, and even with the untrimmed ones it is only 78--88.5\,\% with 3{,}000 customers. The reversal is analyzed in the companion note.
+
+\subsection{Known-cutoff weights}\label{sec:res-cutoff}
+
+We compare the estimator with the weights of Proposition~\ref{prop:cutoff} with the standard one in the same replications: same data, same LightGBM and same outcome model; only the weights change. The channel propensity is estimated adding the premium calls outside the target group, which the standard estimator does not use. The predictions were registered before running these scenarios.
+
+\begin{table}[ht]
+\centering\small
+\caption{Known-cutoff weights in the base scenario, by size. 200 replications; $\theta=0.958\,\%$. SD in points. The last column is the effect of trimming the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths, over these 200 replications (the $+10.9$ in the text comes from a separate set of 60); with the true weights it is $-7.8$.}\label{tab:cutoff}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+Customers & Weights & DR (\%) & SD & Coverage & $\neff/n_0$ & Trimming p90 \\
+\midrule
+30{,}000 & standard & 0.961 & 0.112 & 95.5\,\% & 0.14 & $+10.4$ \\
+30{,}000 & known cutoff & 0.960 & 0.098 & 92.5\,\% & 0.20 & $-6.2$ \\
+10{,}000 & standard & 0.962 & 0.294 & 88.0\,\% & 0.07 & $+19.8$ \\
+10{,}000 & known cutoff & 0.957 & 0.195 & 91.0\,\% & 0.17 & $-4.8$ \\
+3{,}000 & standard & 0.883 & 0.912 & 70.0\,\% & 0.02 & $+50.0$ \\
+3{,}000 & known cutoff & 0.944 & 0.371 & 87.0\,\% & 0.11 & $-10.2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Five of the six predictions hold (Table~\ref{tab:cutoff}): no appreciable bias; $\neff/n_0$ approaches the theoretical 0.22; the dispersion falls by 12, 34 and 59\,\%; trimming recovers the sign of the true weights; and coverage improves with 10{,}000 and 3{,}000 customers. Coverage with 30{,}000 fails: we predicted between 93 and 97\,\% and obtained $92.5\,\%\pm1.9$, because the standard error is 93\,\% of the actual dispersion. With 10{,}000 customers, the standard deviation is 15\,\% above what the $\sqrt n$ rate predicts from the same estimator with 30{,}000 ($0.098\cdot\sqrt3=0.170$), against 52\,\% for the standard one.
+
+A subsequent analysis, not registered in advance, separates the two novelties: imposing the cutoff and using the premium units outside the target group. Imposing the cutoff on the standard classifier, without new data, does not reduce the dispersion (0.117, 0.298 and 0.933 points) and only partly corrects the sign of trimming ($+1.0$, $+2.7$ and $+9.6$). The improvement comes mainly from estimating the channel propensity with many more positive cases; the known cutoff is what makes using it possible.
+
+In the other scenarios (Appendix~\ref{app:extra}), the estimators agree with the same limits as the standard one, and the precision gain holds with good overlap but disappears under medium and low overlap.
+
+\subsection{Sensitivity}\label{sec:res-sensitivity}
+
+The smallest $\Lambda$ for which the population interval $[\theta_0/\Lambda,\Lambda\theta_0]$ contains $\theta$ is $\theta/\theta_0$: 1.30 when the history confounds and 2.26 with unobserved confounding. Coverage of the combined interval $[\hat\ell/\Lambda,\hat u\Lambda]$ rises quickly around that value (Table~\ref{tab:sensitivity}); it stays below the normal approximation because the standard error is smaller in replications with low estimates (correlations of 0.64 and 0.70). The rare-outcome condition of Proposition~\ref{prop:sensitivity}, checked through the bound $\PP(Y>0\mid V,D=0)\le g(V)=\E[Y\mid V,D=0]$ at the 99.99th percentile of $g$ in the donor channel (not at the essential supremum), holds at least up to $\Lambda=5.6$ in the base scenario, 1.8 under confounding through the history and 7.3 under unobserved confounding. With normal $U$, $\lambda$ is unbounded and no finite $\Lambda$ satisfies the MSM in the strict sense, so in that scenario Proposition~\ref{prop:sensitivity} guarantees nothing; $\Lambda=2.26$ contains $\theta$ by construction, and we use it only as a scale.
+
+\begin{table}[ht]
+\centering\small
+\caption{Coverage of the combined sensitivity interval.}\label{tab:sensitivity}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Scenario & $\theta/\theta_0$ & $\Lambda=1.25$ & $\Lambda=1.5$ & $\Lambda=2$ & $\Lambda=2.5$ \\
+\midrule
+$C$ confounds, without $C$ & 1.30 & 87\,\% & 100\,\% & 100\,\% & 100\,\% \\
+Unobserved confounding & 2.26 & 0\,\% & 3\,\% & 71\,\% & 99\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+To calibrate $\Lambda$, in the unobserved-confounding scenario $U$ enters the channel with coefficient 1 and the strongest observed covariate, $V_1$, with 0.5. We predicted, before computing it, that the method of Lemma~\ref{lem:calibration} would recover the exact value for $U$ and that $U$ would exceed every observed covariate; both hold (Table~\ref{tab:calibration}). The $\Lambda$ needed to cover the truth, 2.26 (known here only because $\theta$ is), lies between the median and the 90th percentile of $V_1$: a confounder somewhat stronger than the strongest observed covariate suffices to explain the whole gap. This is not the breakdown $\Lambda$ of Section~\ref{sec:sensitivity}, which depends on the conclusion of interest and is computed from the data. In a second estimate with another sample, the ``target versus donors'' model agrees with the channel model at the median (2.06 against 1.99) but overstates the extremes: 6.34 and 29.98 at the 90th and 99th percentiles, against 5.37 and 15.51 with the channel model and 5.38 and 14.07 exact.
+
+\begin{table}[ht]
+\centering\small
+\caption{Calibration of $\Lambda$ with the channel model: quantiles on $R$ of $\max(\lambda,1/\lambda)$.}\label{tab:calibration}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Variable & Median & 90th percentile & 99th percentile \\
+\midrule
+$U$, exact & 1.99 & 5.38 & 14.07 \\
+$U$, estimated & 2.03 & 5.21 & 14.14 \\
+$V_1$ & 1.72 & 3.07 & 5.81 \\
+$V_2$ & 1.17 & 1.53 & 2.17 \\
+$V_3$ & 1.14 & 1.45 & 1.98 \\
+$V_4$ & 1.12 & 1.36 & 1.70 \\
+$V_5$ & 1.08 & 1.21 & 1.42 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sample size and intervals: Wald and bootstrap}\label{sec:res-bootstrap}
+
+With the standard estimator, the standard deviation of the DR estimator is 0.912, 0.508, 0.294, 0.183 and 0.112 points with 3{,}000, 5{,}000, 10{,}000, 15{,}000 and 30{,}000 customers: it falls like $n^{-0.91}$, much faster than $n^{-1/2}$, and Wald coverage is 70, 80, 88, 92 and 95.5\,\%. The predictions for 5{,}000 and 15{,}000 were registered in advance and held. The estimated $\neff/n_0$ follows the same progression (0.02, 0.07 and 0.14 with 3{,}000, 10{,}000 and 30{,}000, against the theoretical 0.22). This suggests a diagnostic, not yet tested: if $\neff/n_0$ keeps increasing with the sample size, the intervals are not yet reliable.
+
+We also evaluated the unit-level (customer) bootstrap, re-estimating LightGBM and the cross-fitting in each resample. With the standard weights it overstates the dispersion by 39 to 58\,\% (over 80 replications, a mean bootstrap standard error of 0.165 against an actual dispersion of 0.119 with 30{,}000 customers, and 0.446 against 0.322 with 10{,}000; on the 40 replications also used for the Bayesian variant, 0.162 against 0.109 and 0.432 against 0.274), and a Bayesian variant that reweights customers instead of copying them only partly reduces the excess. With the known-cutoff weights, which are much less noisy, the Bayesian bootstrap is nearly calibrated: 0.101 against 0.096 and 0.208 against 0.187 on 40 replications, with coverages of 95 and 90\,\%. All four registered predictions about the bootstrap failed; the evidence suggests that the excess is tied to the noise of the estimated weights, and the details are left to the companion note.
+\section{Discussion}\label{sec:discussion}
+
+The main lesson is that the most dangerous failure of reweighting with channel data is not a lack of overlap but a lack of comparability in how covariates are recorded. When a variable exists in only one channel, support breaks; the ideal classifier shows it, although estimated classifiers may show it only faintly. When the channels measure it differently, support can survive, the estimators target a wrong value that the data cannot distinguish from the truth, and the overlap diagnostics can look better than with correct measurement. Checking that both channels record each covariate in the same way is therefore a design question to settle before estimation, not something the diagnostics will reveal afterwards.
+
+\paragraph{Practical recommendations.} The theory, the simulation and the public-data analyses suggest seven guidelines for evaluating a channel switch with observational data:
+\begin{enumerate}
+  \item Exclude from the covariates the variables recorded by only one channel when they do not predict the basic-channel outcome given the others (Proposition~\ref{prop:drop}; this cannot be tested directly and must be argued), and diagnose lack of support through the mass of $\hat p$ or $\hat e$ close to 1, or through large estimated weights on the $\pi$-invariant scale (Proposition~\ref{prop:breaks}), complemented by univariate checks of range, ceilings and heaping by channel, which catch failures at the edge of a top-coded variable that classifiers miss (Section~\ref{sec:lalonde}).
+  \item Check that each covariate is recorded in the same way in both channels. When differential measurement preserves support, no check on the data detects it (Theorem~\ref{thm:measurement}), and the overlap diagnostics may even improve (Section~\ref{sec:nhanes}); external information is needed. If one channel measures a covariate less accurately and the accurate version cannot be obtained, consider using the less accurate version in both channels as well, and compare: in our illustration it reduced the bias for the waist in every design but not consistently for blood pressure, and we have no general result.
+  \item Use the doubly robust estimator with cross-fitting by unit, bearing in mind that without support it extrapolates the outcome model (Corollary~\ref{cor:drnosupport}).
+  \item If the target group is a cutoff on a known score, estimate the weights with the channel propensity, using all units of the premium channel, and impose the cutoff (Proposition~\ref{prop:cutoff}). With good overlap this reduced the dispersion substantially in our simulation; under poor overlap it did not, so compare it with the standard classifier and, if trimming, trim within the doubly robust estimator (Section~\ref{sec:res-cutoff}).
+  \item For the interval, use Wald with large samples. With medium samples and known-cutoff weights, both Wald and the unit-level Bayesian bootstrap were close to nominal in the simulation (Wald 91--92.5\,\% over 200 replications; the Bayesian bootstrap 90--95\,\% over only 40); with the standard classifier, the bootstrap is conservative. Be wary if $\neff/n_0$ is far below what is expected.
+  \item Do not carry the sign of trimming from the true weights over to the estimated ones without checking it. If trimming, do it within the doubly robust estimator and compute the standard error with the untrimmed weights; in our simulation this was conservative with 30{,}000 customers but undercovered (78--88.5\,\%) with 3{,}000.
+  \item Accompany the estimate with a sensitivity analysis, with $\Lambda$ calibrated against the observed covariates through the channel model (Lemma~\ref{lem:calibration}).
+\end{enumerate}
+
+\paragraph{Limitations.} The simulation evidence comes from a single data-generating process, built so that each result except Theorem~\ref{thm:measurement} had a scenario to test it, and the public-data illustrations are either semi-synthetic (the channel is assigned by us, and the predictions rest on a fitted superpopulation model whose class matters when the outcome depends weakly on the mismeasured covariate) or rest on a single experimental benchmark. Part 3 of Theorem~\ref{thm:measurement} requires the donor instrument to be injective; when it is coarse, or noisy with error that is non-differential with respect to $Y(0)$ in the donor channel, the weighting functional is still $\int m_0\dd P$ under $P\ll Q$, but $m_0(x)=\E_{Q^*}[\mu^*(X^*)\mid\varphi_0(X^*)=x]$ then depends on the latent distribution of the donors, as in regression calibration, and the shift has no closed form in terms of $\mu^*$ alone. Quantitative conclusions from the simulation, such as the gains of the known cutoff or the excess of the bootstrap, should be read as illustrations of the mechanisms, not as general magnitudes. The sensitivity bounds assume the MSM, which does not hold in the strict sense with unbounded confounders. The simulated coverage is evidence outside the strong-overlap condition of Theorem~\ref{thm:normality}. We treat the threshold that defines the target group as fixed. And the estimand is the counterfactual mean under the basic channel as it is today: if receiving the diverted units congests it, (A1) fails.
+
+\paragraph{Open problems.} Five questions remain open: asymptotic normality of the known-cutoff doubly robust estimator, whose influence function we give in Section~\ref{sec:cutoff}; a theory explaining the excess of the bootstrap with noisy estimated weights and the validity of the Bayesian bootstrap with known-cutoff weights; the variance contribution of a threshold estimated as a quantile of the score, which relates to choosing the threshold itself; combining the sensitivity analysis with lack of support (Corollary~\ref{cor:bounds}; \citealp{manamkoong2025}) and extending it to condition (3) of Proposition~\ref{prop:drop} and to differential measurement; and a general result on when measuring both groups with the same imprecise instrument beats differential measurement (Section~\ref{sec:nhanes}).
+
+
+
+\section*{Statements and declarations}
+
+\paragraph{Data and code availability.} The NHANES 2017--2018 files are public \citep{nchs2020}; the NSW and CPS-1 extracts are those of \citet{dehejia1999} and \citet{lalonde1986}, as distributed by \citet{cunningham2021}. All code, registered predictions and raw results are available at \url{https://github.com/pablotgp/channel-measurement} (archived at \href{https://doi.org/10.5281/zenodo.23639437}{doi:10.5281/zenodo.23639437}). No proprietary data were used.
+
+\paragraph{Ethics.} The study uses only synthetic data and publicly available, de-identified data (the NHANES public-use files and the NSW/CPS-1 extracts). No new data were collected from human subjects, so no ethics approval was required.
+
+\paragraph{Funding and competing interests.} This research received no specific funding. The author declares no competing interests.
+
+\paragraph{Use of generative AI.} This work was carried out with extensive use of an AI assistant (Claude, Anthropic) for drafting, derivations, code and internal review. The author designed and directed the research, ran the computations, checked the results, and takes full responsibility for the content.
+
+\paragraph{Changes from version 1.} Version 2 corrects statements that two further independent reviews found overstated or imprecise; no result changes:
+\begin{itemize}
+  \item The NHANES agreement is reported against both the registered tolerance (7 of 8 comparisons) and $|z|<3$ (4 of 8), with all $z$ values, the H\'ajek results and the finite-population caveat.
+  \item The NSW/CPS discussion now gives the estimated probabilities of the two unsupported participants.
+  \item Convergence statements are recast as identities of functionals plus consistency.
+  \item Several references and hypotheses are corrected.
+\end{itemize}
+
+\newpage
+\appendix
+\section{Proofs of the results in the main text}\label{app:proofs}
+
+\paragraph{Proof of Theorem~\ref{thm:identification}.}
+\emph{Step 1 (tower).} Since the law of $X$ given $S=1$ is $P$, $\theta=\E[m_0^S(X)\mid S=1]=\int m_0^S\dd P$, finite by (A4) because $|m_0^S|\le\E[|Y(0)|\mid X,S=1]$ $P$-almost surely.
+\emph{Step 2 (exchangeability).} By (A2), $\theta=\int m_0\dd P$.
+\emph{Step 3 (Radon--Nikodym).} By (A3) there is a measurable $w\ge0$ with $P(A)=\int_A w\dd Q$ for all $A$. The change-of-measure formula, valid for indicators, for simple functions by linearity and for nonnegative functions by monotone convergence, extends to every $P$-integrable $g$: $\int g\dd P=\int g\,w\dd Q$. With $g=m_0$, $\theta=\int m_0\,w\dd Q$.
+\emph{Step 4 (back to the data).} The additional condition is equivalent to $\E[w(X)|Y|\mid D=0]<\infty$, so $w(X)Y$ is integrable under $\PP(\cdot\mid D=0)$, and taking out what is known, $\E[w(X)Y\mid D=0]=\E[w(X)m_0(X)\mid D=0]=\int m_0\,w\dd Q=\theta$.
+The self-normalized form follows from $\E[w(X)\mid D=0]=\int w\dd Q=P(\X)=1$: the ratio equals $\theta$ for $w$ and is invariant to multiplying $w$ by $a>0$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:dr}.}
+By Step 4 of the proof of Theorem~\ref{thm:identification} applied to $\bar w$, the first term equals $\int\bar w(m_0-\bar m)\dd Q$. By its Step 3, $\int\bar m\dd P-\theta=\int(\bar m-m_0)\,w\dd Q$. Adding gives the result.
+\hfill$\square$
+
+
+\paragraph{Proof of Lemma~\ref{lem:mixture}.}
+If $M(A)=0$, then $\pi P(A)+(1-\pi)Q(A)=0$ and, both coefficients being positive, $P(A)=Q(A)=0$. Moreover, for all $A\in\A$, $\pi P(A)=\PP(Z=1,\tilde X\in A)=\int_A p\dd M$ by definition of conditional expectation; hence $p/\pi$ is a version of $dP/dM$. The case of $Q$ is identical with $1-p$.
+\hfill$\square$
+
+
+\paragraph{Proof of Theorem~\ref{thm:odds}.}
+By Lemma~\ref{lem:mixture}, $Q(\{p=1\})=\int_{\{p=1\}}\frac{1-p}{1-\pi}\dd M=0$. For $A\in\A$, by the chain rule,
+\[
+\int_A r\dd Q=\int_{A\cap\{p<1\}}\frac{1-\pi}{\pi}\,\frac{p}{1-p}\cdot\frac{1-p}{1-\pi}\dd M=\int_{A\cap\{p<1\}}\frac{p}{\pi}\dd M=P(A\cap\{p<1\}).
+\]
+Under (A3), $P(\{p=1\})=0$ because $Q(\{p=1\})=0$, so $\int_A r\dd Q=P(A)$ for all $A$.
+\hfill$\square$
+
+
+\paragraph{Proof of Theorem~\ref{thm:lebesgue}.}
+(2) By Theorem~\ref{thm:odds}, $\Pac$ has density $r$ with respect to $Q$, hence $\Pac\ll Q$; $\Ps$ is concentrated on $\{p=1\}$, which is $Q$-null, hence $\Ps\perp Q$; by uniqueness of the Lebesgue decomposition, this is the decomposition. The set $\{p=1\}$ depends on the version of $p$ only up to $M$-null sets, which are null for both $P$ and $Q$. (1) $P\ll Q$ if and only if $\Ps=0$. (3) By Theorem~\ref{thm:odds}, $\E[r(X)\mid D=0]=1-\varepsilon$; repeating Steps 3 and 4 of Theorem~\ref{thm:identification} with $\Pac$, the numerator equals $\int_{\{p<1\}}m_0\dd P=(1-\varepsilon)\thac$. The relation with $\theta$ is the law of total probability.
+\hfill$\square$
+
+
+\paragraph{Proof of Corollary~\ref{cor:drnosupport}.}
+By Theorem~\ref{thm:odds}, the numerator of the first term is $\int_{\{p<1\}}(m_0-\bar m)\dd P=0$. The second term splits into $\{p<1\}$, where it integrates to $(1-\varepsilon)\thac$, and $\{p=1\}$, where it integrates to $\varepsilon\,\E_P[\bar m\mid p=1]$.
+\hfill$\square$
+
+
+\paragraph{Proof of Lemma~\ref{lem:singular}.}
+Let $N$ be a $Q$-null set on which $\Ps$ is concentrated. For every $B$ with $Q(B)=0$, $\Pac(B)=0$ because $\Pac\ll Q$; hence $P(B)=\Ps(B)\le\Ps(\X)$. Moreover $P(N)=\Pac(N)+\Ps(N)=\Ps(\X)$, so the supremum is attained at $N$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:breaks}.}
+Let $B=\mathcal V\times\mathcal C$, the set of profiles with recorded data. By the measurement model, $Q(B)=\PP(C\ne\vacio\mid D=0)=0$, whereas $P(B)=\kappa$; Lemma~\ref{lem:singular} gives $\varepsilon\ge\kappa$. Since $\PP(Z=0,\tilde X\in B)=(1-\pi)Q(B)=0$, $p=1$ $M$-almost surely on $B$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:drop}.}
+(a) If $Q_V(A)=0$, then $Q^*(A\times(\mathcal C\cup\{\vacio\}))=0$, and by (1) also $P^*(A\times(\mathcal C\cup\{\vacio\}))=P_V(A)=0$.
+(b) By (3), $\E[Y(0)\mid X^*,D=0]=g(V)$ except on a $Q^*$-null set, which by (1) is also $P^*$-null. By (2), $\E[Y(0)\mid X^*,S=1]=g(V)$ $P^*$-almost surely, and since $V$ is a function of $X^*$, the tower property within $\{S=1\}$ gives $\E[Y(0)\mid V,S=1]=g(V)$.
+\hfill$\square$
+
+
+\paragraph{Proof of Theorem~\ref{thm:measurement}.}
+(1) If $Q^*(\xi^{-1}(B))=0$, latent support gives $P^*(\xi^{-1}(B))=0$. If $\upsilon\circ\varphi_0=\upsilon\circ\varphi_1$, then $U=\upsilon(\varphi_D(X^*))=(\upsilon\circ\varphi_0)(X^*)$ in both channels, and it suffices to apply the above with $\xi=\upsilon\circ\varphi_0$.
+
+(2) The proof of Proposition~\ref{prop:drop} uses the product structure $X^*=(V,C^*)$ only through the facts that $V$ is a measurable function of $X^*$ and is recorded identically in both channels; both hold for $U=(\upsilon\circ\varphi_0)(X^*)$, and part 1 gives the support of $U$.
+
+(3) In the donor channel, $X=\varphi_0(X^*)$ and $\varphi_0$ is injective with a measurable inverse, so conditioning on $X$ is equivalent to conditioning on $X^*$; by (A1), $m_0(x)=\mu^*(\varphi_0^{-1}(x))$ $Q$-almost surely, and since $P\ll Q$ this version is fixed $P$-almost surely. By Steps 3 and 4 of the proof of Theorem~\ref{thm:identification}, which use only $P\ll Q$ and integrability, $\E[w(X)Y\mid D=0]=\int m_0\dd P$, and by the change of variables for image measures, $\int m_0\dd P=\int m_0(\varphi_1(x^*))\,P^*(dx^*)=\theta_X$. By latent (A2) and the tower property, $\theta=\int\mu^*\dd P^*$.
+
+(4) In the alternative world the donor channel does not change. The target group is recorded with $\varphi_0$ and its latent law is $\tilde P^*=P^*\circ(\varphi_0^{-1}\circ\varphi_1)^{-1}$, so its observed law is $P^*\circ(\varphi_0\circ\varphi_0^{-1}\circ\varphi_1)^{-1}=P^*\circ\varphi_1^{-1}=P$, the same as in the real world. For its observed outcome it suffices to take, given $X$, the same conditional law as in the real world, and under latent (A2) its response in the basic channel is $\mu^*$; its $\theta$ is $\int\mu^*\dd\tilde P^*=\theta_X$. The alternative world satisfies the assumptions: since $\varphi_0$ is injective, $Q^*(A)=Q(\varphi_0(A))$ and $\tilde P^*(A)=P(\varphi_0(A))$, so $P\ll Q$ gives $\tilde P^*\ll Q^*$, and latent (A2) holds by construction. Under the additional condition, premium units outside the target group are treated in the same way, transforming their latent law by $\varphi_0^{-1}\circ\varphi_1$, which is then defined almost surely; without it, $\varphi_1(X^*)$ may fall outside the image of $\varphi_0$ for those units, and a world with $\varphi_1=\varphi_0$ cannot reproduce them.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:cutoff}.}
+Let $\mu$ be the law of $X$ in the population. Since $s(X)$ is a function of $X$, $\PP(S=1\mid X)=\ind\{s(X)\le c\}\,e(X)$. By the definition of conditional probability, $P(A)=\int_A\ind\{s\le c\}\,e\dd\mu/\PP(S=1)$ and $Q(A)=\int_A(1-e)\dd\mu/\PP(D=0)$ for all $A\in\A$, so $P$ and $Q$ are absolutely continuous with respect to $\mu$, with densities proportional to $\ind\{s\le c\}\,e$ and to $1-e$. The set $\{e=1\}$ is $Q$-null, and off it, under (A3), the chain rule gives $dP/dQ=(dP/d\mu)/(dQ/d\mu)=k\,\ind\{s\le c\}\,e/(1-e)$, with $k=\PP(D=0)/\PP(S=1)$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:trimming}.}
+Since $P(\{w=0\})=\int_{\{w=0\}}w\dd Q=0$, on $\{w>0\}$ we have $w_\tau=\varrho_\tau(w)\,w$. By the tower property and the change of measure, $\E[w_\tau(X)Y\mid D=0]=\int w_\tau m_0\dd Q=\E_P[\varrho_\tau(w)\,m_0]$ and $\E[w_\tau(X)\mid D=0]=\E_P[\varrho_\tau(w)]\in(0,1]$; subtracting $\theta=\E_P[m_0]$ gives (1). For (2), the tower property gives $\Cov_P(m_0,\varrho_\tau(w))=\Cov_P(h(T),\varrho_\tau(T))$ with $T=w(X)$. The function $\varrho_\tau$ is nonincreasing; if $h$ is too, $(h(T)-h(T'))(\varrho_\tau(T)-\varrho_\tau(T'))\ge0$ for an independent copy $T'$, and its expectation is $2\Cov_P(h(T),\varrho_\tau(T))$ (Chebyshev's association inequality); the nondecreasing case is symmetric. For (3), $\varrho_\tau\le1$ and $m_0\ge0$ give $\E_P[\varrho_\tau(w)m_0]\le\theta$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:variance}.}
+The first term of $\mathcal V$ is finite because $m_0$ is bounded; the second lies between $\sigma_-^2\,\E_Q[w^2]/(1-\pi)$ and $\sigma_+^2\,\E_Q[w^2]/(1-\pi)$. To see that $P\ll Q$ is not enough, let $Q$ be uniform on $(0,1)$ and $w(x)=x^{-1/2}/2$, which integrates to 1; then $P\ll Q$ but $\E_Q[w^2]=\int_0^1(4x)^{-1}dx=\infty$.
+\hfill$\square$
+
+
+\paragraph{Proof of Proposition~\ref{prop:sensitivity}.}
+By Bayes' rule, $\lambda(x,\cdot)$ is the density of the law of $U$ given $X=x$ in the target group with respect to that in the donor channel, so $\E_Q[\lambda\mid X]=1$, and the derivative of the law of $(X,U)$ in the target group with respect to that in the donor channel is $w(X)\,\lambda(X,U)$. Applying Theorem~\ref{thm:identification} to $(X,U)$, $\theta=\E_Q[w(X)\,\E_Q(\lambda Y\mid X)]$.
+
+(1) Since $Y\ge0$ and $\Lambda^{-1}\le\lambda\le\Lambda$, $m_0(X)/\Lambda\le\E_Q[\lambda Y\mid X]\le\Lambda m_0(X)$; integrate against $w\dd Q$.
+
+(2) Let $q_+(X)=\PP(Y>0\mid X,D=0)$. For the upper bound, take $U=Y(0)$, $\lambda=\Lambda$ if $Y(0)>0$ and $\lambda=\lambda_0(X)=(1-\Lambda q_+)/(1-q_+)$ if $Y(0)=0$. Then $\E_Q[\lambda\mid X]=1$; moreover $\lambda_0\le1\le\Lambda$, and $\lambda_0\ge1/\Lambda$ is equivalent to $q_+\le1/(1+\Lambda)$, so MSM($\Lambda$) holds. Since $\E_Q[\lambda\mid X]=1$, neither the law of $X$ in the target group nor the donor data change, and the target group's $Y(0)$ is never observed, so the world is compatible with the observables; in it, $\E_Q[\lambda Y\mid X]=\Lambda m_0(X)$ and $\theta=\Lambda\theta_0$. For the lower bound, $\lambda=1/\Lambda$ if $Y(0)>0$ and $\lambda=(1-q_+/\Lambda)/(1-q_+)$ if $Y(0)=0$; this value is $\ge1$ and is $\le\Lambda$ if $q_+\le\Lambda/(1+\Lambda)$, which holds because $q_+\le1/(1+\Lambda)\le\Lambda/(1+\Lambda)$.
+
+(3) Let $\bar\lambda_1$ and $\bar\lambda_0$ be the means of $\lambda$ over $\{Y=1\}$ and $\{Y=0\}$ given $X$. The constraint $\E_Q[\lambda\mid X]=1$ reads $m\bar\lambda_1+(1-m)\bar\lambda_0=1$ with $\bar\lambda_0,\bar\lambda_1\in[1/\Lambda,\Lambda]$, and $\E_Q[\lambda Y\mid X]=m\bar\lambda_1$. Solving for $\bar\lambda_0$, the maximum of $m\bar\lambda_1$ is $\min(\Lambda m,\,1-(1-m)/\Lambda)$ and the minimum is $\max(m/\Lambda,\,1-\Lambda(1-m))$; both are attained with $\lambda$ constant on each class. We also checked the formula against the linear-programming solution in 2{,}000 random cases, with maximum error $10^{-15}$.
+\hfill$\square$
+
+
+\paragraph{Proof of Lemma~\ref{lem:calibration}.}
+In the pooled sample, by Bayes' rule, $\odds(Z=1\mid x,u)=\frac{\pi}{1-\pi}\cdot\frac{\PP(S=1\mid x,u)/\PP(S=1)}{\PP(D=0\mid x,u)/\PP(D=0)}$, and likewise without $u$. On $R$, $\PP(S=1\mid x,u)=\PP(D=1\mid x,u)$ and $\PP(S=1\mid x)=\PP(D=1\mid x)$; the constants cancel in the ratio.
+\hfill$\square$
+
+
+\section{Proof of Theorem~\ref{thm:normality}}\label{app:proof}
+
+The doubly robust estimator equals $\theta$ plus an average of i.i.d. mean-zero terms, plus remainders of order $o_P(n^{-1/2})$; the central limit theorem does the rest.
+
+\paragraph{Notation.} We first work with i.i.d. observations $O=(Z,X,(1-Z)Y)$; the case of several observations per unit is treated at the end. $P_nf=n^{-1}\sum_if(O_i)$; $\E f$ is the population expectation; $\|h\|_Q$ and $\|h\|_P$ are the norms of $L^2(Q)$ and $L^2(P)$. Let $o_{\max}=(1-\eta)/\eta$ and $w_{\max}=(1-\pi)o_{\max}/\pi$: by condition 1 and Theorem~\ref{thm:odds}, $o\le o_{\max}$ and $w\le w_{\max}$, and by condition 2, $\hat o\le o_{\max}$. The observations are bounded: $|Y|\le B_Y$ and $|\hat m|\le B_Y$. In fold $k$, with $n_k$ observations, $(\hat o_k,\hat m_k)$ are trained on the data outside the fold; $\E_k$ and $\PP_k$ denote expectation and probability conditional on those data, and $P_{n,k}$ the empirical mean within the fold.
+
+\paragraph{Three identities.} For every bounded measurable $h$:
+\begin{align*}
+&\text{(I1)}\quad \E[(1-Z)\,o(X)\,h(X)]=\pi\,\E_P[h],\\
+&\text{(I2)}\quad \E[(1-Z)\,h(X)\,(Y-m_0(X))]=0,\\
+&\text{(I3)}\quad \|h\|_P^2\le w_{\max}\,\|h\|_Q^2 .
+\end{align*}
+(I1): $\E[(1-Z)oh]=(1-\pi)\E_Q[oh]$, and $o=\pi w/(1-\pi)$ by Theorem~\ref{thm:odds}, so it equals $\pi\E_Q[wh]=\pi\E_P[h]$. (I2): tower property conditioning on $X$ on $\{Z=0\}$, where $\E[Y\mid X,Z=0]=m_0(X)$. (I3): $\|h\|_P^2=\E_Q[wh^2]\le w_{\max}\,\E_Q[h^2]$.
+
+\paragraph{Step 1 (the function $\psi$ and its bias).} For bounded $(o',m')$, let $\psi(O;o',m')=(1-Z)\,o'(X)\,(Y-m'(X))+Z\,(m'(X)-\theta)$. Then $\pi\phi=\psi(\cdot;o,m_0)$ and
+\[
+\E[\psi(O;o',m')]=(1-\pi)\,\E_Q[(o'-o)(m_0-m')].
+\]
+By (I2) with $h=o'$, $\E[(1-Z)o'(Y-m')]=(1-\pi)\E_Q[o'(m_0-m')]$. By (A2), $\theta=\E_P[m_0]$, and by (I1) with $h=m'-m_0$, $\E[Z(m'-\theta)]=\pi\E_P[m'-m_0]=(1-\pi)\E_Q[o(m'-m_0)]$. Adding gives the formula; in particular, $\E\phi=0$. This is Proposition~\ref{prop:dr} written in odds.
+
+\paragraph{Step 2 (linearization).} With $\hat A=P_n[(1-Z)\hat o(Y-\hat m)]$, $\hat B=P_n[(1-Z)\hat o]$ and $\hat\pi=P_nZ$, the estimator is $\hat\theta=\hat A/\hat B+P_n[Z\hat m]/\hat\pi$. On the event $\{\hat\pi>\pi/2,\ \hat B>\pi/2\}$, whose probability tends to 1 and on which we work from now on, $P_n[Z\theta]/\hat\pi=\theta$ and algebra gives exactly
+\[
+\hat\theta-\theta=\frac1\pi P_n\psi(O;\hat o,\hat m)+\hat A\Bigl(\frac1{\hat B}-\frac1\pi\Bigr)+P_n[Z(\hat m-\theta)]\Bigl(\frac1{\hat\pi}-\frac1\pi\Bigr).
+\]
+Steps 3 and 4 show that the first term is $P_n\phi+o_P(n^{-1/2})$; Step 5, that the other two are $o_P(n^{-1/2})$.
+
+\paragraph{Step 3 (empirical process).} Let $\Delta_k=\psi(\cdot;\hat o_k,\hat m_k)-\psi(\cdot;o,m_0)$. Conditional on the data outside fold $k$, $\hat o_k$ and $\hat m_k$ are fixed functions and the $\Delta_k(O_i)$ in the fold are i.i.d. By the conditional Chebyshev inequality, for every $\epsilon>0$,
+\[
+\PP_k\Bigl(\bigl|(P_{n,k}-\E_k)\Delta_k\bigr|>\epsilon\,n^{-1/2}\Bigr)\le\frac{n}{n_k}\,\frac{\E_k[\Delta_k^2]}{\epsilon^2}.
+\]
+Since $\Delta=(1-Z)[(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)]+Z(\hat m-m_0)$ and $|Y-m_0|\le2B_Y$, the inequality $(a+b+c)^2\le3(a^2+b^2+c^2)$ and (I3) give
+\[
+\E_k[\Delta_k^2]\le3\Bigl[4B_Y^2(1-\pi)\,\|\hat o_k-o\|_Q^2+\bigl((1-\pi)o_{\max}^{\,2}+\pi w_{\max}\bigr)\|\hat m_k-m_0\|_Q^2\Bigr],
+\]
+which goes to 0 in probability by condition 3. Since $n/n_k\to K$, the conditional probability goes to 0 in probability, and being bounded by 1, dominated convergence gives that the unconditional probability also goes to 0. Hence $(P_{n,k}-\E_k)\Delta_k=o_P(n^{-1/2})$ for each of the $K$ folds.
+
+\paragraph{Step 4 (bias).} Since $\E_k\psi(\cdot;o,m_0)=0$, Step 1 and Cauchy--Schwarz give
+\[
+|\E_k\Delta_k|=(1-\pi)\bigl|\E_Q[(\hat o_k-o)(m_0-\hat m_k)]\bigr|\le(1-\pi)\,r_o\,r_m=o_P(n^{-1/2}).
+\]
+Summing over folds with weights $n_k/n$, $P_n\psi(\cdot;\hat o,\hat m)=P_n\psi(\cdot;o,m_0)+o_P(n^{-1/2})=\pi P_n\phi+o_P(n^{-1/2})$.
+
+\paragraph{Step 5 (normalizations).} We split the factors of Step 2 into an i.i.d. part and an auxiliary-error part:
+\begin{itemize}
+  \item $\hat A=P_n[(1-Z)o(Y-m_0)]+P_n[(1-Z)\{(\hat o-o)(Y-m_0)+\hat o(m_0-\hat m)\}]$. The first term is $O_P(n^{-1/2})$ by the central limit theorem. In the second, the centered part is $o_P(n^{-1/2})$ by the argument of Step 3, and its conditional mean, by (I2), is $(1-\pi)\E_Q[\hat o_k(m_0-\hat m_k)]$, bounded by $(1-\pi)o_{\max}\,r_m$. Hence $\hat A=O_P(n^{-1/2})+O_P(r_m)$.
+  \item Likewise, $\hat B-\pi=(P_n-\E)[(1-Z)o]+P_n[(1-Z)(\hat o-o)]=O_P(n^{-1/2})+O_P(r_o)$, using $\E[(1-Z)o]=\pi$ by (I1) and that the $L^1(Q)$ norm does not exceed the $L^2(Q)$ norm.
+  \item $P_n[Z(\hat m-\theta)]=P_n[Z(m_0-\theta)]+P_n[Z(\hat m-m_0)]=O_P(n^{-1/2})+O_P(r_m)$, using $\E[Z(m_0-\theta)]=0$ and (I3). Moreover, $1/\hat\pi-1/\pi=O_P(n^{-1/2})$.
+\end{itemize}
+Since $\hat B\to\pi>0$ in probability,
+\[
+\hat A\Bigl(\frac1{\hat B}-\frac1\pi\Bigr)=\frac{\hat A(\pi-\hat B)}{\pi\hat B}=O_P\bigl(n^{-1}+n^{-1/2}(r_o+r_m)+r_or_m\bigr)=o_P(n^{-1/2}),
+\]
+and the third term of Step 2 is $O_P(n^{-1/2})\cdot[O_P(n^{-1/2})+O_P(r_m)]=o_P(n^{-1/2})$.
+
+\paragraph{Step 6 (conclusion).} $\hat\theta-\theta=P_n\phi+o_P(n^{-1/2})$. The $\phi(O_i)$ are i.i.d., with $\E\phi=0$ and $\E\phi^2=\mathcal V<\infty$, because $\phi$ is bounded. The central limit theorem and Slutsky's lemma give $\sqrt n(\hat\theta-\theta)\to N(0,\mathcal V)$.
+
+\paragraph{Step 7 (estimating $\mathcal V$).} The implemented estimator uses
+\[
+\hat\phi(O)=\frac{(1-Z)\,\hat o(X)\,\bigl(Y-\hat m(X)-\hat A/\hat B\bigr)}{\hat B}+\frac{Z\,(\hat m(X)-\hat\mu_1)}{\hat\pi},\qquad\hat\mu_1=\frac{P_n[Z\hat m]}{\hat\pi}.
+\]
+All functions are bounded, so $|\hat\phi-\phi|\le C_0\,(|\hat o-o|+|\hat m-m_0|+|\hat\mu_1-\theta|+|\hat A/\hat B|+|\hat B-\pi|+|\hat\pi-\pi|)$ for a constant $C_0$ (random, but bounded on that event). The conditional means of the squares of the first two terms go to 0 fold by fold, and the scalars go to 0 in probability, so $P_n(\hat\phi-\phi)^2=o_P(1)$. With $P_n\phi^2\to \mathcal V$ by the law of large numbers and Cauchy--Schwarz, $|P_n\hat\phi^2-P_n\phi^2|\le P_n(\hat\phi-\phi)^2+2[P_n(\hat\phi-\phi)^2\cdot P_n\phi^2]^{1/2}\to0$. Thus $\hat{\mathcal V}\to \mathcal V$ in probability, and by Slutsky the interval $\hat\theta\pm z_{1-\alpha/2}(\hat{\mathcal V}/n)^{1/2}$ has asymptotic coverage $1-\alpha$.
+
+\paragraph{Several observations per unit.} If each unit $i$ contributes a block of $N_i\le N_{\max}$ observations with the same $Z_i$, units are i.i.d. and $P$ and $Q$ are defined as observation-level laws, all of the above is repeated with block quantities. Identities (I1)--(I3) hold for block sums by linearity, with $\pi$ and $1-\pi$ replaced by $\bar N_1=\E[\sum_jZ_{ij}]$ and $\bar N_0=\E[\sum_j(1-Z_{ij})]$, the expected numbers of target and donor observations per unit (which can exceed 1), and $o$ by the observation-level odds, so that $o=\bar N_1w/\bar N_0$. Cross-fitting by unit keeps the evaluated fold independent of the training data, and $N_i\le N_{\max}$ keeps everything bounded. The unit-level influence function is $\sum_j\psi(O_{ij};o,m_0)/\bar N_1$, and $\sqrt n$ refers to the number of units; the clustered standard error is its sample version. With dependence within units, $\mathcal V$ is the variance of this block influence function, not the closed form of Section~\ref{sec:inference}, which is the i.i.d. case.
+\section{Known-cutoff weights in the other scenarios}\label{app:extra}
+
+\begin{table}[ht]
+\centering\small
+\caption{Known-cutoff weights in the other scenarios (200 replications, same data as Table~\ref{tab:main}). In each cell, standard $\to$ known cutoff. Trimming of the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths.}\label{tab:cutoff-scenarios}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Scenario & SD of DR & Coverage & Trimming p90 \\
+\midrule
+With $C$ & 0.107 $\to$ 0.096 & 96.5 $\to$ 93.5\,\% & $+16.4\to-0.4$ \\
+$C$ confounds, without $C$ & 0.132 $\to$ 0.115 & 15.5 $\to$ 9.0\,\% & $+20.1\to-7.4$ \\
+$C$ confounds, with $C$ & 0.129 $\to$ 0.113 & 17.5 $\to$ 6.5\,\% & $+32.0\to+3.9$ \\
+Medium overlap & 0.136 $\to$ 0.147 & 94.5 $\to$ 93.5\,\% & $+19.6\to-15.6$ \\
+Low overlap & 0.300 $\to$ 0.342 & 91.0 $\to$ 87.0\,\% & $+34.5\to-20.6$ \\
+Unobserved confounding & 0.127 $\to$ 0.109 & 0.0 $\to$ 0.0\,\% & $+23.1\to+4.6$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the other scenarios, with a second registered prediction (Table~\ref{tab:cutoff-scenarios}), the estimators agree with the same limits as the standard one ($|z|\le1.7$), because only the estimation of the same weights changes; with confounding, coverage with respect to $\theta$ is even lower, because the estimator is more precise around a wrong value. With the channel variable, the weights do not blow up: donors never have it recorded, and the lack of support shows up as $\hat e>0.99$ in 33.3\,\% of the target group, against $\kappa=0.335$. Under low overlap, trimming with these weights reproduces what Proposition~\ref{prop:trimming} predicts for the true weights ($-2.2$, $-12.1$ and $-20.6$ against $-3.0$, $-11.9$ and $-20.8$). The effect of trimming shrinks substantially in every scenario and becomes negative or about zero, except in ``$C$ confounds, with $C$'' and ``Unobserved confounding'', where it remains positive.
+
+Two predictions fail: the dispersion does not decrease under medium overlap, and under low overlap it increases and coverage falls from 91 to 87\,\%. Our interpretation, untested: as overlap worsens, the channel propensity approaches 1 inside the target group and its odds are estimated from few donors, whereas the standard classifier, with very few positive cases, shrinks them toward moderate values. Trimming within the DR estimator equalizes both methods: under low overlap, the root mean squared error at the 90th percentile is 0.160 with the known cutoff and 0.163 with the standard estimator, with 97.5 and 98\,\% coverage using the untrimmed standard error. The precision gain is therefore limited to good overlap, especially with small samples.
+
+\begin{thebibliography}{99}\small
+\bibitem[Baitairian et~al.(2025)Baitairian, Sebastien, Jreich, Katsahian, and Guilloux]{baitairian2025} Baitairian, J.-B., Sebastien, B., Jreich, R., Katsahian, S. and Guilloux, A. (2025). Calibrating confounding strength in sensitivity models for weighting estimators: a comparative review and a new method. arXiv:2510.16560.
+
+\bibitem[Bickel et~al.(2009)Bickel, Brückner, and Scheffer]{bickel2009} Bickel, S., Brückner, M. and Scheffer, T. (2009). Discriminative learning under covariate shift. \emph{Journal of Machine Learning Research}, 10, 2137--2155.
+
+\bibitem[Blake et~al.(2020)]{blake2020} Blake, H. A., Leyrat, C., Mansfield, K. E., Seaman, S., Tomlinson, L. A., Carpenter, J. and Williamson, E. J. (2020). Propensity scores using missingness pattern information: a practical guide. \emph{Statistics in Medicine}, 39(11), 1641--1657.
+
+\bibitem[Chernozhukov et~al.(2018)]{chernozhukov2018} Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W. and Robins, J. (2018). Double/debiased machine learning for treatment and structural parameters. \emph{The Econometrics Journal}, 21(1), C1--C68.
+
+\bibitem[Connor Gorber et~al.(2007)Connor Gorber, Tremblay, Moher, and Gorber]{connorgorber2007} Connor Gorber, S., Tremblay, M., Moher, D. and Gorber, B. (2007). A comparison of direct vs. self-report measures for assessing height, weight and body mass index: a systematic review. \emph{Obesity Reviews}, 8(4), 307--326.
+
+\bibitem[Cook et~al.(2008)Cook, Shadish, and Wong]{cook2008} Cook, T. D., Shadish, W. R. and Wong, V. C. (2008). Three conditions under which experiments and observational studies produce comparable causal estimates. \emph{Journal of Policy Analysis and Management}, 27(4), 724--750.
+
+\bibitem[Crump et~al.(2009)Crump, Hotz, Imbens, and Mitnik]{crump2009} Crump, R. K., Hotz, V. J., Imbens, G. W. and Mitnik, O. A. (2009). Dealing with limited overlap in estimation of average treatment effects. \emph{Biometrika}, 96(1), 187--199.
+
+\bibitem[Cunningham(2021)]{cunningham2021} Cunningham, S. (2021). \emph{Causal Inference: The Mixtape}. Yale University Press.
+
+\bibitem[D'Agostino and Rubin(2000)]{dagostino2000} D'Agostino, R. B., Jr. and Rubin, D. B. (2000). Estimating and using propensity scores with partially missing data. \emph{Journal of the American Statistical Association}, 95, 749--759.
+
+\bibitem[Dahabreh et~al.(2019)Dahabreh, Robertson, Tchetgen Tchetgen, Stuart, and Hernán]{dahabreh2019} Dahabreh, I. J., Robertson, S. E., Tchetgen Tchetgen, E. J., Stuart, E. A. and Hernán, M. A. (2019). Generalizing causal inferences from individuals in randomized trials to all trial-eligible individuals. \emph{Biometrics}, 75(2), 685--694.
+
+\bibitem[D'Amour et~al.(2021)D'Amour, Ding, Feller, Lei, and Sekhon]{damour2021} D'Amour, A., Ding, P., Feller, A., Lei, L. and Sekhon, J. (2021). Overlap in observational studies with high-dimensional covariates. \emph{Journal of Econometrics}, 221, 644--654.
+
+\bibitem[Dehejia and Wahba(1999)]{dehejia1999} Dehejia, R. H. and Wahba, S. (1999). Causal effects in nonexperimental studies: reevaluating the evaluation of training programs. \emph{Journal of the American Statistical Association}, 94(448), 1053--1062.
+
+\bibitem[de~Luna et~al.(2011)de Luna, Waernbaum, and Richardson]{deluna2011} de Luna, X., Waernbaum, I. and Richardson, T. S. (2011). Covariate selection for the nonparametric estimation of an average treatment effect. \emph{Biometrika}, 98(4), 861--875.
+
+\bibitem[Dong et~al.(2020)Dong, Zhang, Zeng, and Li]{dong2020} Dong, J., Zhang, J. L., Zeng, S. and Li, F. (2020). Subgroup balancing propensity score. \emph{Statistical Methods in Medical Research}, 29(3), 659--676.
+
+\bibitem[Dorn and Guo(2023)]{dorn2023} Dorn, J. and Guo, K. (2023). Sharp sensitivity analysis for inverse propensity weighting via quantile balancing. \emph{Journal of the American Statistical Association}, 118(544), 2645--2657.
+
+\bibitem[Hahn(1998)]{hahn1998} Hahn, J. (1998). On the role of the propensity score in efficient semiparametric estimation of average treatment effects. \emph{Econometrica}, 66(2), 315--332.
+
+\bibitem[Heckman et~al.(1997)Heckman, Ichimura, and Todd]{heckman1997} Heckman, J. J., Ichimura, H. and Todd, P. E. (1997). Matching as an econometric evaluation estimator: evidence from evaluating a job training programme. \emph{The Review of Economic Studies}, 64(4), 605--654.
+
+\bibitem[Hirano et~al.(2003)Hirano, Imbens, and Ridder]{hirano2003} Hirano, K., Imbens, G. W. and Ridder, G. (2003). Efficient estimation of average treatment effects using the estimated propensity score. \emph{Econometrica}, 71(4), 1161--1189.
+
+\bibitem[Hong et~al.(2017)Hong, Rudolph, and Stuart]{hong2017} Hong, H., Rudolph, K. E. and Stuart, E. A. (2017). Bayesian approach for addressing differential covariate measurement error in propensity score methods. \emph{Psychometrika}, 82(4), 1078--1096.
+
+\bibitem[Imai and Yamamoto(2010)]{imai2010} Imai, K. and Yamamoto, T. (2010). Causal inference with differential measurement error: nonparametric identification and sensitivity analysis. \emph{American Journal of Political Science}, 54(2), 543--560.
+
+\bibitem[Ke et~al.(2017)]{ke2017} Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q. and Liu, T.-Y. (2017). LightGBM: a highly efficient gradient boosting decision tree. \emph{Advances in Neural Information Processing Systems}, 30, 3146--3154.
+
+\bibitem[Kechris(1995)]{kechris1995} Kechris, A. S. (1995). \emph{Classical Descriptive Set Theory}. Springer.
+
+\bibitem[Khan and Tamer(2010)]{khan2010} Khan, S. and Tamer, E. (2010). Irregular identification, support conditions, and inverse weight estimation. \emph{Econometrica}, 78(6), 2021--2042.
+
+\bibitem[Kish(1965)]{kish1965} Kish, L. (1965). \emph{Survey Sampling}. Wiley.
+
+\bibitem[LaLonde(1986)]{lalonde1986} LaLonde, R. J. (1986). Evaluating the econometric evaluations of training programs with experimental data. \emph{The American Economic Review}, 76(4), 604--620.
+
+\bibitem[Liu et~al.(2024)Liu, Li, Zhou, and Matsouaka]{liu2023} Liu, Y., Li, H., Zhou, Y. and Matsouaka, R. A. (2024). Average treatment effect on the treated, under lack of positivity. \emph{Statistical Methods in Medical Research}, 33(10), 1689--1717.
+
+\bibitem[Ma and Wang(2020)]{ma2020} Ma, X. and Wang, J. (2020). Robust inference using inverse probability weighting. \emph{Journal of the American Statistical Association}, 115(532), 1851--1860.
+
+\bibitem[Ma et~al.(2023)Ma, Sant'Anna, Sasaki, and Ura]{ma2023} Ma, Y., Sant'Anna, P. H. C., Sasaki, Y. and Ura, T. (2023). Doubly robust estimators with weak overlap. arXiv:2304.08974.
+
+\bibitem[Ma et~al.(2025)Ma, Huang, and Namkoong]{manamkoong2025} Ma, Y., Huang, Y. and Namkoong, H. (2025). A sensitivity approach to causal inference under limited overlap. arXiv:2511.22003.
+
+\bibitem[McClean et~al.(2024)McClean, Branson, and Kennedy]{mcclean2024} McClean, A., Branson, Z. and Kennedy, E. H. (2024). Calibrated sensitivity models. arXiv:2405.08738.
+
+\bibitem[National Center for Health Statistics(2020)]{nchs2020} National Center for Health Statistics (2020). \emph{National Health and Nutrition Examination Survey, 2017--2018 data files}. Hyattsville, MD: Centers for Disease Control and Prevention. Files DEMO\_J, BMX\_J, WHQ\_J and BPX\_J, \texttt{https://wwwn.cdc.gov/nchs/nhanes} (accessed 24 October 2026).
+
+\bibitem[Petersen et~al.(2012)Petersen, Porter, Gruber, Wang, and van der Laan]{petersen2012} Petersen, M. L., Porter, K. E., Gruber, S., Wang, Y. and van der Laan, M. J. (2012). Diagnosing and responding to violations in the positivity assumption. \emph{Statistical Methods in Medical Research}, 21(1), 31--54.
+
+\bibitem[Qin(1998)]{qin1998} Qin, J. (1998). Inferences for case-control and semiparametric two-sample density ratio models. \emph{Biometrika}, 85(3), 619--630.
+
+\bibitem[Rassen et~al.(2012)Rassen, Glynn, Rothman, Setoguchi, and Schneeweiss]{rassen2012} Rassen, J. A., Glynn, R. J., Rothman, K. J., Setoguchi, S. and Schneeweiss, S. (2012). Applying propensity scores estimated in a full cohort to adjust for confounding in subgroup analyses. \emph{Pharmacoepidemiology and Drug Safety}, 21(7), 697--709.
+
+\bibitem[Rudin(1987)]{rudin1987} Rudin, W. (1987). \emph{Real and Complex Analysis} (3rd ed.). McGraw-Hill.
+
+\bibitem[Rudolph and Stuart(2018)]{rudolph2016} Rudolph, K. E. and Stuart, E. A. (2018). Using sensitivity analyses for unobserved confounding to address covariate measurement error in propensity score methods. \emph{American Journal of Epidemiology}, 187(3), 604--613.
+
+\bibitem[Smith and Todd(2005)]{smith2005} Smith, J. A. and Todd, P. E. (2005). Does matching overcome LaLonde's critique of nonexperimental estimators? \emph{Journal of Econometrics}, 125(1--2), 305--353.
+
+\bibitem[Steiner et~al.(2011)Steiner, Cook, and Shadish]{steiner2011} Steiner, P. M., Cook, T. D. and Shadish, W. R. (2011). On the importance of reliable covariate measurement in selection bias adjustments using propensity scores. \emph{Journal of Educational and Behavioral Statistics}, 36(2), 213--236.
+
+\bibitem[Sugiyama et~al.(2012)Sugiyama, Suzuki, and Kanamori]{sugiyama2012} Sugiyama, M., Suzuki, T. and Kanamori, T. (2012). \emph{Density Ratio Estimation in Machine Learning}. Cambridge University Press.
+
+\bibitem[Tan(2006)]{tan2006} Tan, Z. (2006). A distributional approach for causal inference using propensity scores. \emph{Journal of the American Statistical Association}, 101(476), 1619--1637.
+
+\bibitem[Webb-Vargas et~al.(2017)Webb-Vargas, Rudolph, Lenis, Murakami, and Stuart]{webbvargas2017} Webb-Vargas, Y., Rudolph, K. E., Lenis, D., Murakami, P. and Stuart, E. A. (2017). An imputation-based solution to using mismeasured covariates in propensity score analysis. \emph{Statistical Methods in Medical Research}, 26(4), 1824--1837.
+
+\bibitem[Westreich et~al.(2011)Westreich, Cole, Funk, Brookhart, and Stürmer]{westreich2011} Westreich, D., Cole, S. R., Funk, M. J., Brookhart, M. A. and Stürmer, T. (2011). The role of the c-statistic in variable selection for propensity score models. \emph{Pharmacoepidemiology and Drug Safety}, 20(3), 317--320.
+
+\bibitem[Westreich et~al.(2017)Westreich, Edwards, Lesko, Stuart, and Cole]{westreich2017} Westreich, D., Edwards, J. K., Lesko, C. R., Stuart, E. and Cole, S. R. (2017). Transportability of trial results using inverse odds of sampling weights. \emph{American Journal of Epidemiology}, 186(8), 1010--1014.
+
+\bibitem[Zhao et~al.(2019)Zhao, Small, and Bhattacharya]{zhao2019} Zhao, Q., Small, D. S. and Bhattacharya, B. B. (2019). Sensitivity analysis for inverse probability weighting estimators via the percentile bootstrap. \emph{Journal of the Royal Statistical Society: Series B}, 81(4), 735--761.
+
+\end{thebibliography}
+
+\end{document}
