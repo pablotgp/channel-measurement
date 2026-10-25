@@ -1,78 +1,63 @@
-# Evaluación contrafactual del cambio de canal
+# When channels measure differently
 
-Material de trabajo de dos artículos en preparación sobre cómo estimar qué pasaría si un grupo de clientes fuese atendido por otro canal, sin un experimento aleatorizado:
+Code, data and results for the paper
 
-1. **Cuando los canales miden distinto: evaluación contrafactual del cambio de canal mediante cambio de medida.** Es el artículo principal. Identificación como cambio de medida (Radon–Nikodym), soporte vía clasificador (descomposición de Lebesgue), variables registradas solo en un canal o medidas con instrumentos distintos, sensibilidad a la confusión no observada y simulación con predicciones registradas antes de ejecutarla.
-2. **Recortar pesos estimados: signo, ruido e inferencia.** Es una nota complementaria. Sesgo exacto del recorte de pesos, conservación o inversión de su signo con pesos estimados y comportamiento del estimador doblemente robusto recortado.
+> **When channels measure differently: counterfactual evaluation of channel switching via change of measure**
+> Pablo Antonio García Pastor
 
-Todo el material es sintético o teórico. **No contiene datos reales de ninguna entidad.**
+The paper estimates what would happen if a group of units (customers, patients, calls) were served by another channel, without a randomized experiment. Identification is cast as a change of measure. Its focus is covariates that each channel records differently: a variable recorded by only one channel, or measured with a different instrument in each one.
 
-## Estructura
+All empirical material is either **synthetic** (the simulation) or **public** (NHANES 2017–2018; the NSW/CPS-1 data of LaLonde, 1986). No proprietary data are used.
 
-| Carpeta | Contenido |
+## Contents
+
+| Folder | What it holds |
 | --- | --- |
-| `borradores/` | Exportaciones de los dos borradores: el paper 1 en markdown y PDF, y el paper 2 en PDF. Los originales se editan en Claude Docs; aquí hay una copia fechada. |
-| `guias/` | Guías de lectura que explican cada resultado paso a paso, con fuente LaTeX (`*.tex`, preámbulo común en `preambulo.tex`) y PDF compilado (`guias/pdf/`). |
-| `simulacion/` | Código de la simulación, predicciones registradas, resultados brutos de cada escenario y scripts de comprobación y auditoría. |
+| `paper/en/` | Official LaTeX source (English), compiled with XeLaTeX. |
+| `paper/es/` | Spanish translation with the same content. |
+| `paper/arxiv/` | `build_arxiv.py`, which builds a single pdfLaTeX-compatible `main.tex` for arXiv. |
+| `simulacion/` | Simulation (Sections 9–10): generator, truths, estimators, registered predictions and raw results. |
+| `ilustracion/` | Public-data illustrations (Section 11): NHANES and NSW/CPS, with data, code, registered predictions and results. |
 
-## La simulación
+File and variable names are in Spanish.
 
-Ficheros principales:
+## Registered predictions
 
-- `gen.py`: generador de datos (clientes, llamadas, canal, historial, compras).
-- `truth.py`: verdad y límites teóricos calculados de forma analítica en una población grande.
-- `scenarios.py`: escenarios. Ejecutado como script, calcula y guarda las predicciones en `predicciones.json`.
-- `est.py`: estimadores de Hájek y doblemente robusto, con *cross-fitting* por cliente (LightGBM).
-- `run.py`: ejecuta las réplicas de un escenario y guarda `res_<escenario>_<R>.json`.
-- `analyze.py`: compara los resultados con las predicciones.
+Predictions that do not follow directly from the theory were written to `prediccion*.json` / `predicciones.json` and **committed before the corresponding run**. The commit timestamps in this repository's history are the record. This is a time-stamped self-registration, not a third-party registry. Failed predictions are reported in the paper.
 
-Predicciones registradas antes de ejecutar:
+## Simulation (`simulacion/`)
 
-- `predicciones.json`: todos los escenarios de la sección 9 del paper 1.
-- `prediccion_DR_sin_soporte.json`: predicción del Corolario 3, registrada antes del escenario «confunde_con_C».
-- `prediccion_n_10000.json`: escenario intermedio de 10 000 clientes.
-
-Comprobaciones: `verificacion.py` contrasta los resultados teóricos en ejemplos continuos. `audit.py` y `audit_truth_se.py` comprueban las verdades por una vía independiente. `check_trim.py`, `diag_trim_sim.py`, `trim_theory_check.py` y `sign_test.py` tratan del recorte con pesos estimados; la salida de este último está en `sign_test_resultado_60_replicas.txt`. `check_medicion.py` contrasta el Teorema 5 y `check_sens.py` la Proposición 7. `calibracion_lambda.py` calibra Λ frente a las covariables observadas (Lema 3), con su predicción registrada en `prediccion_calibracion_lambda.json` y su resultado en `calibracion_lambda_resultado.json`; `calibracion_lema_check.py` contrasta el lema estimando por separado los dos modelos, y su salida está en `calibracion_lema_check_resultado.txt`.
-
-`res_base_40.json` es la prueba piloto inicial (40 réplicas, semilla 500). Notas sobre los resultados del escenario de solapamiento medio: `res_solap_medio_200.json` y `res_solap_medio_ORIGINAL.json` son la tanda original (semillas 1000–1199) y `res_solap_medio_rep7000.json` es la réplica con semillas nuevas (7000–7199).
-
-Pesos con corte conocido (sección 12 del paper 1): `corte_conocido.py` (simulación, con su predicción en `prediccion_corte_conocido.json`), `analyze_corte.py` y `corte_descomposicion.py` (análisis exploratorio). Bootstrap: `bootstrap.py` (con reemplazo y bayesiano), `analyze_bootstrap.py`, predicciones `prediccion_bootstrap*.json` y `prediccion_hipotesis_bootstrap.json`; los resultados ejecutados en el ordenador de Pablo están en `simulacion/resultados_pc/`.
-
-### Reproducir
+- `gen.py`: data generator (customers, calls, channel, channel-recorded history, outcomes).
+- `truth.py`: true θ and theoretical limits, computed on a large population with Gauss–Hermite quadrature.
+- `scenarios.py`: scenarios. Run as a script, it writes the predictions to `predicciones.json`.
+- `est.py`: Hájek and doubly robust estimators with customer-level cross-fitting (LightGBM).
+- `run.py`: runs the replications of one scenario.
+- `analyze.py`: compares the results with the predictions.
+- `corte_conocido.py`: known-cutoff weights (Proposition 2).
+- `bootstrap.py`: unit-level bootstrap, with replacement and Bayesian.
+- `ejecutar_todo.py`: resumable runner for a local machine.
+- `res_*.json` and `resultados_pc/`: raw results.
 
 ```bash
+pip install -r requirements.txt
 cd simulacion
-pip install -r ../requirements.txt
-python scenarios.py            # predicciones (unos 2 minutos)
-python run.py base 200 1000    # un escenario: nombre, réplicas, semilla inicial
-python analyze.py              # comparación con las predicciones
-```
-
-Con 2 núcleos, cada escenario de 30 000 clientes y 200 réplicas tarda unos 8–10 minutos.
-
-Por defecto se usan 2 procesos en paralelo. Para usar todos los núcleos de tu máquina, define `N_JOBS` (`-1` = todos):
-
-```bash
+python scenarios.py               # predictions
 N_JOBS=-1 python run.py base 200 1000
-N_JOBS=-1 python bootstrap.py n_10000 80 60 3000   # escenario, réplicas, remuestreos, semilla inicial
+python analyze.py
 ```
 
-Los resultados no dependen de `N_JOBS`: cada réplica usa su propia semilla y LightGBM se ejecuta con un solo hilo dentro de cada proceso. Las semillas usadas son: 1000 para los escenarios de la tabla principal, 7000 para la réplica del solapamiento medio y 3000 para el escenario de 10 000 clientes.
+## Illustrations (`ilustracion/`)
 
-### Ejecutar el bootstrap en tu ordenador
+- **NHANES** (self-reported vs measured BMI):
+  - `nhanes_comun.py` (data and channel assignment rule);
+  - `nhanes_prediccion.py` (registered predictions);
+  - `nhanes_ilustracion.py` (base run);
+  - `nhanes_robustez.py` (robustness runs);
+  - `analisis_nhanes.md` (results against the predictions).
+  
+  Data: CDC/NCHS public-use files `DEMO_J`, `BMX_J`, `WHQ_J` and `BPX_J` in `datos/nhanes/`.
+- **NSW/CPS-1**: `lalonde.py`. Data: the Dehejia–Wahba NSW subsample and the CPS-1 comparison group in `datos/`, as distributed in the `causaldata` package.
 
-`simulacion/ejecutar_todo.py` lo hace todo con un comando: instala las librerías si faltan, usa casi todos los núcleos, guarda cada réplica al terminarla (si se interrumpe, se relanza y sigue) y al final analiza y crea un zip con los resultados.
+## License
 
-```bash
-cd simulacion
-python ejecutar_todo.py            # bootstrap de 30 000 clientes (semillas 1000-1079, B = 60)
-python ejecutar_todo.py n_10000    # repetición del de 10 000 clientes (semillas 3000-3079)
-```
-
-En Windows, si `python` no se reconoce, usa `py`. Las predicciones de ambas tareas están registradas en `prediccion_bootstrap_base.json` y `prediccion_bootstrap.json`.
-
-## Estado
-
-Los borradores están en español, para fijar notación y resultados; la versión final irá en inglés y LaTeX. La lista de tareas pendientes está al final del paper 1.
-
-Última actualización: 24 de octubre de 2026.
+Code: MIT (see `LICENSE`). The NHANES files are public-domain U.S. government data. The NSW/CPS-1 extracts are redistributed as in the `causaldata` package.
