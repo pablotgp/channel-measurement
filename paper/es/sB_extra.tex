@@ -1,0 +1,22 @@
+\section{Pesos con corte conocido en los demás escenarios}\label{app:extra}
+
+\begin{table}[ht]
+\centering\small
+\caption{Pesos con corte conocido en los demás escenarios (200 réplicas, mismos datos que la tabla~\ref{tab:principal}). En cada celda, estándar $\to$ corte conocido. Recorte del Hájek en el percentil 90 calculado con $m_0$, en milésimas.}\label{tab:corte-escenarios}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Escenario & DE del DR & Cobertura & Recorte p90 \\
+\midrule
+Con $C$ & 0,107 $\to$ 0,096 & 96,5 $\to$ 93,5\,\% & $+16,4\to-0,4$ \\
+$C$ confunde, sin $C$ & 0,132 $\to$ 0,115 & 15,5 $\to$ 9,0\,\% & $+20,1\to-7,4$ \\
+$C$ confunde, con $C$ & 0,129 $\to$ 0,113 & 17,5 $\to$ 6,5\,\% & $+32,0\to+3,9$ \\
+Solapamiento medio & 0,136 $\to$ 0,147 & 94,5 $\to$ 93,5\,\% & $+19,6\to-15,6$ \\
+Solapamiento bajo & 0,300 $\to$ 0,342 & 91,0 $\to$ 87,0\,\% & $+34,5\to-20,6$ \\
+Confusión no observada & 0,127 $\to$ 0,109 & 0,0 $\to$ 0,0\,\% & $+23,1\to+4,6$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En los demás escenarios, con una segunda predicción registrada (tabla~\ref{tab:corte-escenarios}), los estimadores coinciden con los mismos límites que el estándar ($|z|\le1,7$), porque solo cambia cómo se estiman los mismos pesos; con confusión, la cobertura respecto de $\theta$ es incluso menor, porque el estimador es más preciso alrededor de un valor equivocado. Con la variable de canal no hay explosión de pesos: los donantes nunca la tienen registrada, y la falta de soporte aparece como $\hat e>0,99$ en el 33,3\,\% del grupo objetivo, frente a $\kappa=0,335$. Con solapamiento bajo, el recorte con estos pesos reproduce lo que la Proposición~\ref{prop:recorte} predice para los pesos verdaderos ($-2,2$, $-12,1$ y $-20,6$ frente a $-3,0$, $-11,9$ y $-20,8$). El efecto del recorte se reduce mucho en todos los escenarios y pasa a ser negativo o casi nulo, salvo en «$C$ confunde, con $C$» y en «Confusión no observada», donde sigue siendo positivo.
+
+Fallan dos predicciones: la dispersión no baja con solapamiento medio, y con solapamiento bajo sube y la cobertura cae del 91 al 87\,\%. Nuestra interpretación, sin contrastar: al empeorar el solapamiento, la propensión de canal se acerca a 1 dentro del grupo objetivo y sus odds se estiman con pocos donantes, mientras que el clasificador estándar, con muy pocos casos positivos, los encoge hacia valores moderados. Recortar dentro del DR iguala ambos métodos: con solapamiento bajo, la raíz del error cuadrático medio en el percentil 90 es 0,160 con corte conocido y 0,163 con el estándar, con coberturas del 97,5 y el 98\,\% usando el error típico sin recortar. La ventaja en precisión se limita, por tanto, a solapamientos buenos, sobre todo con muestras pequeñas.

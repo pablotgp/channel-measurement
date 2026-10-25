@@ -1,4 +1,4 @@
-\section{The classifier identifies the Radon--Nikodym derivative}\label{sec:classifier}
+\subsection{The classifier identifies the Radon--Nikodym derivative}\label{sec:classifier}
 
 A calibrated classifier that separates the target group from the donor channel yields $w$ up to a constant, and the set where that classifier is certain, $\{p=1\}$, is exactly the unsupported part of the target group.
 
@@ -61,4 +61,17 @@ By Theorem~\ref{thm:odds}, the numerator of the first term is $\int_{\{p<1\}}(m_
 
 Unlike the weighting estimator, which keeps the supported part, the doubly robust estimator fills the unsupported part with the extrapolation of the outcome model. It recovers $\theta$ if and only if that extrapolation is right on average, $\E_P[\bar m\mid p=1]=\ths$, an additional, untestable assumption. \citet{manamkoong2025} propose making it explicit under a smoothness assumption and bounding its effect with a sensitivity analysis.
 
-\paragraph{Practical reading.} In finite samples one never observes $\hat p=1$ exactly. A natural diagnostic is the estimated mass $\hat P(\hat p>1-t)$ for small $\delta$; an AUC close to 1 is a warning sign, because it indicates that $P$ and $Q$ are close to mutually singular, not that the classifier is good. Below that extreme the AUC is not a monotone measure of overlap: when the target group is a cutoff on a score, it is high even with good overlap (Section~\ref{sec:design}).
+\paragraph{Practical reading.} In finite samples one never observes $\hat p=1$ exactly. A natural diagnostic is the estimated mass $\hat P(\hat p>1-t)$ for small $t$; an AUC close to 1 is a warning sign, because it indicates that $P$ and $Q$ are close to mutually singular, not that the classifier is good. Below that extreme the AUC is not a monotone measure of overlap: when the target group is a cutoff on a score, it is high even with good overlap (Section~\ref{sec:design}).
+
+\subsection{Estimators}\label{sec:estimators}
+
+\paragraph{Sampling.} We observe an i.i.d. pooled sample $O_i=(Z_i,X_i,(1-Z_i)Y_i)$, $i=1,\dots,n$, with $\PP(Z=1)=\pi$, $X\mid Z=1\sim P$ and $X\mid Z=0\sim Q$; for $\theta$ only the outcomes of donor units are needed. When a unit (a customer) generates several observations (calls), $O_i$ is the whole block of that unit and everything below applies at the unit level. We assume that the channel and target-group membership are properties of the unit, constant across its observations, and that $P$, $Q$, $m_0$ and $\theta$ are defined at the observation level, so that each unit is weighted by its number of observations. If that number depends on $Y(0)$ given $X$, the unit-level and observation-level estimands, and the corresponding versions of (A2), differ.
+
+\paragraph{Estimators.} With $\hat o=\hat p/(1-\hat p)$ and $n_1$ the number of target-group observations,
+\[
+\hat\theta_{\mathrm{H}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,Y_i}{\sum_{i:Z_i=0}\hat o(X_i)},\qquad
+\hat\theta_{\mathrm{DR}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,(Y_i-\hat m(X_i))}{\sum_{i:Z_i=0}\hat o(X_i)}+\frac1{n_1}\sum_{i:Z_i=1}\hat m(X_i).
+\]
+The first is the Hájek weighting estimator. The second is the doubly robust (DR) estimator, the sample version of $\psi$ in Proposition~\ref{prop:dr} with the weighting term normalized. Both use cross-fitting: units are split into $K$ folds and, for observations in fold $k$, $\hat p$ and $\hat m$ are trained on the other folds.
+
+\paragraph{Diagnostics and evidence.} Three diagnostics are routinely read off a fitted classifier: the estimated unsupported mass $\hat\varepsilon=\hat P(\hat p>1-t)$ for a small $t$ (Theorem~\ref{thm:lebesgue}); the AUC; and Kish's \citeyearpar{kish1965} effective sample size $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ over the $n_0$ donor observations, whose ratio $\neff/n_0$ estimates $1/(1+\chi^2(P\|Q))$ (Section~\ref{sec:inference}). Sections~\ref{sec:channel} and~\ref{sec:instruments} ask what these diagnostics show when channels record covariates differently. Throughout, $z$ denotes (mean $-$ prediction)/(Monte Carlo error) over replications, and a prediction is \emph{registered} when it was committed, with a time stamp, to the public repository (Section~\ref{sec:design}) before the corresponding run.

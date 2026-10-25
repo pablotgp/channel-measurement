@@ -1,6 +1,6 @@
 \section{Resultados de la simulación}\label{sec:resultados}
 
-\subsection{Identificación, variables de canal y especificación}\label{sec:res-principal}
+\subsection{Variables de canal, identificación y especificación}\label{sec:res-principal}
 
 En los ocho escenarios de la tabla~\ref{tab:principal}, las medias de los estimadores quedan cerca de su límite predicho (todos los $|z|\le1,3$ salvo con solapamiento medio, que se comenta a continuación). Con muestras pequeñas fallan la dispersión y la cobertura, no la media (sección~\ref{sec:res-bootstrap}). Una discrepancia en el solapamiento medio ($z=-3,0$ en el Hájek y $-2,1$ en el DR) no reapareció en una réplica con 200 semillas nuevas ($z=+0,8$ y $+1,5$; con las 400 réplicas, $-1,4$ y $-0,3$). Esa réplica no estaba planificada de antemano; con unas 40 comparaciones, la probabilidad de algún $|z|\ge3$ por azar ronda el 10\,\%.
 
@@ -25,9 +25,9 @@ Confusión no observada & 2,697 & 1,193 & 1,198 (0,6) & 1,204 (1,3) & 0,127 & 0,
 \end{table}
 
 \begin{itemize}
-  \item \emph{Identificación.} Sin confusión ni variable de canal, Hájek y DR recuperan $\theta$ y el intervalo cubre el 95,5\,\%.
   \item \emph{Variable de canal.} Con $C$, la masa sin soporte estimada fue $\hat\varepsilon=0,326$, frente a $\kappa=0,335$ (Proposición~\ref{prop:rompe}), y el Hájek converge a $\thac$ (el límite de la ponderación de la sección~\ref{sec:canal} coincide aquí con $\thac$ porque $\delta=0$), con el sesgo predicho de $-0,018$ puntos. La predicción original asignaba también al DR el límite $\thac$ y falló ($z=2,4$ y $4,3$). El DR extrapola el modelo de resultado a la parte sin soporte (Corolario~\ref{cor:drsinsoporte}); la predicción derivada de ello (0,958 y 1,314) se añadió tras el escenario «Con $C$» y se registró antes de ejecutar «$C$ confunde, con $C$», donde se cumplió ($z=0,6$).
   \item \emph{Confusión por el historial.} Sin $C$, el sesgo es el predicho: $-0,40$ puntos, un 23\,\% de $\theta$. Con $C$ tampoco se recupera $\theta$, como dice la sección~\ref{sec:canal}.
+  \item \emph{Identificación.} Sin confusión ni variable de canal, Hájek y DR recuperan $\theta$ y el intervalo cubre el 95,5\,\%.
   \item \emph{Confusión no observada.} Los estimadores convergen al límite predicho por los datos observables, a menos de la mitad de $\theta$, con cobertura nula. El error típico está bien calibrado (97\,\% de la dispersión real) y los diagnósticos se parecen a los del escenario base: nada en los datos delata el problema.
   \item \emph{Solapamiento.} Con solapamiento bajo ($\chi^2\approx36$, sección~\ref{sec:diseno}), la desviación típica casi se triplica, el error típico estimado se queda en el 87\,\% de la dispersión real y la cobertura baja al 91\,\%.
 \end{itemize}
@@ -53,7 +53,7 @@ Con el clasificador flexible y el modelo de resultado mal especificado (lineal),
 
 \subsection{Recorte}\label{sec:res-recorte}
 
-Medimos el efecto del recorte como la diferencia pareada recortado menos sin recortar dentro de cada réplica, en milésimas de punto porcentual. Con los pesos verdaderos y la respuesta verdadera $m_0$, en 60 réplicas del escenario base, la Proposición~\ref{prop:recorte} predice $-0,37$, $-3,18$ y $-7,98$ en los percentiles 99, 95 y 90, y se observa $-0,37\pm0,02$, $-3,13\pm0,06$ y $-7,81\pm0,09$: los perfiles con más peso responden más, y el recorte baja la estimación. Con los pesos estimados por el clasificador, el signo se invierte: $+10,9\pm0,7$ en el percentil 90, positivo en las 60 réplicas (con las compras simuladas, el ruido lo oculta: $+11,8\pm7,3$ en las mismas 60 réplicas). Dentro del DR, el efecto medio del recorte está entre $-0,1$ y $+2,1$ milésimas en los escenarios base y de solapamiento bajo, y entre $+6,4$ y $+12,5$ en el de solapamiento medio, sin distinguirse de cero ($|z|<2$). En el percentil 90, la raíz del error cuadrático medio baja de 0,300 a 0,163 puntos con solapamiento bajo y de 0,111 a 0,082 en el base. Pero el error típico calculado con los pesos recortados se queda en el 64\,\% de la dispersión real con solapamiento bajo, y la cobertura cae al 78,5\,\%; con el error típico sin recortar es del 96,5--99,5\,\% en los percentiles 95 y 90 de los escenarios base y de solapamiento bajo, pero solo del 78--88,5\,\% con 3\,000 clientes. El mecanismo de la inversión se analiza en la nota complementaria.
+Con los pesos verdaderos y $m_0$, recortar en los percentiles 99, 95 y 90 baja la estimación en $0,37$, $3,13$ y $7,81$ milésimas de punto porcentual, como predice la Proposición~\ref{prop:recorte} ($0,37$, $3,18$ y $7,98$): los perfiles con más peso responden más. Con pesos estimados el signo se invierte ($+10,9\pm0,7$ en el percentil 90, positivo en las 60 réplicas). Dentro del DR, el efecto del recorte no se distingue de cero y reduce la raíz del error cuadrático medio (de 0,300 a 0,163 puntos con solapamiento bajo). Su error típico debe calcularse con los pesos sin recortar: con los recortados, la cobertura cae al 78,5\,\% con solapamiento bajo, y aun con los sin recortar es solo del 78--88,5\,\% con 3\,000 clientes. La inversión se analiza en la nota complementaria.
 
 \subsection{Pesos con corte conocido}\label{sec:res-corte}
 
@@ -80,26 +80,7 @@ Se cumplen cinco de las seis predicciones (tabla~\ref{tab:corte}): no hay sesgo 
 
 Un análisis posterior, no registrado de antemano, separa las dos novedades: imponer el corte y usar las unidades premium de fuera del grupo objetivo. Imponer el corte sobre el clasificador estándar, sin datos nuevos, no reduce la dispersión (0,117, 0,298 y 0,933 puntos) y corrige solo en parte el signo del recorte ($+1,0$, $+2,7$ y $+9,6$). La mejora viene sobre todo de estimar la propensión de canal con muchos más casos positivos; el corte conocido es lo que permite usarla.
 
-\begin{table}[ht]
-\centering\small
-\caption{Pesos con corte conocido en los demás escenarios (200 réplicas, mismos datos que la tabla~\ref{tab:principal}). En cada celda, estándar $\to$ corte conocido. Recorte del Hájek en el percentil 90 calculado con $m_0$, en milésimas.}\label{tab:corte-escenarios}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Escenario & DE del DR & Cobertura & Recorte p90 \\
-\midrule
-Con $C$ & 0,107 $\to$ 0,096 & 96,5 $\to$ 93,5\,\% & $+16,4\to-0,4$ \\
-$C$ confunde, sin $C$ & 0,132 $\to$ 0,115 & 15,5 $\to$ 9,0\,\% & $+20,1\to-7,4$ \\
-$C$ confunde, con $C$ & 0,129 $\to$ 0,113 & 17,5 $\to$ 6,5\,\% & $+32,0\to+3,9$ \\
-Solapamiento medio & 0,136 $\to$ 0,147 & 94,5 $\to$ 93,5\,\% & $+19,6\to-15,6$ \\
-Solapamiento bajo & 0,300 $\to$ 0,342 & 91,0 $\to$ 87,0\,\% & $+34,5\to-20,6$ \\
-Confusión no observada & 0,127 $\to$ 0,109 & 0,0 $\to$ 0,0\,\% & $+23,1\to+4,6$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-En los demás escenarios, con una segunda predicción registrada (tabla~\ref{tab:corte-escenarios}), los estimadores coinciden con los mismos límites que el estándar ($|z|\le1,7$), porque solo cambia cómo se estiman los mismos pesos; con confusión, la cobertura respecto de $\theta$ es incluso menor, porque el estimador es más preciso alrededor de un valor equivocado. Con la variable de canal no hay explosión de pesos: los donantes nunca la tienen registrada, y la falta de soporte aparece como $\hat e>0,99$ en el 33,3\,\% del grupo objetivo, frente a $\kappa=0,335$. Con solapamiento bajo, el recorte con estos pesos reproduce lo que la Proposición~\ref{prop:recorte} predice para los pesos verdaderos ($-2,2$, $-12,1$ y $-20,6$ frente a $-3,0$, $-11,9$ y $-20,8$). El efecto del recorte se reduce mucho en todos los escenarios y pasa a ser negativo o casi nulo, salvo en «$C$ confunde, con $C$» y en «Confusión no observada», donde sigue siendo positivo.
-
-Fallan dos predicciones: la dispersión no baja con solapamiento medio, y con solapamiento bajo sube y la cobertura cae del 91 al 87\,\%. Nuestra interpretación, sin contrastar: al empeorar el solapamiento, la propensión de canal se acerca a 1 dentro del grupo objetivo y sus odds se estiman con pocos donantes, mientras que el clasificador estándar, con muy pocos casos positivos, los encoge hacia valores moderados. Recortar dentro del DR iguala ambos métodos: con solapamiento bajo, la raíz del error cuadrático medio en el percentil 90 es 0,160 con corte conocido y 0,163 con el estándar, con coberturas del 97,5 y el 98\,\% usando el error típico sin recortar. La ventaja en precisión se limita, por tanto, a solapamientos buenos, sobre todo con muestras pequeñas.
+En los demás escenarios (apéndice~\ref{app:extra}), los estimadores coinciden con los mismos límites que el estándar, y la ganancia de precisión se mantiene con buen solapamiento pero desaparece con solapamiento medio y bajo.
 
 \subsection{Sensibilidad}\label{sec:res-sensibilidad}
 
@@ -142,19 +123,4 @@ $V_5$ & 1,08 & 1,21 & 1,42 \\
 
 Con el estimador estándar, la desviación típica del DR es 0,912, 0,508, 0,294, 0,183 y 0,112 puntos con 3\,000, 5\,000, 10\,000, 15\,000 y 30\,000 clientes: cae como $n^{-0,91}$, mucho más deprisa que $n^{-1/2}$, y la cobertura del intervalo de Wald es del 70, 80, 88, 92 y 95,5\,\%. Las predicciones de 5\,000 y 15\,000 se registraron de antemano y se cumplieron. El cociente $\neff/n_0$ estimado sigue la misma progresión (0,02, 0,07 y 0,14 con 3\,000, 10\,000 y 30\,000, frente al 0,22 teórico). Esto sugiere un diagnóstico, aún sin contrastar: si $\neff/n_0$ sigue creciendo al aumentar la muestra, los intervalos todavía no son fiables.
 
-\begin{table}[ht]
-\centering\small
-\caption{Bootstrap por unidad (cliente): error típico medio en puntos y, entre paréntesis, la cobertura de $\hat\theta\pm1,96\,\widehat{\mathrm{EE}}$ con cada error típico, en las mismas 40 réplicas.}\label{tab:bootstrap}
-\begin{tabular}{@{}lcccc@{}}
-\toprule
-Clientes & DE real & Wald & Bootstrap con reemplazo & Bootstrap bayesiano \\
-\midrule
-30\,000 & 0,109 & 0,102 (97,5\,\%) & 0,162 (100\,\%) & 0,147 (100\,\%) \\
-10\,000 & 0,274 & 0,230 (82,5\,\%) & 0,432 (100\,\%) & 0,370 (97,5\,\%) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Evaluamos el bootstrap por unidad (cliente) con reemplazo, reestimando LightGBM y el \emph{cross-fitting} en cada uno de 60 remuestreos, en 80 réplicas con 30\,000 y 10\,000 clientes, y, en 40 de ellas, una variante bayesiana que da a cada cliente un peso $\mathrm{Exp}(1)$ en lugar de copias. Las cuatro predicciones registradas fallaron (tabla~\ref{tab:bootstrap}). Predijimos que el bootstrap con reemplazo quedaría cerca de la dispersión real con 30\,000 clientes y entre Wald y la dispersión real con 10\,000; los dos la sobrestiman (en las 80 réplicas, 0,165 frente a 0,119 y 0,446 frente a 0,322). Atribuimos el exceso a las copias de clientes y predijimos que la variante bayesiana lo eliminaría, pero solo reduce el error típico un 9 y un 14\,\%, y el exceso sobre la dispersión real un 28 y un 39\,\%.
-
-Una segunda comprobación, también registrada, apunta a la causa. Aplicado al estimador con pesos de corte conocido, cuyos pesos son mucho menos ruidosos, el bootstrap bayesiano queda casi calibrado: error típico medio de 0,101 frente a una dispersión real de 0,096 en las mismas 40 réplicas con 30\,000 clientes, y de 0,208 frente a 0,187 con 10\,000, con coberturas del 95 y del 90\,\% ($\pm5$). Esto indica que el exceso está ligado al ruido de los pesos estimados: remuestrear reduce la información efectiva, y como con el clasificador estándar la dispersión crece mucho al reducirla, el mundo bootstrap la exagera. Es evidencia de un solo generador de datos, no una demostración.
+Evaluamos también el bootstrap por unidad (cliente), reestimando LightGBM y el \emph{cross-fitting} en cada remuestreo. Con los pesos estándar sobrestima la dispersión entre un 35 y un 60\,\% (en 80 réplicas, un error típico bootstrap medio de 0,165 frente a una dispersión real de 0,119 con 30\,000 clientes, y de 0,446 frente a 0,322 con 10\,000), y una variante bayesiana que pondera a los clientes en lugar de copiarlos solo reduce en parte el exceso. Con los pesos de corte conocido, mucho menos ruidosos, el bootstrap bayesiano queda casi calibrado: 0,101 frente a 0,096 y 0,208 frente a 0,187 en 40 réplicas, con coberturas del 95 y del 90\,\%. Fallaron las cuatro predicciones registradas sobre el bootstrap; la evidencia sugiere que el exceso está ligado al ruido de los pesos estimados, y dejamos los detalles para la nota complementaria.

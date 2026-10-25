@@ -1,0 +1,22 @@
+\section{Known-cutoff weights in the other scenarios}\label{app:extra}
+
+\begin{table}[ht]
+\centering\small
+\caption{Known-cutoff weights in the other scenarios (200 replications, same data as Table~\ref{tab:main}). In each cell, standard $\to$ known cutoff. Trimming of the Hájek estimator at the 90th percentile computed with $m_0$, in thousandths.}\label{tab:cutoff-scenarios}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Scenario & SD of DR & Coverage & Trimming p90 \\
+\midrule
+With $C$ & 0.107 $\to$ 0.096 & 96.5 $\to$ 93.5\,\% & $+16.4\to-0.4$ \\
+$C$ confounds, without $C$ & 0.132 $\to$ 0.115 & 15.5 $\to$ 9.0\,\% & $+20.1\to-7.4$ \\
+$C$ confounds, with $C$ & 0.129 $\to$ 0.113 & 17.5 $\to$ 6.5\,\% & $+32.0\to+3.9$ \\
+Medium overlap & 0.136 $\to$ 0.147 & 94.5 $\to$ 93.5\,\% & $+19.6\to-15.6$ \\
+Low overlap & 0.300 $\to$ 0.342 & 91.0 $\to$ 87.0\,\% & $+34.5\to-20.6$ \\
+Unobserved confounding & 0.127 $\to$ 0.109 & 0.0 $\to$ 0.0\,\% & $+23.1\to+4.6$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the other scenarios, with a second registered prediction (Table~\ref{tab:cutoff-scenarios}), the estimators agree with the same limits as the standard one ($|z|\le1.7$), because only the estimation of the same weights changes; with confounding, coverage with respect to $\theta$ is even lower, because the estimator is more precise around a wrong value. With the channel variable, the weights do not blow up: donors never have it recorded, and the lack of support shows up as $\hat e>0.99$ in 33.3\,\% of the target group, against $\kappa=0.335$. Under low overlap, trimming with these weights reproduces what Proposition~\ref{prop:trimming} predicts for the true weights ($-2.2$, $-12.1$ and $-20.6$ against $-3.0$, $-11.9$ and $-20.8$). The effect of trimming shrinks substantially in every scenario and becomes negative or about zero, except in ``$C$ confounds, with $C$'' and ``Unobserved confounding'', where it remains positive.
+
+Two predictions fail: the dispersion does not decrease under medium overlap, and under low overlap it increases and coverage falls from 91 to 87\,\%. Our interpretation, untested: as overlap worsens, the channel propensity approaches 1 inside the target group and its odds are estimated from few donors, whereas the standard classifier, with very few positive cases, shrinks them toward moderate values. Trimming within the DR estimator equalizes both methods: under low overlap, the root mean squared error at the 90th percentile is 0.160 with the known cutoff and 0.163 with the standard estimator, with 97.5 and 98\,\% coverage using the untrimmed standard error. The precision gain is therefore limited to good overlap, especially with small samples.

@@ -1,4 +1,4 @@
-\section{El clasificador identifica la derivada de Radon--Nikodym}\label{sec:clasificador}
+\subsection{El clasificador identifica la derivada de Radon--Nikodym}\label{sec:clasificador}
 
 Un clasificador calibrado que distingue el grupo objetivo del canal donante da $w$ salvo una constante, y el conjunto donde ese clasificador está seguro, $\{p=1\}$, es exactamente la parte del grupo objetivo sin soporte.
 
@@ -61,4 +61,17 @@ Por el Teorema~\ref{teo:odds}, el numerador del primer sumando es $\int_{\{p<1\}
 
 A diferencia del estimador ponderado, que se queda con la parte con soporte, el doblemente robusto rellena la parte sin soporte con la extrapolación del modelo de resultado. Recupera $\theta$ si y solo si esa extrapolación acierta en media, $\E_P[\bar m\mid p=1]=\ths$, que es un supuesto adicional no contrastable. \citet{manamkoong2025} proponen hacerla explícita bajo un supuesto de suavidad y acotar su efecto con un análisis de sensibilidad.
 
-\paragraph{Lectura práctica.} En muestra finita nunca se observa $\hat p=1$ exactamente. Un diagnóstico natural es la masa estimada $\hat P(\hat p>1-t)$ para $\delta$ pequeño; un AUC cercano a 1 es una señal de alarma, porque indica que $P$ y $Q$ están cerca de ser mutuamente singulares, no que el clasificador sea bueno. Por debajo de ese extremo, el AUC no es una medida monótona del solapamiento: cuando el grupo objetivo es un corte en una puntuación, es alto incluso con buen solapamiento (sección~\ref{sec:diseno}).
+\paragraph{Lectura práctica.} En muestra finita nunca se observa $\hat p=1$ exactamente. Un diagnóstico natural es la masa estimada $\hat P(\hat p>1-t)$ para $t$ pequeño; un AUC cercano a 1 es una señal de alarma, porque indica que $P$ y $Q$ están cerca de ser mutuamente singulares, no que el clasificador sea bueno. Por debajo de ese extremo, el AUC no es una medida monótona del solapamiento: cuando el grupo objetivo es un corte en una puntuación, es alto incluso con buen solapamiento (sección~\ref{sec:diseno}).
+
+\subsection{Estimadores}\label{sec:estimadores}
+
+\paragraph{Muestreo.} Observamos una muestra combinada i.i.d. $O_i=(Z_i,X_i,(1-Z_i)Y_i)$, $i=1,\dots,n$, con $\PP(Z=1)=\pi$, $X\mid Z=1\sim P$ y $X\mid Z=0\sim Q$; para $\theta$ solo hace falta el resultado de las unidades donantes. Cuando una unidad (un cliente) genera varias observaciones (llamadas), $O_i$ es el bloque completo de esa unidad y todo lo que sigue se aplica a nivel de unidad. Suponemos que el canal y la pertenencia al grupo objetivo son propiedades de la unidad, constantes entre sus observaciones, y que $P$, $Q$, $m_0$ y $\theta$ se definen a nivel de observación, de modo que cada unidad pesa según su número de observaciones. Si ese número depende de $Y(0)$ dado $X$, los estimandos por unidad y por observación, y las versiones correspondientes de (A2), difieren.
+
+\paragraph{Estimadores.} Con $\hat o=\hat p/(1-\hat p)$ y $n_1$ el número de observaciones del grupo objetivo,
+\[
+\hat\theta_{\mathrm{H}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,Y_i}{\sum_{i:Z_i=0}\hat o(X_i)},\qquad
+\hat\theta_{\mathrm{DR}}=\frac{\sum_{i:Z_i=0}\hat o(X_i)\,(Y_i-\hat m(X_i))}{\sum_{i:Z_i=0}\hat o(X_i)}+\frac1{n_1}\sum_{i:Z_i=1}\hat m(X_i).
+\]
+El primero es el estimador ponderado de Hájek. El segundo es el doblemente robusto (DR), la versión muestral de $\psi$ en la Proposición~\ref{prop:dr} con el término de pesos normalizado. Ambos usan \emph{cross-fitting}: las unidades se reparten en $K$ bloques y, para las observaciones del bloque $k$, $\hat p$ y $\hat m$ se entrenan con los demás.
+
+\paragraph{Diagnósticos y evidencia.} De un clasificador ajustado se leen habitualmente tres diagnósticos: la masa sin soporte estimada $\hat\varepsilon=\hat P(\hat p>1-t)$ para un $t$ pequeño (Teorema~\ref{teo:lebesgue}); el AUC; y el tamaño muestral efectivo de Kish \citeyearpar{kish1965}, $\neff=(\sum_i\hat w_i)^2/\sum_i\hat w_i^2$ sobre las $n_0$ observaciones donantes, cuyo cociente $\neff/n_0$ estima $1/(1+\chi^2(P\|Q))$ (sección~\ref{sec:inferencia}). Las secciones~\ref{sec:canal} y~\ref{sec:instrumentos} estudian qué muestran estos diagnósticos cuando los canales registran las covariables de forma distinta. En todo el texto, $z$ denota (media $-$ predicción)/(error de Monte Carlo) entre réplicas, y una predicción está \emph{registrada} si se subió, con fecha, al repositorio público (sección~\ref{sec:diseno}) antes de la ejecución correspondiente.
