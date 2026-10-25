@@ -1,5 +1,7 @@
 # When channels measure differently
 
+[![DOI](https://zenodo.org/badge/1433058780.svg)](https://doi.org/10.5281/zenodo.23639437)
+
 Code, data and results for the paper
 
 > **When channels measure differently: counterfactual evaluation of channel switching via change of measure**
