@@ -2,6 +2,8 @@
 
 [![DOI](https://zenodo.org/badge/1433058780.svg)](https://doi.org/10.5281/zenodo.23639437)
 
+**Preprint:** García Pastor, P. A. (2026). *Invisible bias: when channels measure covariates differently*, version 2. Zenodo. [doi:10.5281/zenodo.23649362](https://doi.org/10.5281/zenodo.23649362)
+
 Code, data and results for the paper
 
 > **When channels measure differently: counterfactual evaluation of channel switching via change of measure**
